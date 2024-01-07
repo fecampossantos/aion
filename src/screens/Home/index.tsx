@@ -4,12 +4,10 @@ import { AntDesign } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
-// import useDatabase from "../../../hooks/useDatabase";
 
 import { database } from "../../../hooks/useDatabase/database";
 
 const Home = ({ navigation }) => {
-  // const Database = useDatabase();
   const [projects, setProjects] = useState<Array<Project>>([]);
 
   useEffect(() => {
@@ -26,15 +24,18 @@ const Home = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
-      {projects.length === 0 ? <Text>Você ainda não tem projetos.</Text> : null}
 
-      {projects.map((project: Project) => (
-        <ProjectCard
-          project={project}
-          key={project.project_id}
-          navigation={navigation}
-        />
-      ))}
+      {projects.length > 0 ? (
+        projects.map((project: Project) => (
+          <ProjectCard
+            project={project}
+            key={project.project_id}
+            navigation={navigation}
+          />
+        ))
+      ) : (
+        <Text>Você ainda não tem projetos.</Text>
+      )}
 
       <StatusBar style="auto" />
     </View>

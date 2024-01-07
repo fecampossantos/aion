@@ -18,16 +18,18 @@ const Project = ({ navigation, route }) => {
 
   useEffect(() => {
     navigation.setOptions({ title: project.name });
-    // the tasks should have a new propery called "timed" that will be the sum of all the timings for that task
     database.getAllTasksFromProject(project.project_id, setTasks);
   }, []);
 
   return (
     <View>
-      {tasks.length > 0 ?
+      {tasks.length > 0 ? (
         tasks.map((task: TaskWithTimed) => (
           <Task task={task} key={task.task_id} />
-        )) : <Text>Esse projeto não tem tasks</Text>}
+        ))
+      ) : (
+        <Text>Esse projeto não tem tasks</Text>
+      )}
     </View>
   );
 };

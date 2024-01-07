@@ -1,5 +1,6 @@
 export interface Project {
   project_id: number;
   name: string;
-  hourlyCost: number;
+  hourly_cost: number;
+  created_at: Date;
 }

@@ -1,8 +1,9 @@
 import * as SQLite from "expo-sqlite";
 import { DatabaseInfo, DatabaseType, SQLStatements } from "./constants";
 import { Platform } from "react-native";
+import Task from "../../interfaces/Task";
 
-let db;
+let db: DatabaseType;
 
 if (Platform.OS === "web") {
   db = {
@@ -18,7 +19,6 @@ if (Platform.OS === "web") {
     DatabaseInfo.VERSION,
     DatabaseInfo.DESCRIPTION,
     DatabaseInfo.SIZE
-    //   () => setIsDatabaseReady(true)
   );
 }
 
@@ -70,14 +70,27 @@ const cleanTables = async () => {
   });
 };
 
+const dropTables = async () => {
+  db.transaction((tx) => {
+    tx.executeSql(SQLStatements.drop.dropProjects);
+    tx.executeSql(SQLStatements.drop.dropTimings);
+    tx.executeSql(SQLStatements.drop.dropTasks);
+  });
+};
+
 const getAllProjects = async (setProjects: (projects: any) => void) => {
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql("select * from projects", [], (_, { rows }) => {
-        console.log("projects", JSON.stringify(rows["_array"]));
+  db.transaction((tx) => {
+    tx.executeSql(
+      SQLStatements.retrieve.allProjects,
+      [],
+      (_, { rows }) => {
         setProjects(rows["_array"]);
-      });
-    });
+      },
+      (tx, error) => {
+        console.log("error", error);
+        return true;
+      }
+    );
   });
 };
 
@@ -93,8 +106,22 @@ const getAllTasksFromProject = async (
         setTasks(rows._array);
       },
       (tx, error) => {
-        console.log(error);
+        console.log("error", error);
         return true;
+      }
+    );
+  });
+};
+
+const addNewTiming = (task: Task, time: number) => {};
+
+const getTableNames = () => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      `SELECT name FROM sqlite_master WHERE type='table';`,
+      [],
+      (_, { rows }) => {
+        console.log(rows._array);
       }
     );
   });
@@ -106,4 +133,7 @@ export const database = {
   createTables,
   getAllProjects,
   getAllTasksFromProject,
+  addNewTiming,
+  dropTables,
+  getTableNames,
 };
