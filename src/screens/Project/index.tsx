@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import useDatabase from "../../../hooks/useDatabase";
+import { database } from "../../../hooks/useDatabase/database";
 import { Task as ITask } from "../../../interfaces/Task";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";
@@ -10,7 +10,7 @@ interface TaskWithTimed extends ITask {
 }
 
 const Project = ({ navigation, route }) => {
-  const { openDatabase } = useDatabase();
+  // const { openDatabase } = useDatabase();
 
   const [tasks, setTasks] = useState<Array<ITask>>([]);
 
@@ -18,48 +18,16 @@ const Project = ({ navigation, route }) => {
 
   useEffect(() => {
     navigation.setOptions({ title: project.name });
-    const db = openDatabase();
-
     // the tasks should have a new propery called "timed" that will be the sum of all the timings for that task
-
-    const sqlQuery = `
-    SELECT
-      tasks.*,
-      COALESCE(SUM(timings.stoppedAt - timings.startedAt), 0) AS timed
-    FROM
-      tasks
-    LEFT JOIN
-      timings ON tasks.task_id = timings.task_id
-    WHERE
-      tasks.project_id = ?
-    GROUP BY
-      tasks.task_id;
-  `;
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        sqlQuery,
-        [project.project_id],
-        (_, { rows }) => {
-          setTasks(rows._array);
-          console.log(tasks);
-        },
-        (tx, error) => {
-          console.log(error);
-          return true;
-        }
-      );
-    });
-
-    setTasks(tasks);
+    database.getAllTasksFromProject(project.project_id, setTasks);
   }, []);
 
   return (
     <View>
-      {tasks &&
+      {tasks.length > 0 ?
         tasks.map((task: TaskWithTimed) => (
           <Task task={task} key={task.task_id} />
-        ))}
+        )) : <Text>Esse projeto não tem tasks</Text>}
     </View>
   );
 };
