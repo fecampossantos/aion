@@ -1,0 +1,25 @@
+import { Text, TextInput, View } from "react-native";
+import styles, { placeHolderColor } from "./styles";
+import { parseToCurrencyFormat } from "../../../utils/parser";
+
+const CurrencyInput = ({ value, placeholder, onChange, style = {} }: any) => {
+  const handleChangeText = (text: string) => {
+    return onChange(parseToCurrencyFormat(text));
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <Text style={styles.currency}>R$</Text>
+      <TextInput
+        keyboardType="numeric"
+        style={style ? { ...styles.input, ...style } : { ...styles.input }}
+        value={value}
+        onChangeText={(text) => handleChangeText(text)}
+        placeholder={placeholder}
+        placeholderTextColor={placeHolderColor}
+      />
+    </View>
+  );
+};
+
+export default CurrencyInput;

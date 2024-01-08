@@ -13,7 +13,7 @@ const ProjectCard = ({ project, navigation }: ProjectCardProps) => {
   };
   return (
     <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
-      <Text>{project.name}</Text>
+      <Text style={styles.projectName}>{project.name}</Text>
     </TouchableOpacity>
   );
 };

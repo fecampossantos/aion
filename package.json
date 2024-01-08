@@ -10,12 +10,14 @@
     "ts:check": "tsc"
   },
   "dependencies": {
+    "@expo-google-fonts/open-sans": "^0.2.3",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "@types/react": "~18.2.14",
     "expo": "~49.0.15",
     "expo-asset": "~8.10.1",
     "expo-file-system": "~15.4.5",
+    "expo-font": "~11.4.0",
     "expo-haptics": "~12.4.0",
     "expo-splash-screen": "~0.20.5",
     "expo-sqlite": "~11.3.3",
