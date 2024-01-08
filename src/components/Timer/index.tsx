@@ -7,9 +7,17 @@ import styles from "./styles";
 
 interface TimerProps {
   onStop?: (timeInSeconds: number) => void;
+  onInit?: () => void;
+  disabled: boolean;
+  textToShowWhenStopped: null | string;
 }
 
-const Timer = ({ onStop }: TimerProps) => {
+const Timer = ({
+  onStop = (time: number) => {},
+  onInit = () => {},
+  disabled = false,
+  textToShowWhenStopped,
+}: TimerProps) => {
   const [isCounting, setIsCouting] = useState<boolean>(false);
 
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -40,13 +48,21 @@ const Timer = ({ onStop }: TimerProps) => {
     return timer.hours * 3600 + timer.minutes * 60 + timer.seconds;
   };
 
+  const resetCount = () => {
+    setTimer({ hours: 0, minutes: 0, seconds: 0 });
+  };
+
   const handleTouch = () => {
+    if (disabled) return;
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (isCounting) {
       setIsCouting(false);
-      if (onStop) onStop(getSeconds());
+      resetCount();
+      onStop(getSeconds());
     } else {
       setIsCouting(true);
+      onInit();
     }
   };
 
@@ -54,8 +70,23 @@ const Timer = ({ onStop }: TimerProps) => {
     return String(number).padStart(2, "0");
   };
 
+  const getTimeToShow = () => {
+    if (!isCounting && textToShowWhenStopped) return textToShowWhenStopped;
+
+    return `${formatNumber(timer.hours)}:${formatNumber(
+      timer.minutes
+    )}:${formatNumber(timer.seconds)}`;
+  };
+
   return (
-    <TouchableOpacity style={styles.container} onPress={() => handleTouch()}>
+    <TouchableOpacity
+      style={
+        disabled
+          ? { ...styles.container, backgroundColor: "grey" }
+          : styles.container
+      }
+      onPress={() => handleTouch()}
+    >
       <View>
         <AntDesign
           name={isCounting ? "pause" : "caretright"}
@@ -63,10 +94,7 @@ const Timer = ({ onStop }: TimerProps) => {
           color="black"
         />
       </View>
-      <Text>
-        {formatNumber(timer.hours)}:{formatNumber(timer.minutes)}:
-        {formatNumber(timer.seconds)}
-      </Text>
+      <Text>{getTimeToShow()}</Text>
     </TouchableOpacity>
   );
 };

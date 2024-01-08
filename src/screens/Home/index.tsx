@@ -6,19 +6,20 @@ import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
 
 import { database } from "../../../hooks/useDatabase/database";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = ({ navigation }) => {
   const [projects, setProjects] = useState<Array<Project>>([]);
 
-  useEffect(() => {
+  useFocusEffect(() => {
     database.getAllProjects(setProjects);
-  }, []);
+  });
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Chronos</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("AddProject")}>
           <Text>
             <AntDesign name={"plus"} size={24} color="white" />
           </Text>

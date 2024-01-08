@@ -1,9 +1,6 @@
 import { SQLiteDatabase } from "expo-sqlite";
 
-export type DatabaseType =
-  | SQLiteDatabase
-  | { transaction: () => { executeSql: () => void } }
-  | null;
+export type DatabaseType = SQLiteDatabase | null;
 
 export enum DatabaseInfo {
   NAME = "chronoMainDatabase.database",
@@ -26,28 +23,29 @@ export const SQLStatements = {
                 name TEXT NOT NULL,
                 completed INTEGER NOT NULL DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (project_id) REFERENCES PROJECT(project_id) ON DELETE CASCADE
+                FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
               );`,
     createTimingsTable: `CREATE TABLE IF NOT EXISTS timings (
                 timing_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task_id INTEGER,
                 time INTEGER,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (task_id) REFERENCES TASK(task_id) ON DELETE CASCADE
+                FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
               );`,
   },
   insert: {
     insertIntoProjects:
       "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
     insertIntoTasks:
-      "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, ?);",
-    insertIntoTimings:
-      "INSERT INTO timings (task_id, startedAt, stoppedAt) VALUES (?, ?, ?);",
+      "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, 0);",
+    insertIntoTimings: "INSERT INTO timings (task_id, time) VALUES (?, ?);",
   },
   delete: {
     deleteAllFromProjects: "DELETE FROM projects;",
     deleteAllFromTasks: "DELETE FROM tasks;",
     deleteAllFromTimings: "DELETE FROM timings;",
+    deleteFromProjectById: "DELETE FROM projects WHERE project_id = ?;",
+    deleteFromTaskById: "DELETE FROM tasks WHERE task_id = ?;",
   },
   drop: {
     dropTimings: "DROP TABLE IF EXISTS timings",
@@ -57,18 +55,27 @@ export const SQLStatements = {
 
   retrieve: {
     allProjects: "SELECT * FROM projects",
-    allTasksFromProjects: `
-    SELECT
-      *
-    FROM
-      tasks
-    LEFT JOIN
-      timings ON tasks.task_id = timings.task_id
-    WHERE
-      tasks.project_id = ?
-    GROUP BY
-      tasks.task_id;
-  `,
+    allTimings: "SELECT * FROM timings",
+    allTasksFromProject: `SELECT * FROM tasks WHERE tasks.project_id = ?;`,
+    allTasksFromProjectWithTimedUntilNow: `SELECT 
+    t.task_id,
+    t.name,
+    t.completed,
+    t.created_at AS task_created_at,
+    COALESCE(SUM(ti.time), 0) AS timed_until_now
+FROM 
+    tasks t
+LEFT JOIN 
+    timings ti ON t.task_id = ti.task_id
+WHERE 
+    t.project_id = ? -- Replace ? with the actual project_id
+GROUP BY 
+    t.task_id, t.name, t.completed, t.created_at
+ORDER BY 
+    t.created_at;`,
+    countProjectsByName:
+      "SELECT COUNT(*) AS count FROM projects WHERE name = ?",
+    timingsFromTask: "SELECT * FROM timings WHERE task_id = ?",
   },
 
   getLastAddedId: "SELECT last_insert_rowid() as project_id",

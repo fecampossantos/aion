@@ -2,7 +2,7 @@
 // DONT@DONTrefresh DONTreset
 import { useState, useEffect } from "react";
 
-import { database } from "./database";
+// import { database } from "./database";
 
 const useDatabase = () => {
   const [isDatabaseReady, setIsDatabaseReady] = useState(false);
@@ -12,7 +12,7 @@ const useDatabase = () => {
       try {
         // database.cleanTables();
         // database.dropTables();
-        database.createTables();
+        // database.createTables();
         // database.insertExamples();
         // database.getTableNames();
 

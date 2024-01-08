@@ -1,25 +1,44 @@
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Task as ITask } from "../../../interfaces/Task";
 import styles from "../ProjectCard/styles";
 import Timer from "../Timer";
 import { database } from "../../../hooks/useDatabase/database";
+import { secondsToTimeHHMMSS } from "../../../utils/parser";
 interface TaskWithTimed extends ITask {
-  timed: number;
+  timed_until_now: number;
 }
 
-const Task = ({ task }: { task: TaskWithTimed }) => {
+const Task = ({
+  task,
+  onPress,
+  disableTimer = false,
+  onInitTimer = () => {},
+  onStopTimer = () => {},
+  showTimedUntilNowOnTimer,
+}: {
+  task: TaskWithTimed;
+  onPress: () => void;
+  disableTimer: boolean;
+  onInitTimer: () => void;
+  onStopTimer: () => void;
+  showTimedUntilNowOnTimer: null | number;
+}) => {
   const onStop = (time: number) => {
-    console.log("stopou em time ", time);
-    database.addNewTiming(task, time);
+    console.log("time", time);
+    onStopTimer();
+    database.addTiming(task.task_id, time);
   };
 
   return (
-    <View style={styles.container}>
-      {/* add checkbox here for completed */}
+    <TouchableOpacity onPress={() => onPress()} style={styles.container}>
       <Text>{task.name}</Text>
-      <Text>{task.timed}</Text>
-      <Timer onStop={(time) => onStop(time)} />
-    </View>
+      <Timer
+        onStop={(time) => onStop(time)}
+        disabled={disableTimer}
+        onInit={() => onInitTimer()}
+        textToShowWhenStopped={secondsToTimeHHMMSS(showTimedUntilNowOnTimer)}
+      />
+    </TouchableOpacity>
   );
 };
 
