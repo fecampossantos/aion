@@ -14,7 +14,13 @@ const globalStyle = {
     regular: "OpenSans_400Regular",
     medium: "OpenSans_500Medium",
     bold: "OpenSans_700Bold",
+    italicRegular: "OpenSans_400Regular_Italic",
+    italicMedium: "OpenSans_500Medium_Italic",
+    italicBold: "OpenSans_700Bold_Italic",
   },
+  padding:{
+    horizontal: 24
+  }
 };
 
 export default globalStyle;

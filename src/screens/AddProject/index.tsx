@@ -10,16 +10,29 @@ import styles, { inputColor } from "./styles";
 const AddProject = ({ navigation }) => {
   const [projectName, setProjectName] = useState<string>("");
   const [projectHourlyCost, setProjectHourlyCost] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleAddProject = async () => {
-    if (projectName === "") return;
-
-    const existingProject = await database.getProjectByName(projectName);
-    if (existingProject) return;
+    console.log("adding project ", projectName, projectHourlyCost);
+    if (projectName === "") {
+      setErrorMessage("O nome do projeto nao pode estar vazio");
+      return;
+    }
+    console.log("checking name");
+    const existingProject = database.getProjectByName(projectName);
+    if (existingProject) {
+      console.log("Um projeto com esse nome ja existe");
+      setErrorMessage("Um projeto com esse nome ja existe");
+      return;
+    }
 
     database.addNewProject(projectName, parseFloat(projectHourlyCost));
-
     navigation.navigate("Home");
+  };
+
+  const handleChangeProjectName = (text: string) => {
+    setErrorMessage(null);
+    setProjectName(text);
   };
 
   return (
@@ -28,7 +41,7 @@ const AddProject = ({ navigation }) => {
         <View>
           <Text style={styles.label}>Projeto</Text>
           <TextInput
-            onChangeText={(text) => setProjectName(text)}
+            onChangeText={(text: string) => handleChangeProjectName(text)}
             value={projectName}
             placeholder="Nome do projeto"
           />
@@ -43,6 +56,7 @@ const AddProject = ({ navigation }) => {
         </View>
       </View>
       <Button onPress={() => handleAddProject()} text={"adicionar projeto"} />
+      {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
     </View>
   );
 };

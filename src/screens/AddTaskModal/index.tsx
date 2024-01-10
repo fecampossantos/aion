@@ -1,10 +1,12 @@
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 import { Project as IProject } from "../../../interfaces/Project";
 import { useEffect, useState } from "react";
 
 import { database } from "../../../hooks/useDatabase/database";
-
+import styles from "./styles";
+import TextInput from "../../components/TextInput";
+import Button from "../../components/Button";
 const AddTaskModal = ({ route, navigation }) => {
   const project: IProject = route.params.project;
 
@@ -24,15 +26,13 @@ const AddTaskModal = ({ route, navigation }) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <TextInput
         value={taskName}
-        onChangeText={(text) => setTaskName(text)}
+        onChangeText={(text: string) => setTaskName(text)}
         placeholder="Task"
       />
-      <TouchableOpacity onPress={() => handleAddTaksToProject()}>
-        <Text>Adicionar task</Text>
-      </TouchableOpacity>
+      <Button onPress={() => handleAddTaksToProject()} text="Adicionar task" />
     </View>
   );
 };

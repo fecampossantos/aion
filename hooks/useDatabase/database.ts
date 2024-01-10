@@ -1,7 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { DatabaseInfo, DatabaseType, SQLStatements } from "./constants";
 import { Platform } from "react-native";
-import Task from "../../interfaces/Task";
 
 let db: DatabaseType | any;
 
@@ -22,61 +21,130 @@ if (Platform.OS === "web") {
   );
 }
 
-const createTables = async () => {
+const createTables = () => {
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(SQLStatements.create.createProjectsTable);
   });
-
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(SQLStatements.create.createTasksTable);
   });
-
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(SQLStatements.create.createTimingsTable);
   });
 };
 
-const insertExamples = async () => {
+const insertExamples = () => {
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.insert.insertIntoProjects, [
-      "Example Project",
-      50.0,
-    ]);
+    tx.executeSql(
+      SQLStatements.insert.insertIntoProjects,
+      ["Example Project", 50.0],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.retrieve.allProjects, [], (_, { rows }) => {
-      const project_id = rows.item(0).project_id;
+    tx.executeSql(
+      SQLStatements.retrieve.allProjects,
+      [],
+      (_, { rows }) => {
+        const project_id = rows.item(0).project_id;
 
-      tx.executeSql(SQLStatements.insert.insertIntoTasks, [
-        project_id,
-        "Task 1",
-      ]);
-      tx.executeSql(SQLStatements.insert.insertIntoTasks, [
-        project_id,
-        "Task 2",
-      ]);
-    });
+        tx.executeSql(
+          SQLStatements.insert.insertIntoTasks,
+          [project_id, "Task 1"],
+          () => {},
+          (tx, error) => {
+            console.log(error);
+            return false;
+          }
+        );
+        tx.executeSql(
+          SQLStatements.insert.insertIntoTasks,
+          [project_id, "Task 2"],
+          () => {},
+          (tx, error) => {
+            console.log(error);
+            return false;
+          }
+        );
+      },
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
-const cleanTables = async () => {
+const cleanTables = () => {
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.delete.deleteAllFromTimings);
-    tx.executeSql(SQLStatements.delete.deleteAllFromTasks);
-    tx.executeSql(SQLStatements.delete.deleteAllFromProjects);
+    tx.executeSql(
+      SQLStatements.delete.deleteAllFromTimings,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+    tx.executeSql(
+      SQLStatements.delete.deleteAllFromTasks,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+    tx.executeSql(
+      SQLStatements.delete.deleteAllFromProjects,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
-const dropTables = async () => {
+const dropTables = () => {
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.drop.dropProjects);
-    tx.executeSql(SQLStatements.drop.dropTimings);
-    tx.executeSql(SQLStatements.drop.dropTasks);
+    tx.executeSql(
+      SQLStatements.drop.dropProjects,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+    tx.executeSql(
+      SQLStatements.drop.dropTimings,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+    tx.executeSql(
+      SQLStatements.drop.dropTasks,
+      [],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
-const getAllProjects = async (setProjects: (projects: any) => void) => {
+const getAllProjects = (setProjects: (projects: any) => void) => {
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(
       SQLStatements.retrieve.allProjects,
@@ -85,14 +153,14 @@ const getAllProjects = async (setProjects: (projects: any) => void) => {
         setProjects(rows["_array"]);
       },
       (tx, error) => {
-        console.log("error", error);
+        console.log(error);
         return false;
       }
     );
   });
 };
 
-const getAllTasksFromProjectWithTimed = async (
+const getAllTasksFromProjectWithTimed = (
   projectId: number,
   setTasks: (tasks: any) => void
 ) => {
@@ -105,20 +173,25 @@ const getAllTasksFromProjectWithTimed = async (
         setTasks(rows._array);
       },
       (tx, error) => {
-        console.log("error", error);
-        return true;
+        console.log(error);
+        return false;
       }
     );
   });
 };
 
 const getTableNames = () => {
+  console.log("getting table names");
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(
       `SELECT name FROM sqlite_master WHERE type='table';`,
       [],
       (_, { rows }) => {
         console.log(rows._array);
+      },
+      (_, error) => {
+        console.log(error);
+        return false;
       }
     );
   });
@@ -140,15 +213,28 @@ const addTiming = (taskId: number, time: number) => {
 
 const addNewProject = (projectName: string, projectHourlyCost: number) => {
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.insert.insertIntoProjects, [
-      projectName,
-      projectHourlyCost,
-    ]);
+    tx.executeSql(
+      SQLStatements.insert.insertIntoProjects,
+      [projectName, projectHourlyCost],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 const addNewTaskToProject = (taskName: string, projectID: number) => {
   db.transaction((tx: SQLite.SQLTransaction) => {
-    tx.executeSql(SQLStatements.insert.insertIntoTasks, [projectID, taskName]);
+    tx.executeSql(
+      SQLStatements.insert.insertIntoTasks,
+      [projectID, taskName],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
@@ -162,6 +248,10 @@ const getTimingsFromTask = (
       [taskId],
       (_, { rows }) => {
         setTimings(rows._array);
+      },
+      (tx, error) => {
+        console.log(error);
+        return false;
       }
     );
   });
@@ -169,44 +259,64 @@ const getTimingsFromTask = (
 
 const getAllTimings = (setTimings: (timings: any) => void) => {
   db.transaction((tx) => {
-    tx.executeSql(SQLStatements.retrieve.allTimings, [], (_, { rows }) => {
-      setTimings(rows._array);
-    });
-  });
-};
-
-const getProjectByName = async (projectName: string) => {
-  return new Promise((resolve, reject) => {
-    db.transaction(
-      (tx) => {
-        tx.executeSql(
-          SQLStatements.retrieve.countProjectsByName,
-          [projectName],
-          (_, { rows }) => {
-            const count = rows.item(0).count;
-            resolve(count > 0);
-          },
-          (_, error) => {
-            reject(error);
-          }
-        );
+    tx.executeSql(
+      SQLStatements.retrieve.allTimings,
+      [],
+      (_, { rows }) => {
+        setTimings(rows._array);
       },
-      (error) => {
-        reject(error);
+      (tx, error) => {
+        console.log(error);
+        return false;
       }
     );
   });
 };
 
-const deleteProjectById = async (projectID: number) => {
-  db.transaction((tx) => {
-    tx.executeSql(SQLStatements.delete.deleteFromProjectById, [projectID]);
+const getProjectByName = (projectName: string) => {
+  return db.transaction((tx: SQLite.SQLTransaction) => {
+    tx.executeSql(
+      SQLStatements.retrieve.countProjectsByName,
+      [projectName],
+      (_, { rows }) => {
+        console.log("rows", rows);
+        const count = rows.item(0).count;
+        return count > 0;
+      },
+      (_, error) => {
+        console.log("error 1");
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
-const deleteTaskById = async (taskId: number) => {
+const deleteProjectById = (projectID: number) => {
   db.transaction((tx) => {
-    tx.executeSql(SQLStatements.delete.deleteFromTaskById, [taskId]);
+    tx.executeSql(
+      SQLStatements.delete.deleteFromProjectById,
+      [projectID],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+  });
+};
+
+const deleteTaskById = (taskId: number) => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      SQLStatements.delete.deleteFromTaskById,
+      [taskId],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
   });
 };
 
@@ -225,5 +335,5 @@ export const database = {
   addNewTaskToProject,
   getTimingsFromTask,
   getAllTimings,
-  deleteTaskById
+  deleteTaskById,
 };

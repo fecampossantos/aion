@@ -18,7 +18,15 @@ const styles = StyleSheet.create({
   },
   projectInfoWrapper: {
     padding: 40,
-    gap: 20
+    gap: 20,
+  },
+  errorMessage: {
+    color: globalStyle.white,
+    fontFamily: globalStyle.font.italicRegular,
+    fontSize: 14,
+    width:'100%',
+    textAlign: 'center',
+    marginTop: 20
   },
 });
 

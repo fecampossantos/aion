@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { Entypo } from "@expo/vector-icons";
+import { useState } from "react";
 import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
 
@@ -25,13 +25,12 @@ const Home = ({ navigation }) => {
           style={styles.addButton}
           onPress={() => navigation.navigate("AddProject")}
         >
-          <Text>
-            <AntDesign name={"plus"} size={24} color="black" />
-          </Text>
+          <Entypo name="plus" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.projectsList}>
+        <Text style={styles.title}>Projetos</Text>
         {projects.length > 0 ? (
           projects.map((project: Project) => (
             <ProjectCard
@@ -41,7 +40,7 @@ const Home = ({ navigation }) => {
             />
           ))
         ) : (
-          <Text>Você ainda não tem projetos.</Text>
+          <Text style={styles.error}>Você ainda não tem projetos.</Text>
         )}
       </View>
       <StatusBar style="inverted" />

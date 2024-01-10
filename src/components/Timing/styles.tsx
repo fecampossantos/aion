@@ -3,17 +3,14 @@ import globalStyle from "../../globalStyle";
 
 const styles = StyleSheet.create({
   container: {
-    width: 120,
-    height: 40,
-    borderColor: globalStyle.white,
-    borderWidth: 1,
-    borderRadius: 100,
+    borderBottomWidth: 2,
+    borderColor: globalStyle.black.light,
     display: "flex",
     flexDirection: "row",
+    width: "100%",
     alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 4,
-    paddingVertical: 4,
+    justifyContent: "space-between",
+    padding: 12,
   },
   text: {
     color: globalStyle.white,

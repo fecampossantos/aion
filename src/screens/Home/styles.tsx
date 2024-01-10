@@ -40,6 +40,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 20,
   },
+  title: {
+    color: globalStyle.white,
+    fontFamily: globalStyle.font.bold,
+    fontSize: 20,
+  },
+  error: {
+    color: globalStyle.white,
+    fontFamily: globalStyle.font.italicRegular,
+    fontSize: 20,
+  },
 });
 
 export default styles;
