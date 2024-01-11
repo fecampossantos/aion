@@ -13,15 +13,12 @@ const AddProject = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   const handleAddProject = async () => {
-    console.log("adding project ", projectName, projectHourlyCost);
     if (projectName === "") {
       setErrorMessage("O nome do projeto nao pode estar vazio");
       return;
     }
-    console.log("checking name");
     const existingProject = database.getProjectByName(projectName);
     if (existingProject) {
-      console.log("Um projeto com esse nome ja existe");
       setErrorMessage("Um projeto com esse nome ja existe");
       return;
     }

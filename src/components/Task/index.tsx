@@ -24,7 +24,6 @@ const Task = ({
   showTimedUntilNowOnTimer: null | number;
 }) => {
   const onStop = (time: number) => {
-    console.log("time", time);
     onStopTimer();
     database.addTiming(task.task_id, time);
   };

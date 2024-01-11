@@ -169,7 +169,6 @@ const getAllTasksFromProjectWithTimed = (
       SQLStatements.retrieve.allTasksFromProjectWithTimedUntilNow,
       [projectId],
       (_, { rows }) => {
-        console.log(rows);
         setTasks(rows._array);
       },
       (tx, error) => {
@@ -181,7 +180,6 @@ const getAllTasksFromProjectWithTimed = (
 };
 
 const getTableNames = () => {
-  console.log("getting table names");
   db.transaction((tx: SQLite.SQLTransaction) => {
     tx.executeSql(
       `SELECT name FROM sqlite_master WHERE type='table';`,
@@ -279,12 +277,10 @@ const getProjectByName = (projectName: string) => {
       SQLStatements.retrieve.countProjectsByName,
       [projectName],
       (_, { rows }) => {
-        console.log("rows", rows);
         const count = rows.item(0).count;
         return count > 0;
       },
       (_, error) => {
-        console.log("error 1");
         console.log(error);
         return false;
       }
