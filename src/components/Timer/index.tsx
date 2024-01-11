@@ -8,8 +8,8 @@ import styles from "./styles";
 interface TimerProps {
   onStop?: (timeInSeconds: number) => void;
   onInit?: () => void;
-  disabled: boolean;
-  textToShowWhenStopped: null | string;
+  disabled?: boolean;
+  textToShowWhenStopped?: null | string;
 }
 
 const Timer = ({
@@ -91,10 +91,10 @@ const Timer = ({
         <AntDesign
           name={isCounting ? "pause" : "caretright"}
           size={16}
-          color="black"
+          color="white"
         />
       </View>
-      <Text>{getTimeToShow()}</Text>
+      <Text style={styles.text}>{getTimeToShow()}</Text>
     </TouchableOpacity>
   );
 };

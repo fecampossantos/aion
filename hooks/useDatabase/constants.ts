@@ -4,7 +4,7 @@ export type DatabaseType = SQLiteDatabase | null;
 
 export enum DatabaseInfo {
   NAME = "chronoMainDatabase.database",
-  VERSION = "1.0",
+  VERSION = "1.2",
   DESCRIPTION = "Chrono Main Database",
   SIZE = 200000,
 }
@@ -48,14 +48,14 @@ export const SQLStatements = {
     deleteFromTaskById: "DELETE FROM tasks WHERE task_id = ?;",
   },
   drop: {
-    dropTimings: "DROP TABLE IF EXISTS timings",
-    dropTasks: "DROP TABLE IF EXISTS tasks",
-    dropProjects: "DROP TABLE IF EXISTS projects",
+    dropTimings: "DROP TABLE IF EXISTS timings;",
+    dropTasks: "DROP TABLE IF EXISTS tasks;",
+    dropProjects: "DROP TABLE IF EXISTS projects;",
   },
 
   retrieve: {
-    allProjects: "SELECT * FROM projects",
-    allTimings: "SELECT * FROM timings",
+    allProjects: "SELECT * FROM projects;",
+    allTimings: "SELECT * FROM timings;",
     allTasksFromProject: `SELECT * FROM tasks WHERE tasks.project_id = ?;`,
     allTasksFromProjectWithTimedUntilNow: `SELECT 
     t.task_id,
@@ -74,9 +74,9 @@ GROUP BY
 ORDER BY 
     t.created_at;`,
     countProjectsByName:
-      "SELECT COUNT(*) AS count FROM projects WHERE name = ?",
-    timingsFromTask: "SELECT * FROM timings WHERE task_id = ?",
+      "SELECT COUNT(*) AS count FROM projects WHERE name = ?;",
+    timingsFromTask: "SELECT * FROM timings WHERE task_id = ?;",
   },
 
-  getLastAddedId: "SELECT last_insert_rowid() as project_id",
+  getLastAddedId: "SELECT last_insert_rowid() as project_id;",
 };

@@ -2,6 +2,8 @@ import { Project as IProject } from "../../../interfaces/Project";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import { database } from "../../../hooks/useDatabase/database";
+import styles from "./styles";
+import Button from "../../components/Button";
 
 const ProjectInfo = ({ route, navigation }) => {
   const project: IProject = route.params.project;
@@ -12,10 +14,8 @@ const ProjectInfo = ({ route, navigation }) => {
   };
 
   return (
-    <View>
-      <TouchableOpacity onPress={() => handleDeleteProject()}>
-        <Text>Apagar projeto</Text>
-      </TouchableOpacity>
+    <View style={styles.container}>
+      <Button onPress={() => handleDeleteProject()} text="Apagar projeto" />
     </View>
   );
 };

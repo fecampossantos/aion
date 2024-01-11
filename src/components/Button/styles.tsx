@@ -2,19 +2,16 @@ import { StyleSheet } from "react-native";
 import globalStyle from "../../globalStyle";
 
 const styles = StyleSheet.create({
-  container: {
+  button: {
     borderColor: globalStyle.black.light,
-    borderBottomWidth: 2,
-    display:"flex",
-    flexDirection: "row",
+    borderWidth: 2,
+    borderRadius: 4,
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 12
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  name: {
-    color: globalStyle.white,
-  },
+  text: { color: globalStyle.white, fontFamily: globalStyle.font.bold },
 });
 
 export default styles;

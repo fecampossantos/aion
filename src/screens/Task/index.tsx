@@ -1,22 +1,26 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Task as ITask } from "../../../interfaces/Task";
 import { useCallback, useEffect, useState } from "react";
 import { database } from "../../../hooks/useDatabase/database";
-import Timing from "../../../interfaces/Timing";
+import { Timing as ITiming } from "../../../interfaces/Timing";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+
+import styles from "./styles";
+import Timer from "../../components/Timer";
+import Timing from "../../components/Timing";
 
 const HeaderDeleteButton = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity onPress={onPress}>
     <Text>
-      <Feather name="trash" size={24} color="black" />
+      <Feather name="trash" size={24} color="white" />
     </Text>
   </TouchableOpacity>
 );
 
 const Task = ({ route, navigation }) => {
   const task: ITask = route.params.task;
-  const [timings, setTimings] = useState<Array<Timing>>([]);
+  const [timings, setTimings] = useState<Array<ITiming>>([]);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
   const handleDeleteTask = () => {
@@ -40,8 +44,17 @@ const Task = ({ route, navigation }) => {
   );
 
   return (
-    <View>
-      <Text>{JSON.stringify(timings)}</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Timer />
+      </View>
+      <ScrollView style={styles.timings}>
+        {timings.length > 0 ? (
+          timings.map((t: ITiming) => <Timing timing={t} key={t.timing_id} />)
+        ) : (
+          <Text style={{ color: "white" }}>Sem timings pra essa task</Text>
+        )}
+      </ScrollView>
     </View>
   );
 };

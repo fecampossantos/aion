@@ -5,6 +5,8 @@ import { Task as ITask } from "../../../interfaces/Task";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";
 import { Feather } from "@expo/vector-icons";
+
+import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 interface TaskWithTimed extends ITask {
   timed_until_now: number;
@@ -13,7 +15,20 @@ interface TaskWithTimed extends ITask {
 const HeaderInfoButton = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity onPress={onPress}>
     <Text>
-      <Feather name="info" size={24} color="black" />
+      <Feather name="info" size={24} color="white" />
+    </Text>
+  </TouchableOpacity>
+);
+
+const AddTask = ({ navigation, project }) => (
+  <TouchableOpacity
+    style={styles.addTaskButton}
+    onPress={() => {
+      navigation.navigate("AddTaskModal", { project });
+    }}
+  >
+    <Text>
+      <Feather name="plus" size={40} color="black" />
     </Text>
   </TouchableOpacity>
 );
@@ -50,8 +65,7 @@ const Project = ({ navigation, route }) => {
   };
 
   return (
-    <View style={{ height: "100%" }}>
-      <Text>{JSON.stringify(tasks)}</Text>
+    <View style={styles.container}>
       {tasks.length > 0 ? (
         tasks.map((task: TaskWithTimed) => (
           <Task
@@ -70,18 +84,7 @@ const Project = ({ navigation, route }) => {
         <Text>Esse projeto não tem tasks</Text>
       )}
 
-      <View style={{ position: "absolute", bottom: 0, right: 0 }}>
-        <TouchableOpacity
-          style={{ width: 80, height: 80, backgroundColor: "black" }}
-          onPress={() => {
-            navigation.navigate("AddTaskModal", { project });
-          }}
-        >
-          <Text>
-            <Feather name="plus" size={24} color="white" />
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <AddTask navigation={navigation} project={project} />
     </View>
   );
 };

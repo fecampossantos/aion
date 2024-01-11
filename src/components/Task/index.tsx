@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { Task as ITask } from "../../../interfaces/Task";
-import styles from "../ProjectCard/styles";
+import styles from "./styles";
 import Timer from "../Timer";
 import { database } from "../../../hooks/useDatabase/database";
 import { secondsToTimeHHMMSS } from "../../../utils/parser";
@@ -24,14 +24,13 @@ const Task = ({
   showTimedUntilNowOnTimer: null | number;
 }) => {
   const onStop = (time: number) => {
-    console.log("time", time);
     onStopTimer();
     database.addTiming(task.task_id, time);
   };
 
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.container}>
-      <Text>{task.name}</Text>
+      <Text style={styles.name}>{task.name}</Text>
       <Timer
         onStop={(time) => onStop(time)}
         disabled={disableTimer}

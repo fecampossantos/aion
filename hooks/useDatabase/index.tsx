@@ -2,7 +2,7 @@
 // DONT@DONTrefresh DONTreset
 import { useState, useEffect } from "react";
 
-// import { database } from "./database";
+import { database } from "./database";
 
 const useDatabase = () => {
   const [isDatabaseReady, setIsDatabaseReady] = useState(false);
@@ -29,7 +29,7 @@ const useDatabase = () => {
     if (isDatabaseReady) console.log("isDatabaseReady", isDatabaseReady);
   }, [isDatabaseReady]);
 
-  return { isDatabaseReady };
+  return { isDatabaseReady, database };
 };
 
 export default useDatabase;
