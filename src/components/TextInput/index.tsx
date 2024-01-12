@@ -8,6 +8,7 @@ const TextInput = ({ ...props }: any) => {
         style={styles.input}
         {...props}
         placeholderTextColor={placeHolderColor}
+        testID="textInput-input"
       />
     </View>
   );

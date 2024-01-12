@@ -316,6 +316,21 @@ const deleteTaskById = (taskId: number) => {
   });
 };
 
+
+const deleteTimingById = (timingID: number) => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      SQLStatements.delete.deleteFromTimingById,
+      [timingID],
+      () => {},
+      (tx, error) => {
+        console.log(error);
+        return false;
+      }
+    );
+  });
+};
+
 export const database = {
   cleanTables,
   insertExamples,
@@ -332,4 +347,5 @@ export const database = {
   getTimingsFromTask,
   getAllTimings,
   deleteTaskById,
+  deleteTimingById
 };

@@ -25,7 +25,10 @@ export function secondsToTimeHHMMSS(time: number): string {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-export function fullDateWithHour(dateString: string): string {
+export function fullDateWithHour(dateString: string): {
+  d: string;
+  time: string;
+} {
   const date = new Date(dateString);
   const d = new Date(date).toLocaleDateString("pt-BR");
 
@@ -34,5 +37,5 @@ export function fullDateWithHour(dateString: string): string {
   const seconds = date.getSeconds().toString().padStart(2, "0");
   const time = `${hours}:${minutes}:${seconds}`;
 
-  return `${d} ${time}h`;
+  return { d, time };
 }

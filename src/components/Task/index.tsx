@@ -4,7 +4,8 @@ import styles from "./styles";
 import Timer from "../Timer";
 import { database } from "../../../hooks/useDatabase/database";
 import { secondsToTimeHHMMSS } from "../../../utils/parser";
-interface TaskWithTimed extends ITask {
+
+export interface TaskWithTimed extends ITask {
   timed_until_now: number;
 }
 
@@ -29,12 +30,16 @@ const Task = ({
   };
 
   return (
-    <TouchableOpacity onPress={() => onPress()} style={styles.container}>
+    <TouchableOpacity
+      onPress={() => onPress()}
+      style={styles.container}
+      testID="task-touchable"
+    >
       <Text style={styles.name}>{task.name}</Text>
       <Timer
         onStop={(time) => onStop(time)}
         disabled={disableTimer}
-        onInit={() => onInitTimer()}
+        onInit={() => onInitTimer}
         textToShowWhenStopped={secondsToTimeHHMMSS(showTimedUntilNowOnTimer)}
       />
     </TouchableOpacity>
