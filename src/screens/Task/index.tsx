@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Task as ITask } from "../../../interfaces/Task";
 import { useCallback, useEffect, useState } from "react";
 import { database } from "../../../hooks/useDatabase/database";
@@ -33,6 +33,34 @@ const Task = ({ route, navigation }) => {
   const task: ITask = route.params.task;
   const [timings, setTimings] = useState<Array<ITiming>>([]);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (e) => {
+        if (!isTimerRunning) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+
+        // Prompt the user before leaving the screen
+        Alert.alert(
+          "Parar timer?",
+          "Seu timer ainda esta rodando. Se voce sair, perdera o tempo!",
+          [
+            { text: "Continuar aqui", style: "cancel", onPress: () => {} },
+            {
+              text: "Sair",
+              style: "destructive",
+              onPress: () => navigation.dispatch(e.data.action),
+            },
+          ]
+        );
+      }),
+    [navigation, isTimerRunning]
+  );
 
   const handleDeleteTask = () => {
     if (isTimerRunning) return;
