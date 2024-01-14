@@ -1,13 +1,8 @@
 import { Text, TouchableOpacity, View } from "react-native";
-import { Task as ITask } from "../../../interfaces/Task";
 import styles from "./styles";
 import Timer from "../Timer";
-import { database } from "../../../hooks/useDatabase/database";
 import { secondsToTimeHHMMSS } from "../../../utils/parser";
-
-export interface TaskWithTimed extends ITask {
-  timed_until_now: number;
-}
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const Task = ({
   task,
@@ -17,16 +12,22 @@ const Task = ({
   onStopTimer = () => {},
   showTimedUntilNowOnTimer,
 }: {
-  task: TaskWithTimed;
+  task: any;
   onPress: () => void;
   disableTimer: boolean;
   onInitTimer: () => void;
   onStopTimer: () => void;
   showTimedUntilNowOnTimer: null | number;
 }) => {
-  const onStop = (time: number) => {
+  const database = useSQLiteContext();
+
+  const onStop = async (time: number) => {
     onStopTimer();
-    database.addTiming(task.task_id, time);
+    await database.runAsync(
+      "INSERT INTO timings (task_id, time) VALUES (?, ?);",
+      task.task_id,
+      time
+    );
   };
 
   return (

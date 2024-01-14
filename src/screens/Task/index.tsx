@@ -1,7 +1,6 @@
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Task as ITask } from "../../../interfaces/Task";
 import { useCallback, useEffect, useState } from "react";
-import { database } from "../../../hooks/useDatabase/database";
 import { Timing as ITiming } from "../../../interfaces/Timing";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -10,6 +9,7 @@ import styles from "./styles";
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
 import globalStyle from "../../globalStyle";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const HeaderDeleteButton = ({
   onPress,
@@ -30,6 +30,7 @@ const HeaderDeleteButton = ({
 );
 
 const Task = ({ route, navigation }) => {
+  const database = useSQLiteContext();
   const task: ITask = route.params.task;
   const [timings, setTimings] = useState<Array<ITiming>>([]);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
@@ -64,7 +65,7 @@ const Task = ({ route, navigation }) => {
 
   const handleDeleteTask = () => {
     if (isTimerRunning) return;
-    database.deleteTaskById(task.task_id);
+    database.runAsync("DELETE FROM tasks WHERE task_id = ?;", task.task_id);
     navigation.goBack();
   };
 
@@ -80,24 +81,39 @@ const Task = ({ route, navigation }) => {
     });
   }, [isTimerRunning]);
 
+  async function getTimingsFromTask() {
+    const timings = await database.getAllAsync<ITiming>(
+      "SELECT * FROM timings WHERE task_id = ? ORDER BY created_at DESC;",
+      task.task_id
+    );
+    setTimings(timings);
+  }
+
   useFocusEffect(
     useCallback(() => {
-      database.getTimingsFromTask(task.task_id, setTimings);
+      getTimingsFromTask();
     }, [isTimerRunning])
   );
 
-  const handleDeleteTiming = (timingID: number) => {
-    database.deleteTimingById(timingID);
-    database.getTimingsFromTask(task.task_id, setTimings);
+  const handleDeleteTiming = async (timingID: number) => {
+    await database.runAsync(
+      "DELETE FROM timings WHERE timing_id = ?;",
+      timingID
+    );
+    getTimingsFromTask();
   };
 
   const onInitTimer = () => {
     setIsTimerRunning(true);
   };
 
-  const onStopTimer = (time: number) => {
+  const onStopTimer = async (time: number) => {
     setIsTimerRunning(false);
-    database.addTiming(task.task_id, time);
+    await database.runAsync(
+      "INSERT INTO timings (task_id, time) VALUES (?, ?);",
+      task.task_id,
+      time
+    );
   };
 
   return (

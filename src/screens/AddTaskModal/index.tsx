@@ -1,13 +1,14 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 
 import { Project as IProject } from "../../../interfaces/Project";
 import { useEffect, useState } from "react";
 
-import { database } from "../../../hooks/useDatabase/database";
 import styles from "./styles";
 import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
+import { useSQLiteContext } from "expo-sqlite/next";
 const AddTaskModal = ({ route, navigation }) => {
+  const database = useSQLiteContext();
   const project: IProject = route.params.project;
 
   const [taskName, setTaskName] = useState<string>("");
@@ -18,10 +19,14 @@ const AddTaskModal = ({ route, navigation }) => {
     });
   }, []);
 
-  const handleAddTaksToProject = () => {
+  const handleAddTaksToProject = async () => {
     if (taskName === "") return;
 
-    database.addNewTaskToProject(taskName, project.project_id);
+    await database.runAsync(
+      "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, 0);",
+      project.project_id,
+      taskName
+    );
     navigation.navigate("Project", { project });
   };
 
@@ -32,7 +37,10 @@ const AddTaskModal = ({ route, navigation }) => {
         onChangeText={(text: string) => setTaskName(text)}
         placeholder="Task"
       />
-      <Button onPress={() => handleAddTaksToProject()} text="Adicionar task" />
+      <Button
+        onPress={async () => await handleAddTaksToProject()}
+        text="Adicionar task"
+      />
     </View>
   );
 };

@@ -1,20 +1,26 @@
 import { StatusBar } from "expo-status-bar";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { useState } from "react";
 import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
 
-import { database } from "../../../hooks/useDatabase/database";
 import { useFocusEffect } from "@react-navigation/native";
 
 import styles from "./styles";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const Home = ({ navigation }) => {
+  const database = useSQLiteContext();
   const [projects, setProjects] = useState<Array<Project>>([]);
 
   useFocusEffect(() => {
-    database.getAllProjects(setProjects);
+    async function fetchAllProjects() {
+      const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
+      setProjects(p);
+    }
+
+    fetchAllProjects();
   });
 
   return (
