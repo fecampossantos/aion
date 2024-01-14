@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { database } from "../../../hooks/useDatabase/database";
 import { Task as ITask } from "../../../interfaces/Task";
 import { Project as IProject } from "../../../interfaces/Project";
@@ -36,8 +36,37 @@ const AddTask = ({ navigation, project }) => (
 const Project = ({ navigation, route }) => {
   const [tasks, setTasks] = useState<Array<ITask>>([]);
   const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
+  const isTimerRunning = timerIdRunning !== null;
 
   const project: IProject = route.params.project;
+
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (e) => {
+        if (!isTimerRunning) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+
+        // Prompt the user before leaving the screen
+        Alert.alert(
+          "Parar timer?",
+          "Seu timer ainda esta rodando. Se voce sair, perdera o tempo!",
+          [
+            { text: "Continuar aqui", style: "cancel", onPress: () => {} },
+            {
+              text: "Sair",
+              style: "destructive",
+              onPress: () => navigation.dispatch(e.data.action),
+            },
+          ]
+        );
+      }),
+    [navigation, isTimerRunning]
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -61,6 +90,7 @@ const Project = ({ navigation, route }) => {
   );
 
   const handleNavigateToTask = (task: TaskWithTimed) => {
+    if (isTimerRunning) return;
     navigation.navigate("Task", { task });
   };
 
@@ -83,7 +113,9 @@ const Project = ({ navigation, route }) => {
       ) : (
         <Text>Esse projeto não tem tasks</Text>
       )}
-
+      <Text style={{ color: "white" }}>
+        isTimerRunning: {isTimerRunning} {"<-"}
+      </Text>
       <AddTask navigation={navigation} project={project} />
     </View>
   );

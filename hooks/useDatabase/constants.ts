@@ -46,6 +46,7 @@ export const SQLStatements = {
     deleteAllFromTimings: "DELETE FROM timings;",
     deleteFromProjectById: "DELETE FROM projects WHERE project_id = ?;",
     deleteFromTaskById: "DELETE FROM tasks WHERE task_id = ?;",
+    deleteFromTimingById: "DELETE FROM timings WHERE timing_id = ?;",
   },
   drop: {
     dropTimings: "DROP TABLE IF EXISTS timings;",
@@ -75,7 +76,7 @@ ORDER BY
     t.created_at;`,
     countProjectsByName:
       "SELECT COUNT(*) AS count FROM projects WHERE name = ?;",
-    timingsFromTask: "SELECT * FROM timings WHERE task_id = ?;",
+    timingsFromTask: "SELECT * FROM timings WHERE task_id = ? ORDER BY created_at DESC;",
   },
 
   getLastAddedId: "SELECT last_insert_rowid() as project_id;",

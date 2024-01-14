@@ -9,11 +9,22 @@ import { useFocusEffect } from "@react-navigation/native";
 import styles from "./styles";
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
+import globalStyle from "../../globalStyle";
 
-const HeaderDeleteButton = ({ onPress }: { onPress: () => void }) => (
+const HeaderDeleteButton = ({
+  onPress,
+  isTimerRunning,
+}: {
+  onPress: () => void;
+  isTimerRunning: boolean;
+}) => (
   <TouchableOpacity onPress={onPress}>
     <Text>
-      <Feather name="trash" size={24} color="white" />
+      <Feather
+        name="trash"
+        size={24}
+        color={isTimerRunning ? globalStyle.black.light : "white"}
+      />
     </Text>
   </TouchableOpacity>
 );
@@ -24,6 +35,7 @@ const Task = ({ route, navigation }) => {
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
   const handleDeleteTask = () => {
+    if (isTimerRunning) return;
     database.deleteTaskById(task.task_id);
     navigation.goBack();
   };
@@ -32,10 +44,13 @@ const Task = ({ route, navigation }) => {
     navigation.setOptions({
       title: task.name,
       headerRight: () => (
-        <HeaderDeleteButton onPress={() => handleDeleteTask()} />
+        <HeaderDeleteButton
+          onPress={() => handleDeleteTask()}
+          isTimerRunning={isTimerRunning}
+        />
       ),
     });
-  }, []);
+  }, [isTimerRunning]);
 
   useFocusEffect(
     useCallback(() => {
@@ -43,14 +58,38 @@ const Task = ({ route, navigation }) => {
     }, [isTimerRunning])
   );
 
+  const handleDeleteTiming = (timingID: number) => {
+    database.deleteTimingById(timingID);
+    database.getTimingsFromTask(task.task_id, setTimings);
+  };
+
+  const onInitTimer = () => {
+    setIsTimerRunning(true);
+  };
+
+  const onStopTimer = (time: number) => {
+    setIsTimerRunning(false);
+    database.addTiming(task.task_id, time);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Timer />
+        <Timer
+          onInit={() => onInitTimer()}
+          onStop={(time: number) => onStopTimer(time)}
+        />
       </View>
       <ScrollView style={styles.timings}>
         {timings.length > 0 ? (
-          timings.map((t: ITiming) => <Timing timing={t} key={t.timing_id} />)
+          timings.map((t: ITiming) => (
+            <Timing
+              timing={t}
+              key={t.timing_id}
+              deleteTiming={() => handleDeleteTiming(t.timing_id)}
+              isTimerRunning={isTimerRunning}
+            />
+          ))
         ) : (
           <Text style={{ color: "white" }}>Sem timings pra essa task</Text>
         )}

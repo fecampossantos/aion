@@ -86,6 +86,7 @@ const Timer = ({
           : styles.container
       }
       onPress={() => handleTouch()}
+      testID="timer-touchable"
     >
       <View>
         <AntDesign

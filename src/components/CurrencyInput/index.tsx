@@ -17,6 +17,7 @@ const CurrencyInput = ({ value, placeholder, onChange, style = {} }: any) => {
         onChangeText={(text) => handleChangeText(text)}
         placeholder={placeholder}
         placeholderTextColor={placeHolderColor}
+        testID="currencyInput-input"
       />
     </View>
   );
