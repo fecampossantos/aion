@@ -26,40 +26,87 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
 const ProjectInfo = ({ route, navigation }) => {
   const database = useSQLiteContext();
   const project: IProject = route.params.project;
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(() => {
+    const currentDate = new Date();
+    const sevenDaysAgo = new Date(currentDate);
+    sevenDaysAgo.setDate(currentDate.getDate() - 7);
+
+    return sevenDaysAgo;
+  });
   const [endDate, setEndDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState(null);
   const [dateShown, setDateShown] = useState<"start" | "end" | null>(null);
-  const [resultSet, setResultSet] = useState<any>();
+  const [resultSet, setResultSet] = useState<{
+    labels: Array<string>;
+    datasets: Array<{ data: Array<number> }>;
+  } | null>();
+
+  const [showChart, setShowChart] = useState(false);
+
+  const getInitOfDay = (day: Date) => {
+    const startOfDay = new Date(day);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    return startOfDay.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const getEndOfDay = (day: Date) => {
+    const endOfDay = new Date(day);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return endOfDay.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const prepareResultSet = (
+    result: Array<{ day: string; total_time: number }>
+  ) => {
+    const labels: Array<string> = result.map((r) => r.day);
+    const data: Array<number> = result.map((r) => r.total_time);
+
+    return { labels, datasets: [{ data }] };
+  };
+
+  async function get() {
+    const query = `SELECT 
+        DATE(t.created_at) AS day,
+        SUM(t.time) AS total_time
+    FROM 
+        timings t
+    JOIN 
+        tasks tk ON t.task_id = tk.task_id
+    WHERE 
+        tk.project_id = ?
+        AND t.created_at BETWEEN ? AND ?
+    GROUP BY 
+        day
+    ORDER BY 
+        day;`;
+
+    try {
+      const result = await database.getAllAsync<{
+        day: string;
+        total_time: number;
+      }>(
+        query,
+        project.project_id,
+        getInitOfDay(startDate),
+        getEndOfDay(endDate)
+      );
+      setResultSet(prepareResultSet(result));
+      setShowChart(true);
+    } catch (e) {
+      console.log("error", e);
+    }
+  }
 
   useEffect(() => {
-    async function get() {
-      const result = await database.getAllAsync(
-        `SELECT 
-        DATE(created_at) AS date,
-        SUM(time) AS total_time
-    FROM 
-        timings
-    WHERE 
-        task_id IN (SELECT task_id FROM tasks WHERE project_id = ?)
-        AND DATE(created_at) BETWEEN ? AND ?
-    GROUP BY 
-        DATE(created_at);`,
-        project.project_id,
-        startDate.toString(),
-        endDate.toString()
-      );
-
-      setResultSet(result);
+    async function render() {
+      await get();
     }
 
-    get();
+    render();
   }, [endDate]);
-
-  useEffect(() => {
-    console.log("resultSet", resultSet);
-  }, [resultSet]);
 
   const handleDeleteProject = () => {
     database.runAsync(
@@ -70,7 +117,7 @@ const ProjectInfo = ({ route, navigation }) => {
   };
 
   const handleUpdateDate = (event, selectedDate) => {
-    console.log(selectedDate);
+    if (event.type !== "set") return;
     if (dateShown === "start") {
       setStartDate(new Date(selectedDate));
     } else {
@@ -102,7 +149,9 @@ const ProjectInfo = ({ route, navigation }) => {
         <View style={styles.datesWrapper}>
           <View style={styles.dateButtonsWrapper}>
             <View style={styles.dateWrapper}>
-              <Text style={{ color: globalStyle.white }}>De</Text>
+              <Text style={{ color: globalStyle.white }}>
+                De {showChart ? "s" : "n"}
+              </Text>
               <DateInput
                 date={startDate}
                 onPress={() => handleShowDatePicker("start")}
@@ -118,24 +167,19 @@ const ProjectInfo = ({ route, navigation }) => {
           </View>
         </View>
 
-        <BarChart
-          // style={graphStyle}
-          data={{
-            labels: ["January", "February", "March", "April", "May", "June"],
-            datasets: [
-              {
-                data: [20, 45, 28, 80, 99, 43],
-              },
-            ],
-          }}
-          width={Dimensions.get("screen").width - 48}
-          height={220}
-          yAxisLabel="$"
-          yAxisSuffix="%"
-          chartConfig={chartConfig}
-          verticalLabelRotation={30}
-          fromZero={true}
-        />
+        {showChart ? (
+          <BarChart
+            // style={graphStyle}
+            data={resultSet}
+            width={Dimensions.get("screen").width - 48}
+            height={220}
+            yAxisLabel=""
+            yAxisSuffix="s"
+            chartConfig={chartConfig}
+            verticalLabelRotation={30}
+            fromZero={true}
+          />
+        ) : null}
         <View>
           <Text style={{ color: globalStyle.black.light }}>
             Informações do projeto
@@ -145,19 +189,21 @@ const ProjectInfo = ({ route, navigation }) => {
           </Text>
         </View>
 
-        {/* <Button
+        <Button
           buttonStyle={{ backgroundColor: "red" }}
           onPress={() => handleDeleteProject()}
           text="Apagar projeto"
-        /> */}
+        />
       </View>
       {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"
-          value={datePickerValue}
+          value={datePickerValue || new Date()}
           mode={"date"}
           is24Hour={true}
-          onChange={handleUpdateDate}
+          onChange={(event, selectedDate) =>
+            handleUpdateDate(event, selectedDate)
+          }
           minimumDate={dateShown === "end" ? startDate : null}
           maximumDate={new Date()}
         />
