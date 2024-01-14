@@ -136,6 +136,14 @@ const ProjectInfo = ({ route, navigation }) => {
           verticalLabelRotation={30}
           fromZero={true}
         />
+        <View>
+          <Text style={{ color: globalStyle.black.light }}>
+            Informações do projeto
+          </Text>
+          <Text style={{ color: globalStyle.black.light }}>
+            {JSON.stringify(project)}
+          </Text>
+        </View>
 
         {/* <Button
           buttonStyle={{ backgroundColor: "red" }}

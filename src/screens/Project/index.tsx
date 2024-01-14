@@ -141,9 +141,7 @@ const Project = ({ navigation, route }) => {
       ) : (
         <Text>Esse projeto não tem tasks</Text>
       )}
-      <Text style={{ color: "white" }}>
-        isTimerRunning: {isTimerRunning} {"<-"}
-      </Text>
+
       <AddTask navigation={navigation} project={project} />
     </View>
   );

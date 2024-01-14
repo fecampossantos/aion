@@ -104,8 +104,8 @@ async function migrateDbIfNeeded(db: SQLiteDatabase) {
       10
     );
     await db.runAsync(
-      "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, 0);",
-      0,
+      "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, ?);",
+      1,
       "task exemplo",
       false
     );
