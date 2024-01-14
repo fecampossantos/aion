@@ -4,12 +4,22 @@ import styles from "./styles";
 interface ButtonProps {
   onPress: () => void;
   text: string;
+  buttonStyle?: object;
+  textStyle?: object;
 }
 
-const Button = ({ onPress, text }: ButtonProps) => {
+const Button = ({
+  onPress,
+  text,
+  buttonStyle = {},
+  textStyle = {},
+}: ButtonProps) => {
   return (
-    <TouchableOpacity onPress={() => onPress()} style={styles.button}>
-      <Text style={styles.text}>{text}</Text>
+    <TouchableOpacity
+      onPress={() => onPress()}
+      style={{ ...styles.button, ...buttonStyle }}
+    >
+      <Text style={{ ...styles.text, ...textStyle }}>{text}</Text>
     </TouchableOpacity>
   );
 };

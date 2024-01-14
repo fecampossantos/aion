@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { database } from "../../../hooks/useDatabase/database";
-import { Task as ITask } from "../../../interfaces/Task";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";
 import { Feather } from "@expo/vector-icons";
 
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
-interface TaskWithTimed extends ITask {
+import { useSQLiteContext } from "expo-sqlite/next";
+interface TaskWithTimed {
+  task_id: number;
+  name: string;
+  completed: boolean;
+  task_created_at: string;
   timed_until_now: number;
 }
 
@@ -34,7 +37,8 @@ const AddTask = ({ navigation, project }) => (
 );
 
 const Project = ({ navigation, route }) => {
-  const [tasks, setTasks] = useState<Array<ITask>>([]);
+  const database = useSQLiteContext();
+  const [tasks, setTasks] = useState<Array<TaskWithTimed>>([]);
   const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
   const isTimerRunning = timerIdRunning !== null;
 
@@ -85,7 +89,31 @@ const Project = ({ navigation, route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      database.getAllTasksFromProjectWithTimed(project.project_id, setTasks);
+      async function getTasks() {
+        const allTasks = await database.getAllAsync<TaskWithTimed>(
+          `SELECT 
+      t.task_id,
+      t.name,
+      t.completed,
+      t.created_at AS task_created_at,
+      COALESCE(SUM(ti.time), 0) AS timed_until_now
+  FROM 
+      tasks t
+  LEFT JOIN 
+      timings ti ON t.task_id = ti.task_id
+  WHERE 
+      t.project_id = ?
+  GROUP BY 
+      t.task_id, t.name, t.completed, t.created_at
+  ORDER BY 
+      t.created_at;`,
+          project.project_id
+        );
+
+        setTasks(allTasks);
+      }
+
+      getTasks();
     }, [timerIdRunning])
   );
 
@@ -113,9 +141,7 @@ const Project = ({ navigation, route }) => {
       ) : (
         <Text>Esse projeto não tem tasks</Text>
       )}
-      <Text style={{ color: "white" }}>
-        isTimerRunning: {isTimerRunning} {"<-"}
-      </Text>
+
       <AddTask navigation={navigation} project={project} />
     </View>
   );

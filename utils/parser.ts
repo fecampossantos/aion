@@ -39,3 +39,9 @@ export function fullDateWithHour(dateString: string): {
 
   return { d, time };
 }
+export function fullDate(dateString: string): string {
+  const date = new Date(dateString);
+  const d = new Date(date).toLocaleDateString("pt-BR");
+
+  return d;
+}

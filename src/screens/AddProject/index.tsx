@@ -1,13 +1,14 @@
 import { Text, TouchableOpacity, View } from "react-native";
-import { database } from "../../../hooks/useDatabase/database";
 import { useState } from "react";
 import TextInput from "../../components/TextInput";
 import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
 
 import styles, { inputColor } from "./styles";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const AddProject = ({ navigation }) => {
+  const database = useSQLiteContext();
   const [projectName, setProjectName] = useState<string>("");
   const [projectHourlyCost, setProjectHourlyCost] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -17,13 +18,21 @@ const AddProject = ({ navigation }) => {
       setErrorMessage("O nome do projeto nao pode estar vazio");
       return;
     }
-    const existingProject = database.getProjectByName(projectName);
+    const existingProject = await database.getFirstAsync(
+      "SELECT * FROM projects WHERE name = ?;",
+      projectName
+    );
     if (existingProject) {
-      setErrorMessage("Um projeto com esse nome ja existe");
+      setErrorMessage("Um projeto com esse nome já existe");
       return;
     }
 
-    database.addNewProject(projectName, parseFloat(projectHourlyCost));
+    await database.runAsync(
+      "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
+      projectName,
+      parseFloat(projectHourlyCost)
+    );
+    
     navigation.navigate("Home");
   };
 
