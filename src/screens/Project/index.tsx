@@ -139,7 +139,7 @@ const Project = ({ navigation, route }) => {
           />
         ))
       ) : (
-        <Text>Esse projeto não tem tasks</Text>
+        <Text style={{ color: "white" }}>Esse projeto não tem tasks</Text>
       )}
 
       <AddTask navigation={navigation} project={project} />

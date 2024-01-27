@@ -13,16 +13,24 @@ export function parseToCurrencyFormat(text: string): string {
   return `${integer.padStart(2, "0")},${decimal.padStart(2, "0")}`;
 }
 
-export function secondsToTimeHHMMSS(time: number): string {
-  const hours = Math.floor(time / 3600)
-    .toString()
-    .padStart(2, "0");
-  const minutes = Math.floor((time % 3600) / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = (time % 60).toString().padStart(2, "0");
+export function secondsToHHMMSS(time: number): {
+  hours: number;
+  minutes: number;
+  seconds: number;
+} {
+  const hours = Math.floor(time / 3600);
+  const minutes = Math.floor((time % 3600) / 60);
+  const seconds = time % 60;
 
-  return `${hours}:${minutes}:${seconds}`;
+  return { hours, minutes, seconds };
+}
+
+export function secondsToTimeHHMMSS(time: number): string {
+  const { hours, minutes, seconds } = secondsToHHMMSS(time);
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
 export function fullDateWithHour(dateString: string): {

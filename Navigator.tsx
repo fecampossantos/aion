@@ -6,6 +6,7 @@ import ProjectInfo from "./src/screens/ProjectInfo";
 import AddTaskModal from "./src/screens/AddTaskModal";
 import Task from "./src/screens/Task";
 import globalStyle from "./src/globalStyle";
+import Report from "./src/screens/Report";
 
 const Stack = createNativeStackNavigator();
 
@@ -52,6 +53,15 @@ const StackNavigator = () => {
         }}
       />
       <Stack.Screen
+        name="Task"
+        component={Task}
+        options={{
+          ...headerStyles,
+        }}
+      />
+
+      {/* MODALS */}
+      <Stack.Screen
         name="AddTaskModal"
         component={AddTaskModal}
         options={{
@@ -61,9 +71,11 @@ const StackNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="Task"
-        component={Task}
+        name="Report"
+        component={Report}
         options={{
+          animation: "slide_from_bottom",
+          headerShown: true,
           ...headerStyles,
         }}
       />

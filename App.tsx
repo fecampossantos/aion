@@ -13,11 +13,7 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { Suspense, useEffect } from "react";
 
-import {
-  SQLiteProvider,
-  useSQLiteContext,
-  type SQLiteDatabase,
-} from "expo-sqlite/next";
+import { SQLiteProvider, type SQLiteDatabase } from "expo-sqlite/next";
 import { Text, View } from "react-native";
 
 const Fallback = () => (
