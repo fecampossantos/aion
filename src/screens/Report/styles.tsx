@@ -1,23 +1,13 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import globalStyle from "../../globalStyle";
-import { Dimensions } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: globalStyle.background,
     height: "100%",
-    paddingHorizontal: globalStyle.padding.horizontal,
-    paddingVertical: 30,
-  },
-  datesWrapper: {},
-  dateButtonsWrapper: {
-    display: "flex",
-    flexDirection: "row",
     width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 24,
   },
+
   dateInputWapper: {
     borderWidth: 1,
     borderColor: globalStyle.black.light,
@@ -31,6 +21,14 @@ const styles = StyleSheet.create({
   },
   date: {
     color: globalStyle.white,
+  },
+  dateButtonsWrapper: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 24,
   },
   dateWrapper: {
     display: "flex",

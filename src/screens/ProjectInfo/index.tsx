@@ -23,6 +23,12 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
   </View>
 );
 
+const GenerateReportButton = ({ onPress }: { onPress: () => void }) => (
+  <TouchableOpacity onPress={onPress}>
+    <Feather name="file-text" size={20} color="white" />
+  </TouchableOpacity>
+);
+
 const ProjectInfo = ({ route, navigation }) => {
   const database = useSQLiteContext();
   const project: IProject = route.params.project;
@@ -43,6 +49,17 @@ const ProjectInfo = ({ route, navigation }) => {
   } | null>();
 
   const [showChart, setShowChart] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: project.name,
+      headerRight: () => (
+        <GenerateReportButton
+          onPress={() => navigation.navigate("Report", { project })}
+        />
+      ),
+    });
+  }, []);
 
   const getInitOfDay = (day: Date) => {
     const startOfDay = new Date(day);
@@ -149,9 +166,7 @@ const ProjectInfo = ({ route, navigation }) => {
         <View style={styles.datesWrapper}>
           <View style={styles.dateButtonsWrapper}>
             <View style={styles.dateWrapper}>
-              <Text style={{ color: globalStyle.white }}>
-                De {showChart ? "s" : "n"}
-              </Text>
+              <Text style={{ color: globalStyle.white }}>De</Text>
               <DateInput
                 date={startDate}
                 onPress={() => handleShowDatePicker("start")}

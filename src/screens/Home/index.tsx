@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
 
@@ -14,14 +14,14 @@ const Home = ({ navigation }) => {
   const database = useSQLiteContext();
   const [projects, setProjects] = useState<Array<Project>>([]);
 
-  useFocusEffect(() => {
-    async function fetchAllProjects() {
-      const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
-      setProjects(p);
-    }
+  async function fetchAllProjects() {
+    const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
+    setProjects(p);
+  }
 
+  useEffect(() => {
     fetchAllProjects();
-  });
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -36,19 +36,22 @@ const Home = ({ navigation }) => {
       </View>
 
       <View style={styles.projectsList}>
-        <Text style={styles.title}>Projetos</Text>
         {projects.length > 0 ? (
-          projects.map((project: Project) => (
-            <ProjectCard
-              project={project}
-              key={project.project_id}
-              navigation={navigation}
-            />
-          ))
+          <>
+            <Text style={styles.title}>Projetos</Text>
+            {projects.map((project: Project) => (
+              <ProjectCard
+                project={project}
+                key={project.project_id}
+                navigation={navigation}
+              />
+            ))}
+          </>
         ) : (
           <Text style={styles.error}>Você ainda não tem projetos.</Text>
         )}
       </View>
+
       <StatusBar style="inverted" />
     </View>
   );
