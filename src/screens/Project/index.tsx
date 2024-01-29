@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from "react-native";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";

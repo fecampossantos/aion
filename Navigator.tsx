@@ -9,6 +9,7 @@ import Task from "./src/screens/Task";
 import Report from "./src/screens/Report";
 
 import globalStyle from "./src/globalStyle";
+import EditProject from "./src/screens/EditProject";
 
 const Stack = createNativeStackNavigator();
 
@@ -58,6 +59,14 @@ const StackNavigator = () => {
         name="Task"
         component={Task}
         options={{
+          ...headerStyles,
+        }}
+      />
+      <Stack.Screen
+        name="EditProject"
+        component={EditProject}
+        options={{
+          title: "Editar projeto",
           ...headerStyles,
         }}
       />

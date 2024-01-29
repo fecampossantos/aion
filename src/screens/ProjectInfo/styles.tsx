@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     backgroundColor: globalStyle.background,
     height: "100%",
     paddingHorizontal: globalStyle.padding.horizontal,
-    paddingVertical: 30,
+    flex: 1
   },
   datesWrapper: {},
   dateButtonsWrapper: {
@@ -28,9 +28,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 12,
+    marginBottom: 20
   },
   date: {
     color: globalStyle.white,
+    fontFamily: globalStyle.font.regular,
   },
   dateWrapper: {
     display: "flex",
@@ -38,6 +40,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: Dimensions.get("window").width / 2 - 36,
+  },
+  dangerZone: {
+    borderTopColor: "red",
+    borderTopWidth: 1,
+    paddingVertical: 20,
+    marginTop: 40,
+    gap: 12
+  },
+  projectInfoWrapper: {
+    paddingBottom: 40,
   },
 });
 

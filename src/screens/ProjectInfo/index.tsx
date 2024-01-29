@@ -1,5 +1,12 @@
 import { Project as IProject } from "../../../interfaces/Project";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
 
 import styles from "./styles";
 import Button from "../../components/Button";
@@ -78,8 +85,13 @@ const ProjectInfo = ({ route, navigation }) => {
   const prepareResultSet = (
     result: Array<{ day: string; total_time: number }>
   ) => {
-    const labels: Array<string> = result.map((r) => r.day);
-    const data: Array<number> = result.map((r) => r.total_time);
+    const labels: Array<string> = result.map((r) => {
+      const [year, month, day] = r.day.split("-");
+      return `${day}/${month}/${year}`;
+    });
+    const data: Array<number> = result.map((r) => {
+      return r.total_time / 60;
+    });
 
     return { labels, datasets: [{ data }] };
   };
@@ -133,6 +145,17 @@ const ProjectInfo = ({ route, navigation }) => {
     navigation.navigate("Home");
   };
 
+  const handleClickedOnDeleteProject = () => {
+    Alert.alert("Apagar projeto?", "Você perderá todas as informações dele!", [
+      { text: "Cancelar", style: "cancel", onPress: () => {} },
+      {
+        text: "Apagar",
+        style: "destructive",
+        onPress: () => handleDeleteProject(),
+      },
+    ]);
+  };
+
   const handleUpdateDate = (event, selectedDate) => {
     if (event.type !== "set") return;
     if (dateShown === "start") {
@@ -150,63 +173,97 @@ const ProjectInfo = ({ route, navigation }) => {
   };
 
   const chartConfig = {
-    backgroundGradientFrom: "#1E2923",
-    backgroundGradientFromOpacity: 0,
-    backgroundGradientTo: "#08130D",
-    backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-    strokeWidth: 2, // optional, default 3
+    backgroundGradientFrom: globalStyle.background,
+    backgroundGradientTo: globalStyle.background,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     barPercentage: 0.5,
-    useShadowColorFromDataset: false, // optional
   };
 
   return (
-    <>
-      <View style={styles.container}>
-        <View style={styles.datesWrapper}>
-          <View style={styles.dateButtonsWrapper}>
-            <View style={styles.dateWrapper}>
-              <Text style={{ color: globalStyle.white }}>De</Text>
-              <DateInput
-                date={startDate}
-                onPress={() => handleShowDatePicker("start")}
-              />
-            </View>
-            <View style={styles.dateWrapper}>
-              <Text style={{ color: globalStyle.white }}>Até</Text>
-              <DateInput
-                date={endDate}
-                onPress={() => handleShowDatePicker("end")}
-              />
-            </View>
+    <ScrollView style={styles.container}>
+      <View style={styles.projectInfoWrapper}>
+        <Text
+          style={{
+            color: globalStyle.white,
+            fontSize: 20,
+            fontFamily: globalStyle.font.bold,
+          }}
+        >
+          Informações do projeto
+        </Text>
+        <Text
+          style={{
+            color: globalStyle.white,
+            fontFamily: globalStyle.font.regular,
+          }}
+        >
+          Custo / hora: R${project.hourly_cost.toFixed(2)}
+        </Text>
+        <Text
+          style={{
+            color: globalStyle.white,
+            fontFamily: globalStyle.font.regular,
+          }}
+        >
+          Criado em: {fullDate(project.created_at.toString())}
+        </Text>
+      </View>
+
+      <View style={styles.datesWrapper}>
+        <View style={styles.dateButtonsWrapper}>
+          <View style={styles.dateWrapper}>
+            <Text
+              style={{
+                color: globalStyle.white,
+                fontFamily: globalStyle.font.regular,
+              }}
+            >
+              De
+            </Text>
+            <DateInput
+              date={startDate}
+              onPress={() => handleShowDatePicker("start")}
+            />
+          </View>
+          <View style={styles.dateWrapper}>
+            <Text
+              style={{
+                color: globalStyle.white,
+                fontFamily: globalStyle.font.regular,
+              }}
+            >
+              Até
+            </Text>
+            <DateInput
+              date={endDate}
+              onPress={() => handleShowDatePicker("end")}
+            />
           </View>
         </View>
+      </View>
 
-        {showChart ? (
-          <BarChart
-            // style={graphStyle}
-            data={resultSet}
-            width={Dimensions.get("screen").width - 48}
-            height={220}
-            yAxisLabel=""
-            yAxisSuffix="s"
-            chartConfig={chartConfig}
-            verticalLabelRotation={30}
-            fromZero={true}
-          />
-        ) : null}
-        <View>
-          <Text style={{ color: globalStyle.black.light }}>
-            Informações do projeto
-          </Text>
-          <Text style={{ color: globalStyle.black.light }}>
-            {JSON.stringify(project)}
-          </Text>
-        </View>
+      {showChart ? (
+        <BarChart
+          data={resultSet}
+          width={Dimensions.get("screen").width - 48}
+          height={Dimensions.get("screen").height * 0.5}
+          yAxisLabel=""
+          yAxisSuffix="min"
+          chartConfig={chartConfig}
+          verticalLabelRotation={30}
+          fromZero={true}
+        />
+      ) : null}
 
+      <View style={styles.dangerZone}>
+        <Button
+          buttonStyle={{ backgroundColor: globalStyle.black.light }}
+          onPress={() => navigation.navigate("EditProject", { project })}
+          text="Editar projeto"
+        />
         <Button
           buttonStyle={{ backgroundColor: "red" }}
-          onPress={() => handleDeleteProject()}
+          onPress={() => handleClickedOnDeleteProject()}
           text="Apagar projeto"
         />
       </View>
@@ -223,7 +280,7 @@ const ProjectInfo = ({ route, navigation }) => {
           maximumDate={new Date()}
         />
       )}
-    </>
+    </ScrollView>
   );
 };
 
