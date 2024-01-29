@@ -1,12 +1,14 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import Home from "./src/screens/Home";
 import Project from "./src/screens/Project";
 import AddProject from "./src/screens/AddProject";
 import ProjectInfo from "./src/screens/ProjectInfo";
 import AddTaskModal from "./src/screens/AddTaskModal";
 import Task from "./src/screens/Task";
-import globalStyle from "./src/globalStyle";
 import Report from "./src/screens/Report";
+
+import globalStyle from "./src/globalStyle";
 
 const Stack = createNativeStackNavigator();
 

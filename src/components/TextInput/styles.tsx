@@ -6,6 +6,8 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: globalStyle.font.regular,
     color: globalStyle.white,
+    borderBottomColor: globalStyle.white,
+    borderBottomWidth: 1,
   },
   wrapper: {
     paddingVertical: 4,

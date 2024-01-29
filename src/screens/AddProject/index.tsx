@@ -27,12 +27,14 @@ const AddProject = ({ navigation }) => {
       return;
     }
 
+    const cost = projectHourlyCost === "" ? "00.00" : projectHourlyCost;
+
     await database.runAsync(
       "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
       projectName,
-      parseFloat(projectHourlyCost)
+      parseFloat(cost)
     );
-    
+
     navigation.navigate("Home");
   };
 

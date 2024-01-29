@@ -6,14 +6,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 60,
     borderColor: globalStyle.white,
-    borderWidth: 1,
-    borderRadius: 20,
+    borderWidth: 2,
+    borderRadius: 8,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 12,
     paddingVertical: 4,
+    backgroundColor: globalStyle.black.light
   },
   projectName: {
     color: globalStyle.white,

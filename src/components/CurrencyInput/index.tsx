@@ -1,7 +1,7 @@
-import { Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 import styles, { placeHolderColor } from "./styles";
 import { parseToCurrencyFormat } from "../../../utils/parser";
-
+import TextInput from "../TextInput";
 const CurrencyInput = ({ value, placeholder, onChange, style = {} }: any) => {
   const handleChangeText = (text: string) => {
     return onChange(parseToCurrencyFormat(text));

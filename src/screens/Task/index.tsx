@@ -10,6 +10,7 @@ import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
 import globalStyle from "../../globalStyle";
 import { useSQLiteContext } from "expo-sqlite/next";
+import LoadingView from "../../components/LoadingView";
 
 const HeaderDeleteButton = ({
   onPress,
@@ -33,6 +34,7 @@ const Task = ({ route, navigation }) => {
   const database = useSQLiteContext();
   const task: ITask = route.params.task;
   const [timings, setTimings] = useState<Array<ITiming>>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
   useEffect(
@@ -87,6 +89,7 @@ const Task = ({ route, navigation }) => {
       task.task_id
     );
     setTimings(timings);
+    setIsLoading(false);
   }
 
   useFocusEffect(
@@ -124,20 +127,27 @@ const Task = ({ route, navigation }) => {
           onStop={(time: number) => onStopTimer(time)}
         />
       </View>
-      <ScrollView style={styles.timings}>
-        {timings.length > 0 ? (
-          timings.map((t: ITiming) => (
-            <Timing
-              timing={t}
-              key={t.timing_id}
-              deleteTiming={() => handleDeleteTiming(t.timing_id)}
-              isTimerRunning={isTimerRunning}
-            />
-          ))
-        ) : (
-          <Text style={{ color: "white" }}>Sem timings pra essa task</Text>
-        )}
-      </ScrollView>
+      {isLoading ? (
+        <LoadingView />
+      ) : (
+        <ScrollView style={styles.timings}>
+          {timings.length > 0 ? (
+            timings.map((t: ITiming) => (
+              <Timing
+                timing={t}
+                key={t.timing_id}
+                deleteTiming={() => {
+                  setIsLoading(true);
+                  handleDeleteTiming(t.timing_id);
+                }}
+                isTimerRunning={isTimerRunning}
+              />
+            ))
+          ) : (
+            <Text style={{ color: "white" }}>Sem timings pra essa task</Text>
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 };

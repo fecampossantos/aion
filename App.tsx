@@ -1,5 +1,8 @@
-import { NavigationContainer } from "@react-navigation/native";
-import StackNavigator from "./Navigator";
+import { Suspense } from "react";
+import { Text, View } from "react-native";
+import { SQLiteProvider, type SQLiteDatabase } from "expo-sqlite/next";
+import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
   OpenSans_400Regular,
@@ -10,19 +13,14 @@ import {
   OpenSans_700Bold_Italic,
 } from "@expo-google-fonts/open-sans";
 
-import * as SplashScreen from "expo-splash-screen";
-import { Suspense, useEffect } from "react";
-
-import { SQLiteProvider, type SQLiteDatabase } from "expo-sqlite/next";
-import { Text, View } from "react-native";
+import StackNavigator from "./Navigator";
 
 const Fallback = () => (
-  <View>
-    <Text>Carregando...</Text>
+  <View style={{ backgroundColor: "black" }}>
+    <Text style={{ color: "white" }}>Carregando...</Text>
   </View>
 );
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -44,15 +42,15 @@ export default function App() {
   SplashScreen.hideAsync();
   return (
     <Suspense fallback={<Fallback />}>
-      <NavigationContainer>
-        <SQLiteProvider
-          databaseName="chronoMainDatabase.db"
-          onInit={migrateDbIfNeeded}
-          useSuspense
-        >
+      <SQLiteProvider
+        databaseName="chronoMainDatabase.db"
+        onInit={migrateDbIfNeeded}
+        useSuspense
+      >
+        <NavigationContainer theme={DarkTheme}>
           <StackNavigator />
-        </SQLiteProvider>
-      </NavigationContainer>
+        </NavigationContainer>
+      </SQLiteProvider>
     </Suspense>
   );
 }

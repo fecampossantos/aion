@@ -9,6 +9,7 @@ const TextInput = ({ ...props }: any) => {
         {...props}
         placeholderTextColor={placeHolderColor}
         testID="textInput-input"
+        cursorColor={"#fff"}
       />
     </View>
   );

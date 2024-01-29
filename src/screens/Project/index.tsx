@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";
 import { Feather } from "@expo/vector-icons";
@@ -7,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite/next";
+import LoadingView from "../../components/LoadingView";
 interface TaskWithTimed {
   task_id: number;
   name: string;
@@ -39,6 +46,7 @@ const AddTask = ({ navigation, project }) => (
 const Project = ({ navigation, route }) => {
   const database = useSQLiteContext();
   const [tasks, setTasks] = useState<Array<TaskWithTimed>>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
   const isTimerRunning = timerIdRunning !== null;
 
@@ -114,6 +122,7 @@ const Project = ({ navigation, route }) => {
       }
 
       getTasks();
+      setIsLoading(false);
     }, [timerIdRunning])
   );
 
@@ -124,7 +133,9 @@ const Project = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {tasks.length > 0 ? (
+      {isLoading ? (
+        <LoadingView />
+      ) : tasks.length > 0 ? (
         tasks.map((task: TaskWithTimed) => (
           <Task
             task={task}
@@ -139,7 +150,7 @@ const Project = ({ navigation, route }) => {
           />
         ))
       ) : (
-        <Text style={{ color: "white" }}>Esse projeto não tem tasks</Text>
+        <Text style={styles.noTasksWarning}>Esse projeto não tem tasks</Text>
       )}
 
       <AddTask navigation={navigation} project={project} />

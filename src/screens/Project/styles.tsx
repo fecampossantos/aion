@@ -5,7 +5,9 @@ const styles = StyleSheet.create({
   container: {
     height: "100%",
     backgroundColor: globalStyle.background,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
+    textAlign: "center",
+    width: "100%",
   },
   addTaskButton: {
     alignItems: "center",
@@ -18,6 +20,12 @@ const styles = StyleSheet.create({
     backgroundColor: globalStyle.white,
     borderRadius: 50,
     margin: 20,
+  },
+  noTasksWarning: {
+    color: "white",
+    width: "100%",
+    textAlign: "center",
+    marginTop: 50
   },
 });
 
