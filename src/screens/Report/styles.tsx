@@ -6,8 +6,10 @@ const styles = StyleSheet.create({
     backgroundColor: globalStyle.background,
     height: "100%",
     width: "100%",
+    paddingHorizontal: 24,
+    gap: 30,
+    paddingTop: 20
   },
-
   dateInputWapper: {
     borderWidth: 1,
     borderColor: globalStyle.black.light,

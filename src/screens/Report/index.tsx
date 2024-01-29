@@ -141,27 +141,24 @@ const Report = ({ route, navigation }) => {
   };
 
   return (
-    <>
-      <View style={styles.container}>
-        <View style={styles.dateButtonsWrapper}>
-          <View style={styles.dateWrapper}>
-            <Text style={{ color: globalStyle.white }}>De</Text>
-            <DateInput
-              date={startDate}
-              onPress={() => handleShowDatePicker("start")}
-            />
-          </View>
-          <View style={styles.dateWrapper}>
-            <Text style={{ color: globalStyle.white }}>Até</Text>
-            <DateInput
-              date={endDate}
-              onPress={() => handleShowDatePicker("end")}
-            />
-          </View>
+    <View style={styles.container}>
+      <View style={styles.dateButtonsWrapper}>
+        <View style={styles.dateWrapper}>
+          <Text style={{ color: globalStyle.white }}>De</Text>
+          <DateInput
+            date={startDate}
+            onPress={() => handleShowDatePicker("start")}
+          />
         </View>
-
-        <Button onPress={handleGenerateReport} text="Gerar report" />
+        <View style={styles.dateWrapper}>
+          <Text style={{ color: globalStyle.white }}>Até</Text>
+          <DateInput
+            date={endDate}
+            onPress={() => handleShowDatePicker("end")}
+          />
+        </View>
       </View>
+      <Button onPress={handleGenerateReport} text="Gerar report" />
       {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"
@@ -175,7 +172,7 @@ const Report = ({ route, navigation }) => {
           maximumDate={new Date()}
         />
       )}
-    </>
+    </View>
   );
 };
 

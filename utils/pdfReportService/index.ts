@@ -33,6 +33,8 @@ export function generateReportHTML(
     parseInt(str_total_cost.toString().charAt(str_total_cost.length - 1)) > 5
   ) {
     (total_cost = parseFloat(total_cost.toFixed(2)) + 0) + 0.01;
+  } else {
+    total_cost = parseFloat(total_cost.toFixed(2));
   }
 
   const data_rows = timings.map(
