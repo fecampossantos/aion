@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Project as IProject } from "../../../interfaces/Project";
 import Task from "../../components/Task";
 import { Feather } from "@expo/vector-icons";
@@ -16,7 +11,7 @@ import LoadingView from "../../components/LoadingView";
 interface TaskWithTimed {
   task_id: number;
   name: string;
-  completed: boolean;
+  completed: 0 | 1;
   task_created_at: string;
   timed_until_now: number;
 }
@@ -94,32 +89,32 @@ const Project = ({ navigation, route }) => {
     });
   }, []);
 
+  async function getTasks() {
+    const allTasks = await database.getAllAsync<TaskWithTimed>(
+      `SELECT 
+  t.task_id,
+  t.name,
+  t.completed,
+  t.created_at AS task_created_at,
+  COALESCE(SUM(ti.time), 0) AS timed_until_now
+FROM 
+  tasks t
+LEFT JOIN 
+  timings ti ON t.task_id = ti.task_id
+WHERE 
+  t.project_id = ?
+GROUP BY 
+  t.task_id, t.name, t.completed, t.created_at
+ORDER BY 
+  t.created_at;`,
+      project.project_id
+    );
+
+    setTasks(allTasks);
+  }
+
   useFocusEffect(
     useCallback(() => {
-      async function getTasks() {
-        const allTasks = await database.getAllAsync<TaskWithTimed>(
-          `SELECT 
-      t.task_id,
-      t.name,
-      t.completed,
-      t.created_at AS task_created_at,
-      COALESCE(SUM(ti.time), 0) AS timed_until_now
-  FROM 
-      tasks t
-  LEFT JOIN 
-      timings ti ON t.task_id = ti.task_id
-  WHERE 
-      t.project_id = ?
-  GROUP BY 
-      t.task_id, t.name, t.completed, t.created_at
-  ORDER BY 
-      t.created_at;`,
-          project.project_id
-        );
-
-        setTasks(allTasks);
-      }
-
       getTasks();
       setIsLoading(false);
     }, [timerIdRunning])
@@ -128,6 +123,17 @@ const Project = ({ navigation, route }) => {
   const handleNavigateToTask = (task: TaskWithTimed) => {
     if (isTimerRunning) return;
     navigation.navigate("Task", { task });
+  };
+
+  const handleDoneTask = async (value: boolean, task: TaskWithTimed) => {
+    const toInsert = value ? 1 : 0;
+
+    await database.runAsync(
+      "UPDATE tasks SET completed = ? WHERE task_id = ?;",
+      toInsert,
+      task.task_id
+    );
+    getTasks();
   };
 
   return (
@@ -146,6 +152,7 @@ const Project = ({ navigation, route }) => {
             onInitTimer={() => setTimerIdRunning(task.task_id)}
             onStopTimer={() => setTimerIdRunning(null)}
             showTimedUntilNowOnTimer={task.timed_until_now}
+            handleDoneTask={handleDoneTask}
           />
         ))
       ) : (

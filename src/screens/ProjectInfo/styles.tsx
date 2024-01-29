@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width / 2 - 36,
   },
   dangerZone: {
-    borderTopColor: "red",
+    borderTopColor: globalStyle.white,
     borderTopWidth: 1,
     paddingVertical: 20,
     marginTop: 40,

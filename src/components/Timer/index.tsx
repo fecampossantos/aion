@@ -4,6 +4,7 @@ import * as Haptics from "expo-haptics";
 import { AntDesign } from "@expo/vector-icons";
 
 import styles from "./styles";
+import globalStyle from "../../globalStyle";
 
 interface TimerProps {
   onStop?: (timeInSeconds: number) => void;
@@ -80,11 +81,7 @@ const Timer = ({
 
   return (
     <TouchableOpacity
-      style={
-        disabled
-          ? { ...styles.container, backgroundColor: "grey" }
-          : styles.container
-      }
+      style={disabled ? styles.disabledTimer : styles.container}
       onPress={() => handleTouch()}
       testID="timer-touchable"
     >
@@ -92,10 +89,12 @@ const Timer = ({
         <AntDesign
           name={isCounting ? "pause" : "caretright"}
           size={16}
-          color="white"
+          color={disabled ? globalStyle.black.light : globalStyle.white}
         />
       </View>
-      <Text style={styles.text}>{getTimeToShow()}</Text>
+      <Text style={disabled ? styles.disabledText : styles.text}>
+        {getTimeToShow()}
+      </Text>
     </TouchableOpacity>
   );
 };
