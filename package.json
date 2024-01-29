@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "ts:check": "tsc",
     "test": "jest",
-    "build:apk": "eas build -p android --profile preview"
+    "build:apk": "eas build -p android --profile preview",
+    "build:androidAAB": "eas build -p android"
   },
   "dependencies": {
     "@expo-google-fonts/open-sans": "^0.2.3",
