@@ -24,18 +24,49 @@ const HeaderInfoButton = ({ onPress }: { onPress: () => void }) => (
   </TouchableOpacity>
 );
 
-const AddTask = ({ navigation, project }) => (
-  <TouchableOpacity
-    style={styles.addTaskButton}
-    onPress={() => {
-      navigation.navigate("AddTaskModal", { project });
-    }}
-  >
-    <Text>
-      <Feather name="plus" size={40} color="black" />
-    </Text>
-  </TouchableOpacity>
-);
+const AddTask = ({ navigation, project }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  return (
+    <View style={styles.addButtonWrapper}>
+      {isOpen ? (
+        <View style={styles.addButtons}>
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              navigation.navigate("AddTaskModal", { project });
+            }}
+            style={[styles.addButton, { marginBottom: 20 }]}
+          >
+            <Text>Nova task</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setIsOpen(false);
+              navigation.navigate("AddTaskModal", { project });
+            }}
+            style={styles.addButton}
+          >
+            <Text>Novo tempo</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      <View style={styles.addIconWrapper}>
+        <TouchableOpacity
+          style={styles.addButtonIcon}
+          onPress={() => {
+            setIsOpen(!isOpen);
+          }}
+        >
+          <Text>
+            <Feather name="plus" size={40} color="black" />
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const Project = ({ navigation, route }) => {
   const database = useSQLiteContext();
@@ -76,7 +107,7 @@ const Project = ({ navigation, route }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      title: project.name,
+      title: `${project.name} - Tasks`,
       headerRight: () => (
         <HeaderInfoButton
           onPress={() =>
