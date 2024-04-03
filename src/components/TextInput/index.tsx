@@ -6,10 +6,10 @@ const TextInput = ({ ...props }: any) => {
     <View style={styles.wrapper}>
       <RNTextInput
         style={styles.input}
-        {...props}
         placeholderTextColor={placeHolderColor}
         testID="textInput-input"
         cursorColor={"#fff"}
+        {...props}
       />
     </View>
   );

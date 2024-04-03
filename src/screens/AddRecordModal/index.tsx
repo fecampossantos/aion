@@ -16,26 +16,34 @@ import {
 
 import { Picker } from "@react-native-picker/picker";
 import Task from "../../../interfaces/Task";
+import TextInput from "../../components/TextInput";
 
-const DateTimeInput = ({
-  date,
-  onPress,
-  type = "date",
-}: {
-  date: Date;
-  onPress: () => void;
-  type?: "date" | "time";
-}) => {
-  const textToShow =
-    type === "date"
-      ? fullDate(date.toISOString())
-      : fullHour(date.toISOString());
+const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
   return (
     <View style={styles.dateInputWapper}>
-      <Text style={styles.date}>{textToShow}</Text>
+      <Text style={styles.date}>{fullDate(date.toISOString())}</Text>
       <TouchableOpacity onPress={() => onPress()}>
         <Feather name="calendar" color="white" size={20} />
       </TouchableOpacity>
+    </View>
+  );
+};
+
+const TimeInput = ({
+  time,
+  onChange,
+}: {
+  time: string;
+  onChange: (value: string) => void;
+}) => {
+  const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}h`;
+  return (
+    <View>
+      <TextInput
+        keyboardType="numeric"
+        value={formattedTime}
+        onChangeText={onChange}
+      />
     </View>
   );
 };
@@ -46,14 +54,12 @@ const AddRecordModal = ({ route, navigation }) => {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<any>();
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const [date, setDate] = useState<Date>(new Date());
-  const [startTime, setStartTime] = useState<Date>(new Date());
-  const [endTime, setEndTime] = useState<Date>(new Date());
-  const [timeShown, setTimeShown] = useState<"start" | "end" | null>(null);
-  const [timePickerValue, setTimePickerValue] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const [startTime, setStartTime] = useState("1234");
+  const [endTime, setEndTime] = useState("1234");
 
   async function getTasks() {
     const tasks = await database.getAllAsync<any>(
@@ -66,44 +72,81 @@ const AddRecordModal = ({ route, navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      title: `Adicionar novo tempo em ${project.name}`,
+      title: `Adicionar novo tempo`,
     });
 
     getTasks();
   }, []);
 
+  const validTime = (value: string) => {
+    const hours = parseInt(value.slice(0, 2));
+    const minutes = parseInt(value.slice(2));
+
+    if (hours > 23 || minutes > 59) return false;
+
+    return true;
+  };
+
+  const getDifferenceInSeconds = () => {
+    const hoursStart = parseInt(startTime.slice(0, 2));
+    const minutesStart = parseInt(startTime.slice(2));
+
+    const hoursEnd = parseInt(endTime.slice(0, 2));
+    const minutesEnd = parseInt(endTime.slice(2));
+
+    const hoursDiff = hoursEnd - hoursStart;
+    const minutesDiff = minutesEnd - minutesStart;
+
+    const diffInSeconds = hoursDiff * 3600 + minutesDiff * 60;
+
+    return diffInSeconds;
+  };
+
+  const formatCreatedAt = () => {
+    const newDate = new Date(date);
+    const hoursStart = parseInt(startTime.slice(0, 2));
+    const minutesStart = parseInt(startTime.slice(2));
+
+    newDate.setHours(hoursStart);
+    newDate.setMinutes(minutesStart);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+
+    return newDate;
+  };
+
   const handleAddRecord = async () => {
+    if (selectedTask === undefined || selectedTask === "none_task") return;
+    if (!validTime(startTime)) return;
+    if (!validTime(endTime)) return;
+
     await database.runAsync(
-      "INSERT INTO timings (task_id, time, created_at) VALUES (?, ?);",
-      selectedTask.task_id,
-      0, // add time here
-      formatJsDateToDatabase(date)
+      "INSERT INTO timings (task_id, time, created_at) VALUES (?, ?, ?);",
+      selectedTask,
+      getDifferenceInSeconds(),
+      formatJsDateToDatabase(formatCreatedAt())
     );
+
     navigation.navigate("Project", { project });
   };
 
   const handleUpdateDate = (event, selectedDate) => {
     if (event.type !== "set") return;
+
     setDate(new Date(selectedDate));
-    setShowDatePicker(false);
+    setShowPicker(false);
   };
 
-  const handleUpdateTime = (event, selectedTime) => {
-    if (event.type !== "set") return;
+  const handleChangeTime = (type: "start" | "end", value: string) => {
+    const formattedTime = value.replace(/\D/g, "");
 
-    const dt = new Date(selectedTime);
-    if (timeShown === "start") {
-      setStartTime(new Date(dt));
+    if (formattedTime.length === 5) return;
+
+    if (type === "start") {
+      setStartTime(formattedTime);
     } else {
-      setEndTime(new Date(dt));
+      setEndTime(formattedTime);
     }
-    setShowTimePicker(false);
-  };
-
-  const handleShowTimePicker = (timeValue: "start" | "end") => {
-    setTimeShown(timeValue);
-    setTimePickerValue(timeValue === "start" ? startTime : endTime);
-    setShowTimePicker(true);
   };
 
   return (
@@ -137,7 +180,7 @@ const AddRecordModal = ({ route, navigation }) => {
         >
           Em
         </Text>
-        <DateTimeInput date={date} onPress={() => setShowDatePicker(true)} />
+        <DateInput date={date} onPress={() => setShowPicker(true)} />
       </View>
 
       <View style={styles.dateButtonsWrapper}>
@@ -150,10 +193,9 @@ const AddRecordModal = ({ route, navigation }) => {
           >
             De
           </Text>
-          <DateTimeInput
-            date={startTime}
-            onPress={() => handleShowTimePicker("start")}
-            type="time"
+          <TimeInput
+            onChange={(value) => handleChangeTime("start", value)}
+            time={startTime}
           />
         </View>
         <View style={styles.dateWrapper}>
@@ -165,10 +207,9 @@ const AddRecordModal = ({ route, navigation }) => {
           >
             Até
           </Text>
-          <DateTimeInput
-            date={endTime}
-            onPress={() => handleShowTimePicker("end")}
-            type="time"
+          <TimeInput
+            onChange={(value) => handleChangeTime("end", value)}
+            time={endTime}
           />
         </View>
       </View>
@@ -177,26 +218,15 @@ const AddRecordModal = ({ route, navigation }) => {
         onPress={async () => await handleAddRecord()}
         text="Adicionar tempo"
       />
-      {showDatePicker && (
-        <DateTimePicker
-          testID="datePicker"
-          value={date || new Date()}
-          mode={"date"}
-          is24Hour={true}
-          onChange={(event, selectedDate) =>
-            handleUpdateDate(event, selectedDate)
-          }
-          maximumDate={new Date()}
-        />
-      )}
 
-      {showTimePicker && (
+      {showPicker && (
         <DateTimePicker
           testID="timePicker"
-          value={timePickerValue || new Date()}
-          mode={"time"}
+          value={date || new Date()}
+          mode={"date"}
+          maximumDate={new Date()}
           onChange={(event, selectedDate) =>
-            handleUpdateTime(event, selectedDate)
+            handleUpdateDate(event, selectedDate)
           }
         />
       )}
