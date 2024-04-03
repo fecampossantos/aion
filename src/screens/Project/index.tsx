@@ -43,7 +43,7 @@ const AddTask = ({ navigation, project }) => {
           <TouchableOpacity
             onPress={() => {
               setIsOpen(false);
-              navigation.navigate("AddTaskModal", { project });
+              navigation.navigate("AddRecordModal", { project });
             }}
             style={styles.addButton}
           >

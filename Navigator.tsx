@@ -5,6 +5,7 @@ import Project from "./src/screens/Project";
 import AddProject from "./src/screens/AddProject";
 import ProjectInfo from "./src/screens/ProjectInfo";
 import AddTaskModal from "./src/screens/AddTaskModal";
+import AddRecordModal from "./src/screens/AddRecordModal";
 import Task from "./src/screens/Task";
 import Report from "./src/screens/Report";
 
@@ -84,6 +85,15 @@ const StackNavigator = () => {
       <Stack.Screen
         name="Report"
         component={Report}
+        options={{
+          animation: "slide_from_bottom",
+          headerShown: true,
+          ...headerStyles,
+        }}
+      />
+      <Stack.Screen
+        name="AddRecordModal"
+        component={AddRecordModal}
         options={{
           animation: "slide_from_bottom",
           headerShown: true,
