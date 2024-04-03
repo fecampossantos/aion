@@ -47,9 +47,31 @@ export function fullDateWithHour(dateString: string): {
 
   return { d, time };
 }
+
 export function fullDate(dateString: string): string {
   const date = new Date(dateString);
   const d = new Date(date).toLocaleDateString("pt-BR");
 
   return d;
+}
+
+export function fullHour(dateString: string): string {
+  const date = new Date(dateString);
+  const d = new Date(date);
+
+  const hours = d.getHours().toString().padStart(2, "0");
+  const minutes = d.getMinutes().toString().padStart(2, "0");
+
+  return `${hours}:${minutes}h`;
+}
+
+export function formatJsDateToDatabase(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is zero-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
