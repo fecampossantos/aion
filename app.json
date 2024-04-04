@@ -2,7 +2,7 @@
   "expo": {
     "name": "chrono",
     "slug": "chrono",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1C1C1C"
       },
-      "package": "com.fecampossantos.chrono"
+      "package": "com.fecampossantos.chrono",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
