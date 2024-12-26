@@ -6,7 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import styles from "./styles";
 import Button from "../../components/Button";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import globalStyle from "../../globalStyle";
 import {
   formatJsDateToDatabase,

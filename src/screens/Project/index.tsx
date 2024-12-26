@@ -6,7 +6,7 @@ import { Feather } from "@expo/vector-icons";
 
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import LoadingView from "../../components/LoadingView";
 interface TaskWithTimed {
   task_id: number;

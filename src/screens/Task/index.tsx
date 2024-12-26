@@ -9,7 +9,7 @@ import styles from "./styles";
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
 import globalStyle from "../../globalStyle";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import LoadingView from "../../components/LoadingView";
 
 const HeaderDeleteButton = ({

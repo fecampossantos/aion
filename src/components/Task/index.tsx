@@ -2,7 +2,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import Timer from "../Timer";
 import { secondsToTimeHHMMSS } from "../../../utils/parser";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import CheckBox from "../CheckBox";
 
 interface TaskWithTimed {

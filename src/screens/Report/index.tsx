@@ -8,7 +8,7 @@ import {
 import { Project as IProject } from "../../../interfaces/Project";
 import styles from "./styles";
 import { useState } from "react";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 import globalStyle from "../../globalStyle";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useFocusEffect } from "@react-navigation/native";

@@ -5,7 +5,7 @@ import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
 
 import styles, { inputColor } from "./styles";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 
 const AddProject = ({ navigation }) => {
   const database = useSQLiteContext();

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import styles from "./styles";
 import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 const AddTaskModal = ({ route, navigation }) => {
   const database = useSQLiteContext();
   const project: IProject = route.params.project;

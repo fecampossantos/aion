@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Text, View } from "react-native";
-import { SQLiteProvider, type SQLiteDatabase } from "expo-sqlite/next";
+import { SQLiteProvider, type SQLiteDatabase } from "expo-sqlite";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
 import {

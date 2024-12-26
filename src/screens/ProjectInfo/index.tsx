@@ -19,7 +19,7 @@ import { fullDate } from "../../../utils/parser";
 import globalStyle from "../../globalStyle";
 
 import { BarChart } from "react-native-chart-kit";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
   <View style={styles.dateInputWapper}>

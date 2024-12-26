@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useSQLiteContext } from "expo-sqlite";
 
 import { Project } from "../../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
