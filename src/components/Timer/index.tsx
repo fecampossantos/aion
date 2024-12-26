@@ -63,17 +63,17 @@ const Timer = ({
       setIsCounting(true);
       onInit();
 
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Task Timer Running",
-          body: `Time elapsed: ${getTimeToShow()}`,
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: 1,
-          repeats: true,
-        },
-      });
+      // await Notifications.scheduleNotificationAsync({
+      //   content: {
+      //     title: "Task Timer Running",
+      //     body: `Time elapsed: ${getTimeToShow()}`,
+      //   },
+      //   trigger: {
+      //     type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      //     seconds: 1,
+      //     repeats: true,
+      //   },
+      // });
     }
   };
 
