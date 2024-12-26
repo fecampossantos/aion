@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import * as Haptics from "expo-haptics";
+import * as Notifications from "expo-notifications";
 import { AntDesign } from "@expo/vector-icons";
 import styles from "./styles";
 import globalStyle from "../../globalStyle";
@@ -26,7 +27,7 @@ const Timer = ({
     let startTime: number;
 
     if (isCounting) {
-      startTime = Date.now() - getSeconds() * 1000; // Adjust for current timer state
+      startTime = Date.now() - getSeconds() * 1000;
 
       intervalId = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -49,7 +50,7 @@ const Timer = ({
     setTimer({ hours: 0, minutes: 0, seconds: 0 });
   };
 
-  const handleTouch = () => {
+  const handleTouch = async () => {
     if (disabled) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -57,9 +58,22 @@ const Timer = ({
       setIsCounting(false);
       onStop(getSeconds());
       resetCount();
+      await Notifications.dismissAllNotificationsAsync();
     } else {
       setIsCounting(true);
       onInit();
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Task Timer Running",
+          body: `Time elapsed: ${getTimeToShow()}`,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: 1,
+          repeats: true,
+        },
+      });
     }
   };
 

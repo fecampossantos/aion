@@ -15,6 +15,9 @@ import {
 
 import StackNavigator from "./Navigator";
 
+import { useEffect } from "react";
+import * as Notifications from "expo-notifications";
+
 const Fallback = () => (
   <View style={{ backgroundColor: "black" }}>
     <Text style={{ color: "white" }}>Carregando...</Text>
@@ -32,6 +35,17 @@ export default function App() {
     OpenSans_500Medium_Italic,
     OpenSans_700Bold_Italic,
   });
+
+  const requestPermissions = async () => {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") {
+      await Notifications.requestPermissionsAsync();
+    }
+  };
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
 
   if (!fontsLoaded) {
     if (!fontsLoaded) console.log("Fonts not loaded. Waiting.");
