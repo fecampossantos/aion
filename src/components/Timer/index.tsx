@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import { AntDesign } from "@expo/vector-icons";
-
 import styles from "./styles";
 import globalStyle from "../../globalStyle";
 
@@ -19,25 +18,22 @@ const Timer = ({
   disabled = false,
   textToShowWhenStopped,
 }: TimerProps) => {
-  const [isCounting, setIsCouting] = useState<boolean>(false);
-
+  const [isCounting, setIsCounting] = useState<boolean>(false);
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    let intervalId: string | number | NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
+    let startTime: number;
 
     if (isCounting) {
-      intervalId = setInterval(() => {
-        setTimer((prevTimer) => {
-          const seconds = prevTimer.seconds + 1;
-          const minutes = prevTimer.minutes + Math.floor(seconds / 60);
-          const hours = prevTimer.hours + Math.floor(minutes / 60);
+      startTime = Date.now() - getSeconds() * 1000; // Adjust for current timer state
 
-          return {
-            hours: hours % 24,
-            minutes: minutes % 60,
-            seconds: seconds % 60,
-          };
+      intervalId = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setTimer({
+          hours: Math.floor(elapsed / 3600),
+          minutes: Math.floor((elapsed % 3600) / 60),
+          seconds: elapsed % 60,
         });
       }, 1000);
     }
@@ -58,11 +54,11 @@ const Timer = ({
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (isCounting) {
-      setIsCouting(false);
-      resetCount();
+      setIsCounting(false);
       onStop(getSeconds());
+      resetCount();
     } else {
-      setIsCouting(true);
+      setIsCounting(true);
       onInit();
     }
   };
