@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Notifications from "expo-notifications";
@@ -11,6 +11,7 @@ interface TimerProps {
   onInit?: () => void;
   disabled?: boolean;
   textToShowWhenStopped?: null | string;
+  taskName?: string; // Added optional task name prop
 }
 
 const Timer = ({
@@ -18,63 +19,60 @@ const Timer = ({
   onInit = () => {},
   disabled = false,
   textToShowWhenStopped,
+  taskName = "Task", // Default task name
 }: TimerProps) => {
   const [isCounting, setIsCounting] = useState<boolean>(false);
-  const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    let startTime: number;
-
-    if (isCounting) {
-      startTime = Date.now() - getSeconds() * 1000;
-
-      intervalId = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        setTimer({
-          hours: Math.floor(elapsed / 3600),
-          minutes: Math.floor((elapsed % 3600) / 60),
-          seconds: elapsed % 60,
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(intervalId);
-  }, [isCounting]);
-
-  const getSeconds = () => {
-    return timer.hours * 3600 + timer.minutes * 60 + timer.seconds;
-  };
-
-  const resetCount = () => {
-    setTimer({ hours: 0, minutes: 0, seconds: 0 });
-  };
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const notificationId = useRef<string | null>(null);
 
   const handleTouch = async () => {
     if (disabled) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (isCounting) {
+      // Stop timer
       setIsCounting(false);
       onStop(getSeconds());
       resetCount();
-      await Notifications.dismissAllNotificationsAsync();
+
+      // Dismiss notification
+      if (notificationId.current) {
+        await Notifications.dismissNotificationAsync(notificationId.current);
+        notificationId.current = null;
+      }
     } else {
+      // Start timer
+      const now = new Date();
+      const formattedTime = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
       setIsCounting(true);
+      setStartTime(formattedTime);
       onInit();
 
-      // await Notifications.scheduleNotificationAsync({
-      //   content: {
-      //     title: "Task Timer Running",
-      //     body: `Time elapsed: ${getTimeToShow()}`,
-      //   },
-      //   trigger: {
-      //     type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      //     seconds: 1,
-      //     repeats: true,
-      //   },
-      // });
+      // Show notification
+      const id = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Timer for ${taskName} running`,
+          body: `Started at ${formattedTime}`,
+        },
+        trigger: null, // Immediate notification
+      });
+      notificationId.current = id;
     }
+  };
+
+  const resetCount = () => {
+    setStartTime(null);
+    setTimer({ hours: 0, minutes: 0, seconds: 0 });
+  };
+
+  const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 });
+
+  const getSeconds = () => {
+    return timer.hours * 3600 + timer.minutes * 60 + timer.seconds;
   };
 
   const formatNumber = (number: number): string => {
@@ -88,6 +86,28 @@ const Timer = ({
       timer.minutes
     )}:${formatNumber(timer.seconds)}`;
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isCounting) {
+      intervalId = setInterval(() => {
+        setTimer((prevTimer) => {
+          const seconds = prevTimer.seconds + 1;
+          const minutes = prevTimer.minutes + Math.floor(seconds / 60);
+          const hours = prevTimer.hours + Math.floor(minutes / 60);
+
+          return {
+            hours: hours % 24,
+            minutes: minutes % 60,
+            seconds: seconds % 60,
+          };
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isCounting]);
 
   return (
     <TouchableOpacity
