@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity } from "react-native";
+import { Pressable, Text } from "react-native";
 import styles from "./styles";
 
 interface ButtonProps {
@@ -15,12 +15,12 @@ const Button = ({
   textStyle = {},
 }: ButtonProps) => {
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={() => onPress()}
       style={{ ...styles.button, ...buttonStyle }}
     >
       <Text style={{ ...styles.text, ...textStyle }}>{text}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

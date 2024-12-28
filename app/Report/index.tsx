@@ -45,12 +45,6 @@ const Report = () => {
   const [datePickerValue, setDatePickerValue] = useState(null);
   const [dateShown, setDateShown] = useState<"start" | "end" | null>(null);
 
-  // useFocusEffect(() => {
-  //   router.setOptions({
-  //     title: `Novo report - ${project.name}`,
-  //   });
-  // });
-
   const handleShowDatePicker = (dateValue: "start" | "end") => {
     setDateShown(dateValue);
     setDatePickerValue(dateValue === "start" ? startDate : endDate);
@@ -67,59 +61,59 @@ const Report = () => {
     setShowDatePicker(false);
   };
 
-  const handleGenerateReport = async () => {
-    try {
-      const timings = await database.getAllAsync<TimingsResult>(
-        `
-            SELECT
-            tk.completed as task_completed,
-            tk.name as task_name,
-            ti.created_at as timing_created_at,
-            ti.time as timing_timed
-            FROM tasks tk
-            LEFT JOIN
-            timings ti ON tk.task_id = ti.task_id
-            WHERE
-            tk.project_id = ? AND ti.created_at BETWEEN ? AND ?
-            ORDER BY
-            ti.created_at;
-            `,
-        [project.project_id, getInitOfDay(startDate), getEndOfDay(endDate)]
-      );
+  // const handleGenerateReport = async () => {
+  //   try {
+  //     const timings = await database.getAllAsync<TimingsResult>(
+  //       `
+  //           SELECT
+  //           tk.completed as task_completed,
+  //           tk.name as task_name,
+  //           ti.created_at as timing_created_at,
+  //           ti.time as timing_timed
+  //           FROM tasks tk
+  //           LEFT JOIN
+  //           timings ti ON tk.task_id = ti.task_id
+  //           WHERE
+  //           tk.project_id = ? AND ti.created_at BETWEEN ? AND ?
+  //           ORDER BY
+  //           ti.created_at;
+  //           `,
+  //       [project.project_id, getInitOfDay(startDate), getEndOfDay(endDate)]
+  //     );
 
-      const startDateSTR = fullDate(startDate.toString());
-      const endDateSTR = fullDate(endDate.toString());
+  //     const startDateSTR = fullDate(startDate.toString());
+  //     const endDateSTR = fullDate(endDate.toString());
 
-      const documentName = `Report_${project.name}_${startDateSTR.replaceAll(
-        "/",
-        "-"
-      )}_${endDateSTR.replaceAll("/", "-")}`;
+  //     const documentName = `Report_${project.name}_${startDateSTR.replaceAll(
+  //       "/",
+  //       "-"
+  //     )}_${endDateSTR.replaceAll("/", "-")}`;
 
-      const html = generateReportHTML(
-        project,
-        startDateSTR,
-        endDateSTR,
-        timings,
-        documentName
-      );
+  //     const html = generateReportHTML(
+  //       project,
+  //       startDateSTR,
+  //       endDateSTR,
+  //       timings,
+  //       documentName
+  //     );
 
-      const { uri } = await Print.printToFileAsync({ html });
+  //     const { uri } = await Print.printToFileAsync({ html });
 
-      const pdfFile = `${uri.slice(
-        0,
-        uri.lastIndexOf("/") + 1
-      )}${documentName}.pdf`;
+  //     const pdfFile = `${uri.slice(
+  //       0,
+  //       uri.lastIndexOf("/") + 1
+  //     )}${documentName}.pdf`;
 
-      await FileSystem.moveAsync({
-        from: uri,
-        to: pdfFile,
-      });
+  //     await FileSystem.moveAsync({
+  //       from: uri,
+  //       to: pdfFile,
+  //     });
 
-      await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
-    } catch (e) {
-      console.warn(e);
-    }
-  };
+  //     await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
+  //   } catch (e) {
+  //     console.warn(e);
+  //   }
+  // };
 
   const getInitOfDay = (day: Date) => {
     const startOfDay = new Date(day);
@@ -153,7 +147,7 @@ const Report = () => {
           />
         </View>
       </View>
-      <Button onPress={handleGenerateReport} text="Gerar report" />
+      {/* <Button onPress={handleGenerateReport} text="Gerar report" /> */}
       {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"

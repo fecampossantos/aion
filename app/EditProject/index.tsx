@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TextInput from "../../components/TextInput";
 import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
@@ -7,16 +7,31 @@ import Button from "../../components/Button";
 import styles from "./styles";
 import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
+import { Project as IProject } from "../../interfaces/Project";
 
 const EditProject = () => {
-  const { project } = useLocalSearchParams();
+  const { projectID } = useLocalSearchParams();
+  const [project, setProject] = useState<IProject>();
 
   const database = useSQLiteContext();
-  const [projectName, setProjectName] = useState<string>(project.name);
-  const [projectHourlyCost, setProjectHourlyCost] = useState<string>(
-    `${project.hourly_cost.toString()},00`
-  );
+  const [projectName, setProjectName] = useState<string>();
+  const [projectHourlyCost, setProjectHourlyCost] = useState<string>();
   const [errorMessage, setErrorMessage] = useState(null);
+
+  useEffect(() => {
+    async function getProject() {
+      const project = await database.getFirstAsync<IProject>(
+        `SELECT * FROM projects WHERE project_id = ?;`,
+        projectID as string
+      );
+
+      setProject(project);
+      setProjectName(project.name);
+      setProjectHourlyCost(`${project.hourly_cost.toString()},00`);
+    }
+
+    getProject();
+  }, [projectID]);
 
   const handleEditProject = async () => {
     if (projectName === "") {
@@ -51,6 +66,8 @@ const EditProject = () => {
     setErrorMessage(null);
     setProjectName(text);
   };
+
+  if (!project) return null;
 
   return (
     <View style={styles.container}>

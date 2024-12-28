@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Text, Pressable, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Project as IProject } from "../../interfaces/Project";
 import Task from "../../components/Task";
@@ -17,14 +17,6 @@ interface TaskWithTimed {
   timed_until_now: number;
 }
 
-const HeaderInfoButton = ({ onPress }: { onPress: () => void }) => (
-  <TouchableOpacity onPress={onPress}>
-    <Text>
-      <Feather name="info" size={24} color="white" />
-    </Text>
-  </TouchableOpacity>
-);
-
 const AddTask = ({ router, project }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -32,16 +24,19 @@ const AddTask = ({ router, project }) => {
     <View style={styles.addButtonWrapper}>
       {isOpen ? (
         <View style={styles.addButtons}>
-          <TouchableOpacity
+          <Pressable
             onPress={() => {
               setIsOpen(false);
-              router.push({ pathname: "/AddTaskModal", params: { project } });
+              router.push({
+                pathname: "AddTaskModal",
+                params: { projectID: project.project_id },
+              });
             }}
             style={[styles.addButton, { marginBottom: 20 }]}
           >
             <Text>Nova task</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             onPress={() => {
               setIsOpen(false);
               router.push({ pathname: "/AddRecordModal", params: { project } });
@@ -49,12 +44,12 @@ const AddTask = ({ router, project }) => {
             style={styles.addButton}
           >
             <Text>Novo tempo</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ) : null}
 
       <View style={styles.addIconWrapper}>
-        <TouchableOpacity
+        <Pressable
           style={styles.addButtonIcon}
           onPress={() => {
             setIsOpen(!isOpen);
@@ -63,7 +58,7 @@ const AddTask = ({ router, project }) => {
           <Text>
             <Feather name="plus" size={40} color="black" />
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -158,6 +153,8 @@ ORDER BY
     );
     getTasks();
   };
+
+  if (!project) return <LoadingView />;
 
   return (
     <View style={styles.container}>

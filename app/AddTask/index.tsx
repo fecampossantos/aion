@@ -9,17 +9,24 @@ import Button from "../../components/Button";
 import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
 
-const AddTaskModal = () => {
+const AddTask = () => {
   const database = useSQLiteContext();
-  const { project } = useLocalSearchParams();
+  const { projectID } = useLocalSearchParams();
+  const [project, setProject] = useState<IProject>();
 
   const [taskName, setTaskName] = useState<string>("");
 
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     title: `Adicionar task em ${project.name}`,
-  //   });
-  // }, []);
+  useEffect(() => {
+    async function getProject() {
+      const project = await database.getFirstAsync<IProject>(
+        `SELECT * FROM projects WHERE project_id = ?;`,
+        projectID as string
+      );
+      setProject(project);
+    }
+
+    getProject();
+  }, [projectID]);
 
   const handleAddTaksToProject = async () => {
     if (taskName === "") return;
@@ -29,7 +36,10 @@ const AddTaskModal = () => {
       project.project_id,
       taskName
     );
-    router.push({ pathname: "Project", params: { project } });
+    router.push({
+      pathname: "Project",
+      params: { projectID: project.project_id },
+    });
   };
 
   return (
@@ -47,4 +57,4 @@ const AddTaskModal = () => {
   );
 };
 
-export default AddTaskModal;
+export default AddTask;

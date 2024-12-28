@@ -8,14 +8,12 @@ import Button from "../../components/Button";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSQLiteContext } from "expo-sqlite";
 import globalStyle from "../../globalStyle";
-import {
-  formatJsDateToDatabase,
-  fullDate,
-} from "../../utils/parser";
+import { formatJsDateToDatabase, fullDate } from "../../utils/parser";
 
 import { Picker } from "@react-native-picker/picker";
 import Task from "../../interfaces/Task";
 import TextInput from "../../components/TextInput";
+import { router, useLocalSearchParams } from "expo-router";
 
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
   return (
@@ -47,9 +45,9 @@ const TimeInput = ({
   );
 };
 
-const AddRecordModal = ({ route, navigation }) => {
+const AddRecord = () => {
   const database = useSQLiteContext();
-  const project: IProject = route.params.project;
+  const { projectID } = useLocalSearchParams();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<any>();
@@ -57,25 +55,35 @@ const AddRecordModal = ({ route, navigation }) => {
   const [date, setDate] = useState<Date>(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
-  const [startTime, setStartTime] = useState("1234");
-  const [endTime, setEndTime] = useState("1234");
+  const [startTime, setStartTime] = useState("0000");
+  const [endTime, setEndTime] = useState("0000");
 
-  async function getTasks() {
-    const tasks = await database.getAllAsync<any>(
-      "SELECT * FROM tasks WHERE project_id = ? ORDER BY created_at DESC;",
-      project.project_id
-    );
-
-    setTasks(tasks);
-  }
+  const [project, setProject] = useState<IProject>();
 
   useEffect(() => {
-    navigation.setOptions({
-      title: `Adicionar novo tempo`,
-    });
+    async function getProject() {
+      const project = await database.getFirstAsync<IProject>(
+        `SELECT * FROM projects WHERE project_id = ?;`,
+        projectID as string
+      );
+      setProject(project);
+    }
 
+    getProject();
+  }, [projectID]);
+
+  useEffect(() => {
+    async function getTasks() {
+      const tasks = await database.getAllAsync<any>(
+        "SELECT * FROM tasks WHERE project_id = ? ORDER BY created_at DESC;",
+        project.project_id
+      );
+
+      setTasks(tasks);
+    }
+    if (!project) return;
     getTasks();
-  }, []);
+  }, [project]);
 
   const validTime = (value: string) => {
     const hours = parseInt(value.slice(0, 2));
@@ -126,7 +134,10 @@ const AddRecordModal = ({ route, navigation }) => {
       formatJsDateToDatabase(formatCreatedAt())
     );
 
-    navigation.navigate("Project", { project });
+    router.push({
+      pathname: "Project",
+      params: { projectID: project.project_id },
+    });
   };
 
   const handleUpdateDate = (event, selectedDate) => {
@@ -150,6 +161,7 @@ const AddRecordModal = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* // TODO if no tasks, show a message */}
       <Picker
         selectedValue={selectedTask}
         onValueChange={(itemValue, itemIndex) => setSelectedTask(itemValue)}
@@ -233,4 +245,4 @@ const AddRecordModal = ({ route, navigation }) => {
   );
 };
 
-export default AddRecordModal;
+export default AddRecord;

@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     backgroundColor: globalStyle.background,
     height: "100%",
     paddingHorizontal: globalStyle.padding.horizontal,
-    flex: 1
+    flex: 1,
   },
   datesWrapper: {},
   dateButtonsWrapper: {
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 12,
-    marginBottom: 20
+    marginBottom: 20,
   },
   date: {
     color: globalStyle.white,
@@ -46,11 +46,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     paddingVertical: 20,
     marginTop: 40,
-    gap: 12
+    gap: 12,
   },
   projectInfoWrapper: {
     paddingBottom: 40,
   },
 });
+
+export const chartConfig = {
+  backgroundGradientFrom: globalStyle.background,
+  backgroundGradientTo: globalStyle.background,
+  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  barPercentage: 0.5,
+};
 
 export default styles;

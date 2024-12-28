@@ -6,7 +6,7 @@ import Button from "../../components/Button";
 
 import styles from "./styles";
 import { useSQLiteContext } from "expo-sqlite";
-import { router, Stack, useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 
 const AddProject = () => {
   const database = useSQLiteContext();
