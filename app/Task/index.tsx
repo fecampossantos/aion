@@ -1,34 +1,13 @@
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { Task as ITask } from "../../interfaces/Task";
-import { useCallback, useEffect, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
 import { Timing as ITiming } from "../../interfaces/Timing";
-import { Feather } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 import styles from "./styles";
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
-import globalStyle from "../../globalStyle";
 import { useSQLiteContext } from "expo-sqlite";
 import LoadingView from "../../components/LoadingView";
-
-const HeaderDeleteButton = ({
-  onPress,
-  isTimerRunning,
-}: {
-  onPress: () => void;
-  isTimerRunning: boolean;
-}) => (
-  <TouchableOpacity onPress={onPress}>
-    <Text>
-      <Feather
-        name="trash"
-        size={24}
-        color={isTimerRunning ? globalStyle.black.light : "white"}
-      />
-    </Text>
-  </TouchableOpacity>
-);
 
 const Task = () => {
   const router = useRouter();
@@ -51,12 +30,6 @@ const Task = () => {
   useEffect(() => {
     getTimingsFromTask();
   }, [taskID, isTimerRunning]);
-
-  const handleDeleteTask = () => {
-    if (isTimerRunning) return;
-    database.runAsync("DELETE FROM tasks WHERE task_id = ?;", taskID as string);
-    router.back(); // Replaces navigation.goBack()
-  };
 
   const handleDeleteTiming = async (timingID: number) => {
     await database.runAsync(
@@ -102,14 +75,14 @@ const Task = () => {
               />
             ))
           ) : (
-            <Text style={{ color: "white" }}>Sem timings pra essa task</Text>
+            <View style={styles.noTimingsWarningContainer}>
+              <Text style={styles.noTimingsWarningText}>
+                Sem timings pra essa task
+              </Text>
+            </View>
           )}
         </ScrollView>
       )}
-      <HeaderDeleteButton
-        onPress={handleDeleteTask}
-        isTimerRunning={isTimerRunning}
-      />
     </View>
   );
 };

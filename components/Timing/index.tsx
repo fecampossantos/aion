@@ -1,10 +1,9 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, Pressable, View } from "react-native";
 import styles from "./styles";
 import { Timing as ITiming } from "../../interfaces/Timing";
 import { secondsToTimeHHMMSS, fullDateWithHour } from "../../utils/parser";
 
 import { Feather } from "@expo/vector-icons";
-import { database } from "../../../hooks/useDatabase/database";
 import globalStyle from "../../globalStyle";
 
 const Timing = ({
@@ -30,13 +29,13 @@ const Timing = ({
       </Text>
       <Text style={styles.text}>{secondsToTimeHHMMSS(timing.time)}</Text>
 
-      <TouchableOpacity onPress={() => handleDeleteTiming()}>
+      <Pressable onPress={() => handleDeleteTiming()}>
         <Feather
           name="trash"
           size={24}
           color={isTimerRunning ? globalStyle.black.light : "white"}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };

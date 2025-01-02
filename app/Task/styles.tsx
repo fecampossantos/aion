@@ -16,6 +16,17 @@ const styles = StyleSheet.create({
   timings: {
     paddingHorizontal: globalStyle.padding.horizontal,
   },
+  noTimingsWarningContainer:{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 20
+  },
+  noTimingsWarningText: {
+    color: globalStyle.black.light,
+    fontFamily: globalStyle.font.italicRegular,
+    fontSize: 20,
+  },
 });
 
 export default styles;

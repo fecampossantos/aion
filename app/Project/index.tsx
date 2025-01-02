@@ -93,7 +93,10 @@ ORDER BY
 
   const handleNavigateToTask = (task: TaskWithTimed) => {
     if (isTimerRunning) return;
-    router.push({ pathname: "/Task", params: { taskID: task.task_id } });
+    router.push({
+      pathname: "/Task",
+      params: { taskID: task.task_id, taskName: task.name, projectID },
+    });
   };
 
   const handleDoneTask = async (value: boolean, task: TaskWithTimed) => {
