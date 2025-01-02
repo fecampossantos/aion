@@ -1,10 +1,10 @@
-import { Slot } from "expo-router";
+import { router, Slot } from "expo-router";
 import Content from "../../components/Content";
 
 const AddProjectLayout = () => {
   return (
     <Content.Wrapper>
-      <Content.Header />
+      <Content.Header left={<Content.BackButton onPress={router.back} />} />
       <Content.Body>
         <Slot />
       </Content.Body>

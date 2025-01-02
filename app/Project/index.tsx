@@ -3,11 +3,11 @@ import { Alert, Text, Pressable, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Project as IProject } from "../../interfaces/Project";
 import Task from "../../components/Task";
-import { Feather } from "@expo/vector-icons";
 
 import styles from "./styles";
 import { useSQLiteContext } from "expo-sqlite";
 import LoadingView from "../../components/LoadingView";
+import AddButton from "./components/AddButton";
 
 interface TaskWithTimed {
   task_id: number;
@@ -16,53 +16,6 @@ interface TaskWithTimed {
   task_created_at: string;
   timed_until_now: number;
 }
-
-const AddTask = ({ router, project }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  return (
-    <View style={styles.addButtonWrapper}>
-      {isOpen ? (
-        <View style={styles.addButtons}>
-          <Pressable
-            onPress={() => {
-              setIsOpen(false);
-              router.push({
-                pathname: "AddTaskModal",
-                params: { projectID: project.project_id },
-              });
-            }}
-            style={[styles.addButton, { marginBottom: 20 }]}
-          >
-            <Text>Nova task</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              setIsOpen(false);
-              router.push({ pathname: "/AddRecordModal", params: { project } });
-            }}
-            style={styles.addButton}
-          >
-            <Text>Novo tempo</Text>
-          </Pressable>
-        </View>
-      ) : null}
-
-      <View style={styles.addIconWrapper}>
-        <Pressable
-          style={styles.addButtonIcon}
-          onPress={() => {
-            setIsOpen(!isOpen);
-          }}
-        >
-          <Text>
-            <Feather name="plus" size={40} color="black" />
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
 
 const Project = () => {
   const router = useRouter();
@@ -179,7 +132,7 @@ ORDER BY
         <Text style={styles.noTasksWarning}>Esse projeto não tem tasks</Text>
       )}
 
-      <AddTask router={router} project={project} />
+      <AddButton project={project} />
     </View>
   );
 };

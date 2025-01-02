@@ -1,10 +1,24 @@
-import { Slot } from "expo-router";
+import { router, Slot, useLocalSearchParams } from "expo-router";
 import Content from "../../components/Content";
 
 const ProjectInfoLayout = () => {
+  const { projectID } = useLocalSearchParams();
+
   return (
     <Content.Wrapper>
-      <Content.Header title={"Informações do projeto"} />
+      <Content.Header
+        title={"Informações do projeto"}
+        left={
+          <Content.BackButton
+            onPress={() =>
+              router.replace({
+                pathname: "Project",
+                params: { projectID },
+              })
+            }
+          />
+        }
+      />
       <Content.Body>
         <Slot />
       </Content.Body>

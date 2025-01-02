@@ -42,7 +42,7 @@ const ProjectLayout = () => {
 
   return (
     <Content.Wrapper>
-      <Content.Header right={<HeaderInfoButton />} title={project.name} />
+      <Content.Header right={<HeaderInfoButton />} title={project.name} left={<Content.BackButton onPress={router.back}/>}/>
       <Content.Body>
         <Slot />
       </Content.Body>
