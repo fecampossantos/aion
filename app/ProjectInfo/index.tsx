@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
 import styles, { chartConfig } from "./styles";
@@ -11,7 +12,7 @@ import Button from "../../components/Button";
 import { Feather } from "@expo/vector-icons";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { fullDate } from "../../utils/parser";
 import globalStyle from "../../globalStyle";
@@ -20,6 +21,12 @@ import { BarChart } from "react-native-chart-kit";
 import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
+
+import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import { shareAsync } from "expo-sharing";
+import { generateReportHTML } from "../../utils/pdfReportService";
+import { useSQLiteContext } from "expo-sqlite";
 
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
   <View style={styles.dateInputWapper}>
@@ -38,6 +45,9 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
 
 const ProjectInfo = () => {
   const { projectID } = useLocalSearchParams<{ projectID: string }>();
+  const database = useSQLiteContext();
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  
   const {
     getTimings,
     getProject,
@@ -67,6 +77,108 @@ const ProjectInfo = () => {
   }, [endDate, project]);
 
   if (!project) return null;
+
+  const getInitOfDay = (day: Date) => {
+    const startOfDay = new Date(day);
+    startOfDay.setHours(0, 0, 0, 0);
+    return startOfDay.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const getEndOfDay = (day: Date) => {
+    const endOfDay = new Date(day);
+    endOfDay.setHours(23, 59, 59, 999);
+    return endOfDay.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const handleGenerateReport = async () => {
+    if (isGeneratingReport || !project) return;
+    
+    setIsGeneratingReport(true);
+    try {
+      // Get comprehensive timing data with task information
+      const timings = await database.getAllAsync<{
+        task_completed: 0 | 1;
+        timing_created_at: string;
+        task_name: string;
+        timing_timed: number;
+        task_created_at?: string;
+      }>(
+        `
+        SELECT
+          tk.completed as task_completed,
+          tk.name as task_name,
+          tk.created_at as task_created_at,
+          ti.created_at as timing_created_at,
+          ti.time as timing_timed
+        FROM tasks tk
+        LEFT JOIN timings ti ON tk.task_id = ti.task_id
+        WHERE
+          tk.project_id = ? 
+          AND ti.created_at BETWEEN ? AND ?
+          AND ti.time > 0
+        ORDER BY
+          ti.created_at DESC;
+        `,
+        [projectID, getInitOfDay(startDate), getEndOfDay(endDate)]
+      );
+
+      if (timings.length === 0) {
+        Alert.alert(
+          "Nenhum dado encontrado", 
+          "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
+        );
+        return;
+      }
+
+      const startDateSTR = fullDate(startDate.toString());
+      const endDateSTR = fullDate(endDate.toString());
+
+      const documentName = `Relatorio_${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_${startDateSTR.replaceAll(
+        "/",
+        "-"
+      )}_${endDateSTR.replaceAll("/", "-")}`;
+
+      const html = generateReportHTML(
+        project,
+        startDateSTR,
+        endDateSTR,
+        timings,
+        documentName
+      );
+
+      const { uri } = await Print.printToFileAsync({ 
+        html,
+        margins: {
+          left: 20,
+          top: 20,
+          right: 20,
+          bottom: 20,
+        }
+      });
+
+      const pdfFile = `${uri.slice(
+        0,
+        uri.lastIndexOf("/") + 1
+      )}${documentName}.pdf`;
+
+      await FileSystem.moveAsync({
+        from: uri,
+        to: pdfFile,
+      });
+
+      await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
+      
+      Alert.alert("Sucesso", "Relatório PDF gerado com sucesso!");
+    } catch (e) {
+      console.warn("Error generating report:", e);
+      Alert.alert(
+        "Erro ao gerar relatório", 
+        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
+      );
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -134,6 +246,18 @@ const ProjectInfo = () => {
           fromZero={true}
         />
       ) : null}
+
+      {/* Generate Report Button */}
+      <View style={{ marginVertical: 20 }}>
+        <Button
+          buttonStyle={{ 
+            backgroundColor: globalStyle.primary || '#2563eb',
+            opacity: isGeneratingReport ? 0.7 : 1
+          }}
+          onPress={handleGenerateReport}
+          text={isGeneratingReport ? "Gerando relatório..." : "📄 Gerar Relatório PDF"}
+        />
+      </View>
 
       <View style={styles.dangerZone}>
         <Button
