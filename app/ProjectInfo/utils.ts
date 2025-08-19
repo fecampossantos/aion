@@ -1,5 +1,3 @@
-import { Alert } from "react-native";
-
 export const getInitOfDay = (day: Date) => {
   const startOfDay = new Date(day);
   startOfDay.setHours(0, 0, 0, 0);
