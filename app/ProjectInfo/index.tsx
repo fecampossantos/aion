@@ -21,6 +21,12 @@ import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
 
+/**
+ * DateInput component displays a formatted date with a calendar icon
+ * @param {Date} date - The date to display
+ * @param {Function} onPress - Function to call when calendar icon is pressed
+ * @returns {JSX.Element} A date display with calendar icon
+ */
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
   <View style={styles.dateInputWapper}>
     <Text style={styles.date}>{fullDate(date.toISOString())}</Text>
@@ -36,6 +42,10 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
 //   </TouchableOpacity>
 // );
 
+/**
+ * ProjectInfo component displays detailed project information with charts and date filtering
+ * @returns {JSX.Element} A scrollable view with project details, charts, and action buttons
+ */
 const ProjectInfo = () => {
   const { projectID } = useLocalSearchParams<{ projectID: string }>();
   const {

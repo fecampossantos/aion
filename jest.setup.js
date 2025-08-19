@@ -80,6 +80,36 @@ jest.mock('react-native-bouncy-checkbox', () => {
     }, React.createElement(Text, { testID: 'checkbox-state' }, isChecked ? 'checked' : 'unchecked'));
 });
 
+// Mock @react-native-picker/picker
+jest.mock('@react-native-picker/picker', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  
+  const MockPicker = function MockPicker({ selectedValue, onValueChange, children, testID }) {
+    return React.createElement(View, { testID: testID || "picker" }, children);
+  };
+  
+  MockPicker.Item = function MockPickerItem({ label, value }) {
+    return React.createElement(View, { testID: `picker-item-${value}` }, 
+      React.createElement(Text, null, label)
+    );
+  };
+  
+  return MockPicker;
+});
+
+// Mock @react-native-community/datetimepicker
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  
+  return function MockDateTimePicker({ testID, value, mode, onChange }) {
+    return React.createElement(View, { testID: testID }, 
+      React.createElement(Text, null, "Date Picker")
+    );
+  };
+});
+
 // Silence warnings
 const originalWarn = console.warn;
 console.warn = (...args) => {

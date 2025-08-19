@@ -9,6 +9,10 @@ import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
 import { Project as IProject } from "../../interfaces/Project";
 
+/**
+ * EditProject component allows users to modify existing project details
+ * @returns {JSX.Element} A form for editing project name and hourly cost with validation
+ */
 const EditProject = () => {
   const { projectID } = useLocalSearchParams();
   const [project, setProject] = useState<IProject>();
@@ -25,9 +29,11 @@ const EditProject = () => {
         projectID as string
       );
 
-      setProject(project);
-      setProjectName(project.name);
-      setProjectHourlyCost(`${project.hourly_cost.toString()},00`);
+      if (project) {
+        setProject(project);
+        setProjectName(project.name);
+        setProjectHourlyCost(`${project.hourly_cost.toString()},00`);
+      }
     }
 
     getProject();
@@ -50,14 +56,17 @@ const EditProject = () => {
       }
     }
 
-    const cost = projectHourlyCost === "" ? "00.00" : projectHourlyCost;
+    const cost = projectHourlyCost === "" ? "00.00" : projectHourlyCost.replace(",", ".");
 
-    await database.runAsync(
-      "UPDATE projects SET name = ?, hourly_cost = ? WHERE project_id = ?;",
-      projectName,
-      parseFloat(cost),
-      project.project_id
-    );
+    // Only update if there are actual changes
+    if (projectName !== project.name || parseFloat(cost) !== project.hourly_cost) {
+      await database.runAsync(
+        "UPDATE projects SET name = ?, hourly_cost = ? WHERE project_id = ?;",
+        projectName,
+        parseFloat(cost),
+        project.project_id
+      );
+    }
 
     router.push("/");
   };

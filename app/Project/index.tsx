@@ -17,6 +17,10 @@ interface TaskWithTimed {
   timed_until_now: number;
 }
 
+/**
+ * Project component displays a project with its tasks and manages task operations
+ * @returns {JSX.Element} A view showing project tasks with timer and completion functionality
+ */
 const Project = () => {
   const router = useRouter();
   const database = useSQLiteContext();

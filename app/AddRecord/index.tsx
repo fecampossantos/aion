@@ -15,23 +15,37 @@ import Task from "../../interfaces/Task";
 import TextInput from "../../components/TextInput";
 import { router, useLocalSearchParams } from "expo-router";
 
+/**
+ * DateInput component displays a date with a calendar picker button
+ * @param {Date} date - The date to display
+ * @param {Function} onPress - Function to call when calendar button is pressed
+ * @returns {JSX.Element} A date display with calendar picker button
+ */
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
   return (
     <View style={styles.dateInputWapper}>
-      <Text style={styles.date}>{fullDate(date.toISOString())}</Text>
+      <Text style={styles.date} testID="date-display">{fullDate(date.toISOString())}</Text>
       <TouchableOpacity onPress={() => onPress()}>
-        <Feather name="calendar" color="white" size={20} />
+        <Feather name="calendar" color="white" size={20} testID="calendar-icon" />
       </TouchableOpacity>
     </View>
   );
 };
 
+/**
+ * TimeInput component displays and handles time input
+ * @param {string} time - The time value in HHMM format
+ * @param {Function} onChange - Function to call when time changes
+ * @returns {JSX.Element} A time input field with formatted display
+ */
 const TimeInput = ({
   time,
   onChange,
+  testID,
 }: {
   time: string;
   onChange: (value: string) => void;
+  testID?: string;
 }) => {
   const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}h`;
   return (
@@ -40,11 +54,16 @@ const TimeInput = ({
         keyboardType="numeric"
         value={formattedTime}
         onChangeText={onChange}
+        testID={testID}
       />
     </View>
   );
 };
 
+/**
+ * AddRecord component allows users to add time records for tasks
+ * @returns {JSX.Element} A form for adding time records with task selection, date picker, and time inputs
+ */
 const AddRecord = () => {
   const database = useSQLiteContext();
   const { projectID } = useLocalSearchParams();
@@ -204,10 +223,13 @@ const AddRecord = () => {
           >
             De
           </Text>
-          <TimeInput
-            onChange={(value) => handleChangeTime("start", value)}
-            time={startTime}
-          />
+          <View testID="start-time-display">
+            <TimeInput
+              onChange={(value) => handleChangeTime("start", value)}
+              time={startTime}
+              testID="start-time-input"
+            />
+          </View>
         </View>
         <View style={styles.dateWrapper}>
           <Text
@@ -218,10 +240,13 @@ const AddRecord = () => {
           >
             Até
           </Text>
-          <TimeInput
-            onChange={(value) => handleChangeTime("end", value)}
-            time={endTime}
-          />
+          <View testID="end-time-display">
+            <TimeInput
+              onChange={(value) => handleChangeTime("end", value)}
+              time={endTime}
+              testID="end-time-input"
+            />
+          </View>
         </View>
       </View>
 

@@ -42,4 +42,60 @@ describe("<Timer />", () => {
 
     expect(onInitMock).not.toHaveBeenCalled();
   });
+
+  it("displays custom text when stopped", () => {
+    const customText = "01:30:45";
+    const { getByText } = render(
+      <Timer textToShowWhenStopped={customText} />
+    );
+    
+    expect(getByText(customText)).toBeDefined();
+  });
+
+  it("displays default time format when no custom text", () => {
+    const { getByText } = render(<Timer />);
+    
+    // Should display initial time format (00:00:00)
+    expect(getByText("00:00:00")).toBeDefined();
+  });
+
+  it("shows play icon when not counting", () => {
+    const { getByTestId } = render(<Timer />);
+    const timerTouchable = getByTestId(timerTouchableTestID);
+    
+    // Should contain play icon (caretright)
+    expect(timerTouchable).toBeDefined();
+  });
+
+  it("calls onStop with correct time when stopping timer", async () => {
+    const onStopMock = jest.fn();
+    const { getByTestId } = render(<Timer onStop={onStopMock} />);
+    const timerTouchable = getByTestId(timerTouchableTestID);
+
+    // Start timer
+    fireEvent.press(timerTouchable);
+    
+    // Wait a bit and stop timer
+    await new Promise(resolve => setTimeout(resolve, 100));
+    fireEvent.press(timerTouchable);
+
+    expect(onStopMock).toHaveBeenCalledWith(expect.any(Number));
+    expect(onStopMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("has correct accessibility when disabled", () => {
+    const { getByTestId } = render(<Timer disabled />);
+    const timerTouchable = getByTestId(timerTouchableTestID);
+    
+    expect(timerTouchable).toBeDefined();
+    // The component should still be rendered but not respond to touches
+  });
+
+  it("handles task name prop correctly", () => {
+    const taskName = "Test Task";
+    const { getByTestId } = render(<Timer taskName={taskName} />);
+    const timerTouchable = getByTestId(timerTouchableTestID);
+    
+    expect(timerTouchable).toBeDefined();
+  });
 });

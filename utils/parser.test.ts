@@ -102,7 +102,8 @@ describe("Parser Utilities", () => {
     });
 
     it("handles different date formats", () => {
-      expect(fullDate("2023-12-25")).toBe("25/12/2023");
+      // Use a date with explicit timezone to avoid timezone issues
+      expect(fullDate("2023-12-25T12:00:00")).toBe("25/12/2023");
     });
   });
 
