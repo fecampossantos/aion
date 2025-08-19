@@ -131,7 +131,7 @@ ORDER BY
       contentContainerStyle={styles.tasksListContent}
     >
       <View style={styles.container}>
-        <StatusBar style="light" backgroundColor={theme.colors.neutral[900]} />
+        <StatusBar style="light" />
 
         {/* Project Stats */}
         <View style={styles.statsContainer}>

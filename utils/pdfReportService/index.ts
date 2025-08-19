@@ -1,5 +1,10 @@
 import { Project } from "../../interfaces/Project";
-import { fullDate, secondsToHHMMSS, secondsToTimeHHMMSS, fullDateWithHour } from "../parser";
+import {
+  fullDate,
+  secondsToHHMMSS,
+  secondsToTimeHHMMSS,
+  fullDateWithHour,
+} from "../parser";
 
 type TimingsResult = {
   task_completed: 0 | 1;
@@ -22,31 +27,35 @@ type ProjectSummary = {
 
 function calculateProjectSummary(timings: TimingsResult[]): ProjectSummary {
   const totalSessions = timings.length;
-  const totalTasks = new Set(timings.map(t => t.task_name)).size;
+  const totalTasks = new Set(timings.map((t) => t.task_name)).size;
   const completedTasks = new Set(
-    timings.filter(t => t.task_completed === 1).map(t => t.task_name)
+    timings.filter((t) => t.task_completed === 1).map((t) => t.task_name)
   ).size;
-  
-  const sessionTimes = timings.map(t => t.timing_timed);
-  const averageSessionTime = sessionTimes.length > 0 
-    ? sessionTimes.reduce((a, b) => a + b, 0) / sessionTimes.length 
-    : 0;
-  const longestSession = sessionTimes.length > 0 ? Math.max(...sessionTimes) : 0;
-  const shortestSession = sessionTimes.length > 0 ? Math.min(...sessionTimes) : 0;
-  
+
+  const sessionTimes = timings.map((t) => t.timing_timed);
+  const averageSessionTime =
+    sessionTimes.length > 0
+      ? sessionTimes.reduce((a, b) => a + b, 0) / sessionTimes.length
+      : 0;
+  const longestSession =
+    sessionTimes.length > 0 ? Math.max(...sessionTimes) : 0;
+  const shortestSession =
+    sessionTimes.length > 0 ? Math.min(...sessionTimes) : 0;
+
   // Group by day to find most productive day
   const dayTotals = timings.reduce((acc, timing) => {
     const day = fullDate(timing.timing_created_at);
     acc[day] = (acc[day] || 0) + timing.timing_timed;
     return acc;
   }, {} as Record<string, number>);
-  
-  const mostProductiveDay = Object.keys(dayTotals).length > 0
-    ? Object.entries(dayTotals).reduce((a, b) => a[1] > b[1] ? a : b)[0]
-    : "N/A";
-  
+
+  const mostProductiveDay =
+    Object.keys(dayTotals).length > 0
+      ? Object.entries(dayTotals).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+      : "N/A";
+
   const totalDays = Object.keys(dayTotals).length;
-  
+
   return {
     totalTasks,
     completedTasks,
@@ -55,7 +64,7 @@ function calculateProjectSummary(timings: TimingsResult[]): ProjectSummary {
     longestSession,
     shortestSession,
     mostProductiveDay,
-    totalDays
+    totalDays,
   };
 }
 
@@ -89,9 +98,10 @@ export function generateReportHTML(
   }
 
   const summary = calculateProjectSummary(timings);
-  const completionRate = summary.totalTasks > 0 
-    ? ((summary.completedTasks / summary.totalTasks) * 100).toFixed(1)
-    : "0";
+  const completionRate =
+    summary.totalTasks > 0
+      ? ((summary.completedTasks / summary.totalTasks) * 100).toFixed(1)
+      : "0";
 
   // Group timings by task
   const taskGroups = timings.reduce((acc, timing) => {
@@ -99,42 +109,49 @@ export function generateReportHTML(
       acc[timing.task_name] = {
         sessions: [],
         totalTime: 0,
-        completed: timing.task_completed
+        completed: timing.task_completed,
       };
     }
     acc[timing.task_name].sessions.push(timing);
     acc[timing.task_name].totalTime += timing.timing_timed;
     return acc;
-  }, {} as Record<string, { sessions: TimingsResult[], totalTime: number, completed: number }>);
+  }, {} as Record<string, { sessions: TimingsResult[]; totalTime: number; completed: number }>);
 
-  const data_rows = timings.map(
-    (t: TimingsResult) => {
-      const { d: date, time } = fullDateWithHour(t.timing_created_at);
-      return `
-      <tr class="${t.task_completed === 1 ? 'completed-task' : 'pending-task'}">
+  const data_rows = timings.map((t: TimingsResult) => {
+    const { d: date, time } = fullDateWithHour(t.timing_created_at);
+    return `
+      <tr class="${t.task_completed === 1 ? "completed-task" : "pending-task"}">
         <td>
-          <span class="status-icon">${t.task_completed === 0 ? "⏳" : "✅"}</span>
-          <span class="status-text">${t.task_completed === 0 ? "Em progresso" : "Concluída"}</span>
+          <span class="status-icon">${
+            t.task_completed === 0 ? "⏳" : "✅"
+          }</span>
+          <span class="status-text">${
+            t.task_completed === 0 ? "Em progresso" : "Concluída"
+          }</span>
         </td>
         <td class="task-name">${t.task_name}</td>
         <td class="session-date">${date}</td>
         <td class="session-time">${time}</td>
         <td class="session-duration">${secondsToTimeHHMMSS(t.timing_timed)}</td>
       </tr>`;
-    }
-  );
+  });
 
-  const task_summary_rows = Object.entries(taskGroups).map(([taskName, data]) => `
-    <tr class="${data.completed === 1 ? 'completed-task' : 'pending-task'}">
+  const task_summary_rows = Object.entries(taskGroups).map(
+    ([taskName, data]) => `
+    <tr class="${data.completed === 1 ? "completed-task" : "pending-task"}">
       <td>
         <span class="status-icon">${data.completed === 0 ? "⏳" : "✅"}</span>
         <span class="task-name">${taskName}</span>
       </td>
       <td class="sessions-count">${data.sessions.length} sessões</td>
       <td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>
-      <td class="task-cost">R$ ${((data.totalTime / 3600) * project.hourly_cost).toFixed(2)}</td>
+      <td class="task-cost">R$ ${(
+        (data.totalTime / 3600) *
+        project.hourly_cost
+      ).toFixed(2)}</td>
     </tr>
-  `);
+  `
+  );
 
   const html = `
     <!DOCTYPE html>
@@ -662,19 +679,27 @@ export function generateReportHTML(
         <div class="summary-card">
           <h3>Tempo Total</h3>
           <div class="metric">${totalTime}</div>
-          <div class="sub-metric">${summary.totalSessions} sessões em ${summary.totalDays} dias</div>
+          <div class="sub-metric">${summary.totalSessions} sessões em ${
+    summary.totalDays
+  } dias</div>
         </div>
         
         <div class="summary-card">
           <h3>Taxa de Conclusão</h3>
           <div class="metric">${completionRate}%</div>
-          <div class="sub-metric">${summary.completedTasks} de ${summary.totalTasks} tarefas</div>
+          <div class="sub-metric">${summary.completedTasks} de ${
+    summary.totalTasks
+  } tarefas</div>
         </div>
         
         <div class="summary-card">
           <h3>Sessão Média</h3>
-          <div class="metric">${secondsToTimeHHMMSS(Math.round(summary.averageSessionTime))}</div>
-          <div class="sub-metric">Variação: ${secondsToTimeHHMMSS(summary.shortestSession)} - ${secondsToTimeHHMMSS(summary.longestSession)}</div>
+          <div class="metric">${secondsToTimeHHMMSS(
+            Math.round(summary.averageSessionTime)
+          )}</div>
+          <div class="sub-metric">Variação: ${secondsToTimeHHMMSS(
+            summary.shortestSession
+          )} - ${secondsToTimeHHMMSS(summary.longestSession)}</div>
         </div>
         
         <div class="summary-card">
@@ -729,9 +754,13 @@ export function generateReportHTML(
 
       <div class="cost-summary">
         <h3>💰 Resumo Financeiro</h3>
-        <div class="total-cost">R$ ${total_cost.toString().replace(".", ",")}</div>
+        <div class="total-cost">R$ ${total_cost
+          .toString()
+          .replace(".", ",")}</div>
         <div class="cost-breakdown">
-          Baseado em ${hours}h ${minutes}m ${seconds}s a R$ ${project.hourly_cost}/hora
+          Baseado em ${hours}h ${minutes}m ${seconds}s a R$ ${
+    project.hourly_cost
+  }/hora
         </div>
       </div>
     </div>

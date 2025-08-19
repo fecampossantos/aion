@@ -22,7 +22,6 @@ import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
 
-
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
 import { shareAsync } from "expo-sharing";
@@ -33,23 +32,79 @@ import { useSQLiteContext } from "expo-sqlite";
  * DateInput component displays a formatted date with a calendar icon
  * @param {Date} date - The date to display
  * @param {Function} onPress - Function to call when calendar icon is pressed
+ * @param {string} label - Label text for the date input
+ * @param {boolean} isActive - Whether this date input is currently active
  * @returns {JSX.Element} A date display with calendar icon
  */
-
-const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
-  <View style={styles.dateInputWapper}>
-    <Text style={styles.date}>{fullDate(date.toISOString())}</Text>
-    <TouchableOpacity onPress={() => onPress()}>
-      <Feather name="calendar" color="white" size={20} />
+const DateInput = ({
+  date,
+  onPress,
+  label,
+  isActive,
+}: {
+  date: Date;
+  onPress: () => void;
+  label: string;
+  isActive: boolean;
+}) => (
+  <View style={styles.dateInputContainer}>
+    <Text style={styles.dateLabel}>{label}</Text>
+    <TouchableOpacity
+      style={[styles.dateInput, isActive && styles.dateInputActive]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.dateContent}>
+        <Feather name="calendar" color={globalStyle.white} size={20} />
+        <Text style={styles.dateText}>{fullDate(date.toISOString())}</Text>
+      </View>
+      <Feather
+        name="chevron-down"
+        color={globalStyle.white}
+        size={16}
+        style={styles.chevronIcon}
+      />
     </TouchableOpacity>
   </View>
 );
 
-// const GenerateReportButton = ({ onPress }: { onPress: () => void }) => (
-//   <TouchableOpacity onPress={onPress}>
-//     <Feather name="file-text" size={20} color="white" />
-//   </TouchableOpacity>
-// );
+/**
+ * Project stats card component showing key project information
+ * @param {Object} project - The project object containing project details
+ * @returns {JSX.Element} A card displaying project statistics
+ */
+const ProjectStatsCard = ({ project }: { project: any }) => (
+  <View style={styles.projectStatsCard}>
+    <View style={styles.projectStatsHeader}>
+      <Feather name="info" color={globalStyle.white} size={24} />
+      <Text style={styles.projectStatsTitle}>Informações do Projeto</Text>
+    </View>
+    <View style={styles.projectStatsContent}>
+      <View style={styles.projectStatItem}>
+        <View style={styles.projectStatIcon}>
+          <Feather name="dollar-sign" color={globalStyle.white} size={16} />
+        </View>
+        <View style={styles.projectStatText}>
+          <Text style={styles.projectStatLabel}>Custo por Hora</Text>
+          <Text style={styles.projectStatValue}>
+            R$ {project.hourly_cost.toFixed(2)}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.projectStatItem}>
+        <View style={styles.projectStatIcon}>
+          <Feather name="calendar" color={globalStyle.white} size={16} />
+        </View>
+        <View style={styles.projectStatText}>
+          <Text style={styles.projectStatLabel}>Criado em</Text>
+          <Text style={styles.projectStatValue}>
+            {fullDate(project.created_at.toString())}
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+);
 
 /**
  * ProjectInfo component displays detailed project information with charts and date filtering
@@ -59,7 +114,7 @@ const ProjectInfo = () => {
   const { projectID } = useLocalSearchParams<{ projectID: string }>();
   const database = useSQLiteContext();
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  
+
   const {
     getTimings,
     getProject,
@@ -90,21 +145,34 @@ const ProjectInfo = () => {
 
   if (!project) return null;
 
+  /**
+   * Gets the start of day as ISO string for database queries
+   * @param {Date} day - The date to get start of day for
+   * @returns {string} ISO string formatted for database
+   */
   const getInitOfDay = (day: Date) => {
     const startOfDay = new Date(day);
     startOfDay.setHours(0, 0, 0, 0);
     return startOfDay.toISOString().slice(0, 19).replace("T", " ");
   };
 
+  /**
+   * Gets the end of day as ISO string for database queries
+   * @param {Date} day - The date to get end of day for
+   * @returns {string} ISO string formatted for database
+   */
   const getEndOfDay = (day: Date) => {
     const endOfDay = new Date(day);
     endOfDay.setHours(23, 59, 59, 999);
     return endOfDay.toISOString().slice(0, 19).replace("T", " ");
   };
 
+  /**
+   * Generates and shares the PDF report
+   */
   const handleGenerateReport = async () => {
     if (isGeneratingReport || !project) return;
-    
+
     setIsGeneratingReport(true);
     try {
       // Get comprehensive timing data with task information
@@ -136,7 +204,7 @@ const ProjectInfo = () => {
 
       if (timings.length === 0) {
         Alert.alert(
-          "Nenhum dado encontrado", 
+          "Nenhum dado encontrado",
           "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
         );
         return;
@@ -145,10 +213,13 @@ const ProjectInfo = () => {
       const startDateSTR = fullDate(startDate.toString());
       const endDateSTR = fullDate(endDate.toString());
 
-      const documentName = `Relatorio_${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_${startDateSTR.replaceAll(
+      const documentName = `Relatorio_${project.name.replace(
+        /[^a-zA-Z0-9]/g,
+        "_"
+      )}_${startDateSTR.replaceAll("/", "-")}_${endDateSTR.replaceAll(
         "/",
         "-"
-      )}_${endDateSTR.replaceAll("/", "-")}`;
+      )}`;
 
       const html = generateReportHTML(
         project,
@@ -158,14 +229,14 @@ const ProjectInfo = () => {
         documentName
       );
 
-      const { uri } = await Print.printToFileAsync({ 
+      const { uri } = await Print.printToFileAsync({
         html,
         margins: {
           left: 20,
           top: 20,
           right: 20,
           bottom: 20,
-        }
+        },
       });
 
       const pdfFile = `${uri.slice(
@@ -179,12 +250,12 @@ const ProjectInfo = () => {
       });
 
       await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
-      
+
       Alert.alert("Sucesso", "Relatório PDF gerado com sucesso!");
     } catch (e) {
       console.warn("Error generating report:", e);
       Alert.alert(
-        "Erro ao gerar relatório", 
+        "Erro ao gerar relatório",
         "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
       );
     } finally {
@@ -193,101 +264,104 @@ const ProjectInfo = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.projectInfoWrapper}>
-        <Text
-          style={{
-            color: globalStyle.white,
-            fontFamily: globalStyle.font.regular,
-          }}
-        >
-          Custo / hora: R${project.hourly_cost.toFixed(2)}
-        </Text>
-        <Text
-          style={{
-            color: globalStyle.white,
-            fontFamily: globalStyle.font.regular,
-          }}
-        >
-          Criado em: {fullDate(project.created_at.toString())}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Feather name="folder" color={globalStyle.white} size={32} />
+        <Text style={styles.title}>{project.name}</Text>
+        <Text style={styles.subtitle}>
+          Visualize estatísticas e gere relatórios do seu projeto
         </Text>
       </View>
 
-      <View style={styles.datesWrapper}>
-        <View style={styles.dateButtonsWrapper}>
-          <View style={styles.dateWrapper}>
-            <Text
-              style={{
-                color: globalStyle.white,
-                fontFamily: globalStyle.font.regular,
-              }}
-            >
-              De
-            </Text>
-            <DateInput
-              date={startDate}
-              onPress={() => handleShowDatePicker("start")}
-            />
-          </View>
-          <View style={styles.dateWrapper}>
-            <Text
-              style={{
-                color: globalStyle.white,
-                fontFamily: globalStyle.font.regular,
-              }}
-            >
-              Até
-            </Text>
-            <DateInput
-              date={endDate}
-              onPress={() => handleShowDatePicker("end")}
-            />
-          </View>
+      <ProjectStatsCard project={project} />
+
+      <View style={styles.dateSection}>
+        <Text style={styles.sectionTitle}>Período de Análise</Text>
+        <View style={styles.dateInputsContainer}>
+          <DateInput
+            date={startDate}
+            onPress={() => handleShowDatePicker("start")}
+            label="Data Inicial"
+            isActive={dateShown === "start"}
+          />
+          <DateInput
+            date={endDate}
+            onPress={() => handleShowDatePicker("end")}
+            label="Data Final"
+            isActive={dateShown === "end"}
+          />
         </View>
       </View>
 
-      {showChart ? (
-        <BarChart
-          data={resultSet}
-          width={Dimensions.get("screen").width - 48}
-          height={Dimensions.get("screen").height * 0.5}
-          yAxisLabel=""
-          yAxisSuffix="min"
-          chartConfig={chartConfig}
-          verticalLabelRotation={30}
-          fromZero={true}
-        />
-      ) : null}
+      {showChart && (
+        <View style={styles.chartSection}>
+          <View style={styles.chartHeader}>
+            <Feather name="bar-chart-2" color={globalStyle.white} size={24} />
+            <Text style={styles.chartTitle}>Atividade por Tarefa</Text>
+          </View>
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={resultSet}
+              width={Dimensions.get("screen").width - 48}
+              height={Dimensions.get("screen").height * 0.4}
+              yAxisLabel=""
+              yAxisSuffix="min"
+              chartConfig={chartConfig}
+              verticalLabelRotation={30}
+              fromZero={true}
+              style={styles.chart}
+            />
+          </View>
+        </View>
+      )}
 
-      {/* Generate Report Button */}
-      <View style={{ marginVertical: 20 }}>
+      <View style={styles.actionSection}>
         <Button
-          buttonStyle={{ 
-            backgroundColor: globalStyle.primary || '#2563eb',
-            opacity: isGeneratingReport ? 0.7 : 1
-          }}
+          buttonStyle={styles.generateReportButton}
           onPress={handleGenerateReport}
-          text={isGeneratingReport ? "Gerando relatório..." : "📄 Gerar Relatório PDF"}
+          text={
+            isGeneratingReport
+              ? "Gerando relatório..."
+              : "📄 Gerar Relatório PDF"
+          }
+          textStyle={{
+            fontSize: 12,
+            textAlign: "center",
+            fontFamily: globalStyle.font.regular,
+            color: globalStyle.white,
+          }}
         />
+        {isGeneratingReport && (
+          <View style={styles.loadingInfo}>
+            <Feather name="loader" color={globalStyle.white} size={16} />
+            <Text style={styles.loadingText}>
+              Processando dados e gerando PDF...
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.dangerZone}>
-        <Button
-          buttonStyle={{ backgroundColor: globalStyle.black.light }}
-          onPress={() =>
-            router.push({
-              pathname: "/EditProject",
-              params: { projectID: project.project_id },
-            })
-          }
-          text="Editar projeto"
-        />
-        <Button
-          buttonStyle={{ backgroundColor: "red" }}
-          onPress={() => handleClickedOnDeleteProject()}
-          text="Apagar projeto"
-        />
+        <Text style={styles.dangerZoneTitle}>Gerenciar Projeto</Text>
+        <View style={styles.dangerZoneButtons}>
+          <Button
+            buttonStyle={styles.editButton}
+            onPress={() =>
+              router.push({
+                pathname: "/EditProject",
+                params: { projectID: project.project_id },
+              })
+            }
+            text="✏️ Editar Projeto"
+          />
+          <Button
+            buttonStyle={styles.deleteButton}
+            onPress={() => handleClickedOnDeleteProject()}
+            text="🗑️ Apagar Projeto"
+          />
+        </View>
       </View>
+
       {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"

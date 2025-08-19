@@ -7,7 +7,7 @@ import { theme } from "../globalStyle/theme";
 export default function HomeLayout() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.neutral[900] }}>
-      <StatusBar style="light" backgroundColor={theme.colors.neutral[900]} />
+      <StatusBar style="light" />
       <SQLiteProvider
         databaseName="chronoMainDatabase.db"
         onInit={migrateDbIfNeeded}

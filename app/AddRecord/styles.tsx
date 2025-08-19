@@ -79,8 +79,6 @@ const styles = StyleSheet.create({
     tintColor: colors.neutral[400],
     marginRight: spacing.md,
   },
-
-  // Date section
   dateSection: {
     marginBottom: spacing['3xl'],
   },

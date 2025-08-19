@@ -108,7 +108,7 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" backgroundColor={theme.colors.neutral[900]} />
+      <StatusBar style="light" />
       <View style={styles.header}>
         <Text style={styles.headerText}>Chrono</Text>
         <Pressable
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.fontSize.md,
     textAlign: "center",
-    lineHeight: theme.typography.lineHeight.normal,
   },
   databaseButtonsContainer: {
     width: "100%",

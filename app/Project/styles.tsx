@@ -33,9 +33,10 @@ const styles = StyleSheet.create({
   statLabel: {
     color: theme.colors.neutral[400],
     fontFamily: theme.typography.fontFamily.medium,
-    fontSize: theme.typography.fontSize.xs,
+    fontSize: 10,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+    textAlign: "center",
   },
   
   // Tasks Section
