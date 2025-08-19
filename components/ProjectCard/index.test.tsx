@@ -1,9 +1,16 @@
 import React from "react";
-
 import { render, fireEvent } from "@testing-library/react-native";
 
 import ProjectCard from "./index";
 import { Project } from "../../interfaces/Project";
+
+// Mock the router
+const mockPush = jest.fn();
+jest.mock("expo-router", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
 
 describe("<ProjectCard />", () => {
   const mockProject: Project = {
@@ -13,30 +20,31 @@ describe("<ProjectCard />", () => {
     created_at: new Date(),
   };
 
-  const mockNavigation = {
-    navigate: jest.fn(),
-  };
-
   const testID = "projectCard-touchable";
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it("renders correctly", () => {
     const { getByText } = render(
-      <ProjectCard project={mockProject} navigation={mockNavigation} />
+      <ProjectCard project={mockProject} />
     );
     const projectName = getByText(mockProject.name);
     expect(projectName).toBeDefined();
   });
 
-  it("calls navigation when pressed", () => {
+  it("calls router push when pressed", () => {
     const { getByTestId } = render(
-      <ProjectCard project={mockProject} navigation={mockNavigation} />
+      <ProjectCard project={mockProject} />
     );
 
     const touchable = getByTestId(testID);
 
     fireEvent.press(touchable);
-    expect(mockNavigation.navigate).toHaveBeenCalledWith("Project", {
-      project: mockProject,
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "Project",
+      params: { projectID: mockProject.project_id },
     });
   });
 });
