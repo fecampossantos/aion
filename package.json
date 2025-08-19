@@ -9,6 +9,9 @@
     "web": "expo start --web",
     "ts:check": "tsc",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:coverage:watch": "jest --coverage --watch",
     "build:apk": "eas build -p android --profile preview",
     "build:androidAAB": "eas build -p android"
   },
@@ -46,13 +49,36 @@
     "@babel/core": "^7.20.0",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^12.4.3",
-    "@types/jest": "^29.5.11"
+    "@types/jest": "^29.5.11",
+    "jest-environment-jsdom": "^29.2.1"
   },
   "private": true,
   "jest": {
     "preset": "jest-expo",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
-    ]
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
+    ],
+    "collectCoverageFrom": [
+      "app/**/*.{ts,tsx}",
+      "components/**/*.{ts,tsx}",
+      "interfaces/**/*.{ts,tsx}",
+      "utils/**/*.{ts,tsx}",
+      "!**/*.test.{ts,tsx}",
+      "!**/*.d.ts",
+      "!**/*.styles.tsx",
+      "!**/_layout.tsx",
+      "!**/node_modules/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 35,
+        "functions": 34,
+        "lines": 40,
+        "statements": 40
+      }
+    }
   }
 }
