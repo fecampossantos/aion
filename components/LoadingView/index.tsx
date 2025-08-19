@@ -1,6 +1,14 @@
-import { ActivityIndicator, View } from "react-native";
-import styles from "./styles";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
 import globalStyle from "../../globalStyle";
+
+const styles = StyleSheet.create({
+  loadingView: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+  },
+});
 
 /**
  * LoadingView component displays a loading indicator

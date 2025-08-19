@@ -1,5 +1,12 @@
-import { View } from "react-native";
-import styles from "./styles";
+import { View, StyleSheet } from "react-native";
+import { theme } from "../../globalStyle/theme";
+
+const styles = StyleSheet.create({
+  body: { 
+    flex: 1,
+    backgroundColor: theme.colors.neutral[900],
+  },
+});
 
 /**
  * Body component provides the main content area wrapper
