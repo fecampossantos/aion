@@ -1,17 +1,23 @@
 import { StyleSheet } from "react-native";
-import globalStyle from "../../globalStyle";
+import { theme } from "../../globalStyle/theme";
 
 const styles = StyleSheet.create({
   button: {
-    borderColor: globalStyle.black.light,
+    borderColor: theme.colors.neutral[700],
     borderWidth: 2,
-    borderRadius: 4,
+    borderRadius: theme.borderRadius.md,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.neutral[800],
+    ...theme.shadows.sm,
   },
-  text: { color: globalStyle.white, fontFamily: globalStyle.font.bold },
+  text: { 
+    color: theme.colors.white, 
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.md,
+  },
 });
 
 export default styles;

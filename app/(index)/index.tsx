@@ -2,16 +2,24 @@ import { useState, useEffect } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { useSQLiteContext } from "expo-sqlite";
+import { StatusBar } from "expo-status-bar";
 
 import { Project } from "../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
-
 import LoadingView from "../../components/LoadingView";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
-import globalStyle from "../../globalStyle";
-import { populateDatabase, clearDatabase, getDatabaseStats } from "../../utils/databaseUtils";
+import { theme } from "../../globalStyle/theme";
+import {
+  populateDatabase,
+  clearDatabase,
+  getDatabaseStats,
+} from "../../utils/databaseUtils";
 
+/**
+ * Home component that displays the main dashboard with projects and database management options
+ * @returns The main home screen component
+ */
 const Home = () => {
   const database = useSQLiteContext();
   const [projects, setProjects] = useState<Array<Project>>([]);
@@ -51,7 +59,10 @@ const Home = () => {
                 `Database populated successfully!\n\nAdded:\n• ${stats.projects} projects\n• ${stats.tasks} tasks\n• ${stats.timings} time entries`
               );
             } catch (error) {
-              Alert.alert("Error", "Failed to populate database. Please try again.");
+              Alert.alert(
+                "Error",
+                "Failed to populate database. Please try again."
+              );
               console.error("Population error:", error);
             } finally {
               setIsPopulating(false);
@@ -81,7 +92,10 @@ const Home = () => {
               await fetchAllProjects();
               Alert.alert("Success!", "Database cleared successfully!");
             } catch (error) {
-              Alert.alert("Error", "Failed to clear database. Please try again.");
+              Alert.alert(
+                "Error",
+                "Failed to clear database. Please try again."
+              );
               console.error("Clear error:", error);
             } finally {
               setIsClearing(false);
@@ -94,6 +108,7 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" backgroundColor={theme.colors.neutral[900]} />
       <View style={styles.header}>
         <Text style={styles.headerText}>Chrono</Text>
         <Pressable
@@ -101,7 +116,11 @@ const Home = () => {
           onPress={() => router.push("AddProject")}
           disabled={isLoading}
         >
-          <Entypo name="plus" size={24} color="black" />
+          <Entypo
+            name="plus"
+            size={theme.components.icon.medium}
+            color={theme.colors.neutral[800]}
+          />
         </Pressable>
       </View>
 
@@ -111,25 +130,57 @@ const Home = () => {
           onPress={handlePopulateDatabase}
           disabled={isLoading || isPopulating || isClearing}
         >
-          <Text style={styles.databaseButtonText}>
-            {isPopulating ? "Populating..." : "Populate Database"}
-          </Text>
-          <Text style={styles.databaseButtonSubtext}>
-            Add 2 months of sample data
-          </Text>
+          <View style={styles.buttonContent}>
+            <View style={styles.buttonIconContainer}>
+              {isPopulating ? (
+                <Entypo
+                  name="cycle"
+                  size={theme.components.icon.small}
+                  color={theme.colors.white}
+                />
+              ) : (
+                <Entypo
+                  name="database"
+                  size={theme.components.icon.small}
+                  color={theme.colors.white}
+                />
+              )}
+            </View>
+            <View style={styles.buttonTextContainer}>
+              <Text style={styles.databaseButtonText}>
+                {isPopulating ? "Populating..." : "Populate Database"}
+              </Text>
+            </View>
+          </View>
         </Pressable>
-        
+
         <Pressable
           style={[styles.databaseButton, styles.clearButton]}
           onPress={handleClearDatabase}
           disabled={isLoading || isPopulating || isClearing}
         >
-          <Text style={styles.databaseButtonText}>
-            {isClearing ? "Clearing..." : "Clear Database"}
-          </Text>
-          <Text style={styles.databaseButtonSubtext}>
-            Remove all data
-          </Text>
+          <View style={styles.buttonContent}>
+            <View style={styles.buttonIconContainer}>
+              {isClearing ? (
+                <Entypo
+                  name="cycle"
+                  size={theme.components.icon.small}
+                  color={theme.colors.white}
+                />
+              ) : (
+                <Entypo
+                  name="trash"
+                  size={theme.components.icon.small}
+                  color={theme.colors.white}
+                />
+              )}
+            </View>
+            <View style={styles.buttonTextContainer}>
+              <Text style={styles.databaseButtonText}>
+                {isClearing ? "Clearing..." : "Clear Database"}
+              </Text>
+            </View>
+          </View>
         </Pressable>
       </View>
 
@@ -145,7 +196,15 @@ const Home = () => {
               ))}
             </View>
           ) : (
-            <Text style={styles.error}>Você ainda não tem projetos.</Text>
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>📁</Text>
+              <Text style={styles.emptyStateTitle}>
+                Nenhum projeto encontrado
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                Comece criando seu primeiro projeto para organizar suas tarefas
+              </Text>
+            </View>
           )}
         </View>
       )}
@@ -156,89 +215,130 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: globalStyle.background,
+    backgroundColor: theme.colors.neutral[900],
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 40,
+    paddingTop: theme.spacing["4xl"],
   },
   header: {
     width: "100%",
-    backgroundColor: globalStyle.background,
+    backgroundColor: theme.colors.neutral[900],
     height: 80,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    color: "white",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginBottom: theme.spacing.lg,
   },
   headerText: {
-    color: globalStyle.white,
-    fontFamily: globalStyle.font.bold,
-    fontSize: 40,
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize["5xl"],
+    letterSpacing: -0.5,
   },
   addButton: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: globalStyle.white,
-    borderRadius: 4,
-    width: 30,
-    height: 30,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    width: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
+    ...theme.shadows.md,
   },
   projectsList: {
     width: "100%",
     display: "flex",
-    gap: 20,
-    paddingHorizontal: 20,
-    marginTop: 20,
+    gap: theme.spacing.lg,
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing.lg,
   },
   title: {
-    color: globalStyle.white,
-    fontFamily: globalStyle.font.bold,
-    fontSize: 20,
-    marginBottom: 14,
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.xl,
+    marginBottom: theme.spacing.md,
+    letterSpacing: 0.5,
   },
-  error: {
-    color: globalStyle.white,
-    fontFamily: globalStyle.font.italicRegular,
-    fontSize: 20,
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: theme.spacing["4xl"],
+    paddingHorizontal: theme.spacing["2xl"],
+  },
+  emptyStateIcon: {
+    fontSize: theme.typography.fontSize["5xl"],
+    marginBottom: theme.spacing.lg,
+  },
+  emptyStateTitle: {
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.xl,
+    marginBottom: theme.spacing.sm,
+    textAlign: "center",
+  },
+  emptyStateSubtitle: {
+    color: theme.colors.neutral[400],
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.fontSize.md,
+    textAlign: "center",
+    lineHeight: theme.typography.lineHeight.normal,
   },
   databaseButtonsContainer: {
     width: "100%",
-    paddingHorizontal: 20,
-    marginTop: 10,
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing.sm,
     flexDirection: "row",
-    gap: 10,
+    gap: theme.spacing.md,
     justifyContent: "space-between",
   },
   databaseButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 60,
+    minHeight: 80,
+    ...theme.shadows.md,
+    borderWidth: 1,
+    borderColor: "transparent",
   },
   populateButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: theme.colors.success[600],
+    borderColor: theme.colors.success[500],
   },
   clearButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: theme.colors.error[600],
+    borderColor: theme.colors.error[500],
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
+  },
+  buttonIconContainer: {
+    width: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
+    borderRadius: theme.spacing["4xl"] / 2,
+    backgroundColor: theme.colors.transparent.white[20],
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: theme.spacing.md,
+  },
+  buttonTextContainer: {
+    flex: 1,
+    alignItems: "flex-start",
   },
   databaseButtonText: {
-    color: globalStyle.white,
-    fontFamily: globalStyle.font.bold,
-    fontSize: 14,
-    textAlign: "center",
-  },
-  databaseButtonSubtext: {
-    color: globalStyle.white,
-    fontFamily: globalStyle.font.regular,
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 2,
-    opacity: 0.8,
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.sm,
+    textAlign: "left",
+    marginBottom: theme.spacing.xs,
+    letterSpacing: 0.5,
   },
 });
 

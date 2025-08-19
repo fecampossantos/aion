@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Notifications from "expo-notifications";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import styles from "./styles";
-import globalStyle from "../../globalStyle";
+import { theme } from "../../globalStyle/theme";
 
 interface TimerProps {
   onStop?: (timeInSeconds: number) => void;
@@ -14,6 +14,11 @@ interface TimerProps {
   taskName?: string; // Added optional task name prop
 }
 
+/**
+ * Timer component provides start, pause, and stop functionality with visual feedback
+ * @param {TimerProps} props - Timer configuration and callbacks
+ * @returns {JSX.Element} A touchable timer with start/pause controls and stop button
+ */
 const Timer = ({
   onStop = (time: number) => {},
   onInit = () => {},
@@ -22,6 +27,7 @@ const Timer = ({
   taskName = "Task", // Default task name
 }: TimerProps) => {
   const [isCounting, setIsCounting] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<string | null>(null);
   const notificationId = useRef<string | null>(null);
 
@@ -29,18 +35,8 @@ const Timer = ({
     if (disabled) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (isCounting) {
-      // Stop timer
-      setIsCounting(false);
-      onStop(getSeconds());
-      resetCount();
-
-      // Dismiss notification
-      if (notificationId.current) {
-        await Notifications.dismissNotificationAsync(notificationId.current);
-        notificationId.current = null;
-      }
-    } else {
+    
+    if (!isCounting) {
       // Start timer
       const now = new Date();
       const formattedTime = now.toLocaleTimeString([], {
@@ -49,6 +45,7 @@ const Timer = ({
       });
 
       setIsCounting(true);
+      setIsPaused(false);
       setStartTime(formattedTime);
       onInit();
 
@@ -61,6 +58,30 @@ const Timer = ({
         trigger: null, // Immediate notification
       });
       notificationId.current = id;
+    } else if (isPaused) {
+      // Resume from pause
+      setIsPaused(false);
+    } else {
+      // Pause timer
+      setIsPaused(true);
+    }
+  };
+
+  const handleStop = async () => {
+    if (disabled || !isCounting) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
+    // Stop timer
+    setIsCounting(false);
+    setIsPaused(false);
+    onStop(getSeconds());
+    resetCount();
+
+    // Dismiss notification
+    if (notificationId.current) {
+      await Notifications.dismissNotificationAsync(notificationId.current);
+      notificationId.current = null;
     }
   };
 
@@ -87,10 +108,16 @@ const Timer = ({
     )}:${formatNumber(timer.seconds)}`;
   };
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+  const getIconName = () => {
+    if (!isCounting) return "caretright";
+    if (isPaused) return "caretright";
+    return "pause";
+  };
 
-    if (isCounting) {
+  useEffect(() => {
+    let intervalId: number;
+
+    if (isCounting && !isPaused) {
       intervalId = setInterval(() => {
         setTimer((prevTimer) => {
           const seconds = prevTimer.seconds + 1;
@@ -107,25 +134,41 @@ const Timer = ({
     }
 
     return () => clearInterval(intervalId);
-  }, [isCounting]);
+  }, [isCounting, isPaused]);
 
   return (
-    <TouchableOpacity
-      style={disabled ? styles.disabledTimer : styles.container}
-      onPress={() => handleTouch()}
-      testID="timer-touchable"
-    >
-      <View>
-        <AntDesign
-          name={isCounting ? "pause" : "caretright"}
-          size={16}
-          color={disabled ? globalStyle.black.light : globalStyle.white}
-        />
-      </View>
-      <Text style={disabled ? styles.disabledText : styles.text}>
-        {getTimeToShow()}
-      </Text>
-    </TouchableOpacity>
+    <View style={styles.timerWrapper}>
+      <TouchableOpacity
+        style={disabled ? styles.disabledTimer : styles.container}
+        onPress={() => handleTouch()}
+        testID="timer-touchable"
+      >
+        <View>
+          <AntDesign
+            name={getIconName()}
+            size={20}
+            color={disabled ? theme.colors.neutral[400] : theme.colors.white}
+          />
+        </View>
+        <Text style={disabled ? styles.disabledText : styles.text}>
+          {getTimeToShow()}
+        </Text>
+      </TouchableOpacity>
+      
+      {isCounting && (
+        <TouchableOpacity
+          style={styles.stopButton}
+          onPress={handleStop}
+          testID="timer-stop-button"
+        >
+          <Feather
+            name="square"
+            size={16}
+            color={theme.colors.white}
+          />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 

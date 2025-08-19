@@ -4,7 +4,7 @@ import { Timing as ITiming } from "../../interfaces/Timing";
 import { secondsToTimeHHMMSS, fullDateWithHour } from "../../utils/parser";
 
 import { Feather } from "@expo/vector-icons";
-import globalStyle from "../../globalStyle";
+import { theme } from "../../globalStyle/theme";
 
 const Timing = ({
   timing,
@@ -33,7 +33,7 @@ const Timing = ({
         <Feather
           name="trash"
           size={24}
-          color={isTimerRunning ? globalStyle.black.light : "white"}
+          color={isTimerRunning ? theme.colors.neutral[400] : theme.colors.white}
         />
       </Pressable>
     </View>

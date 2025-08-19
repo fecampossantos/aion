@@ -7,13 +7,13 @@ import styles from "./styles";
 import Button from "../../components/Button";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSQLiteContext } from "expo-sqlite";
-import globalStyle from "../../globalStyle";
 import { formatJsDateToDatabase, fullDate } from "../../utils/parser";
 
 import { Picker } from "@react-native-picker/picker";
 import Task from "../../interfaces/Task";
 import TextInput from "../../components/TextInput";
 import { router, useLocalSearchParams } from "expo-router";
+import { colors } from "../../globalStyle/theme";
 
 /**
  * DateInput component displays a date with a calendar picker button
@@ -25,7 +25,7 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
   return (
     <View style={styles.dateInputWapper}>
       <Text style={styles.date} testID="date-display">{fullDate(date.toISOString())}</Text>
-      <TouchableOpacity onPress={() => onPress()}>
+      <TouchableOpacity onPress={() => onPress()} style={styles.calendarButton}>
         <Feather name="calendar" color="white" size={20} testID="calendar-icon" />
       </TouchableOpacity>
     </View>
@@ -49,7 +49,7 @@ const TimeInput = ({
 }) => {
   const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}h`;
   return (
-    <View>
+    <View style={styles.timeInputContainer}>
       <TextInput
         keyboardType="numeric"
         value={formattedTime}
@@ -78,6 +78,7 @@ const AddRecord = () => {
   const [endTime, setEndTime] = useState("0000");
 
   const [project, setProject] = useState<IProject>();
+  const [isPickerFocused, setIsPickerFocused] = useState(false);
 
   useEffect(() => {
     async function getProject() {
@@ -180,80 +181,87 @@ const AddRecord = () => {
 
   return (
     <View style={styles.container}>
-      {/* // TODO if no tasks, show a message */}
-      <Picker
-        selectedValue={selectedTask}
-        onValueChange={(itemValue, itemIndex) => setSelectedTask(itemValue)}
-        style={{
-          color: "white",
-          borderBottomColor: "white",
-          borderBottomWidth: 1,
-        }}
-        dropdownIconColor={"white"}
-      >
-        <Picker.Item label="Selecione a task" value="none_task" />
-        {tasks.map((task: Task) => (
-          <Picker.Item
-            label={task.name}
-            value={task.task_id}
-            key={task.task_id}
-          />
-        ))}
-      </Picker>
-
-      <View>
-        <Text
-          style={{
-            color: globalStyle.white,
-            fontFamily: globalStyle.font.regular,
-          }}
-        >
-          Em
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Adicionar Registro</Text>
+        <Text style={styles.headerSubtitle}>
+          {project?.name ? `Projeto: ${project.name}` : 'Carregando projeto...'}
         </Text>
+      </View>
+
+      <View style={styles.pickerSection}>
+        <Text style={styles.pickerLabel}>Selecione uma tarefa</Text>
+        <View style={[
+          styles.pickerContainer,
+          isPickerFocused && styles.pickerContainerFocused
+        ]}>
+          {selectedTask && selectedTask !== "none_task" && (
+            <View style={styles.selectedTaskIndicator} />
+          )}
+          <Picker
+            selectedValue={selectedTask}
+            onValueChange={(itemValue, itemIndex) => setSelectedTask(itemValue)}
+            style={styles.picker}
+            dropdownIconColor={colors.neutral[400]}
+            itemStyle={styles.pickerItem}
+            onFocus={() => setIsPickerFocused(true)}
+            onBlur={() => setIsPickerFocused(false)}
+          >
+            <Picker.Item 
+              label="Selecione a task" 
+              value="none_task" 
+              style={styles.pickerItem}
+              color={colors.neutral[400]}
+            />
+            {tasks.map((task: Task) => (
+              <Picker.Item
+                label={task.name}
+                value={task.task_id}
+                key={task.task_id}
+                style={styles.pickerItem}
+                color={colors.white}
+              />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
+      <View style={styles.dateSection}>
+        <Text style={styles.dateLabel}>Data do registro</Text>
         <DateInput date={date} onPress={() => setShowPicker(true)} />
       </View>
 
-      <View style={styles.dateButtonsWrapper}>
-        <View style={styles.dateWrapper}>
-          <Text
-            style={{
-              color: globalStyle.white,
-              fontFamily: globalStyle.font.regular,
-            }}
-          >
-            De
-          </Text>
-          <View testID="start-time-display">
-            <TimeInput
-              onChange={(value) => handleChangeTime("start", value)}
-              time={startTime}
-              testID="start-time-input"
-            />
+      <View style={styles.timeSection}>
+        <Text style={styles.timeSectionTitle}>Horário do trabalho</Text>
+        <View style={styles.dateButtonsWrapper}>
+          <View style={styles.dateWrapper}>
+            <Text style={styles.timeLabel}>Início</Text>
+            <View testID="start-time-display">
+              <TimeInput
+                onChange={(value) => handleChangeTime("start", value)}
+                time={startTime}
+                testID="start-time-input"
+              />
+            </View>
           </View>
-        </View>
-        <View style={styles.dateWrapper}>
-          <Text
-            style={{
-              color: globalStyle.white,
-              fontFamily: globalStyle.font.regular,
-            }}
-          >
-            Até
-          </Text>
-          <View testID="end-time-display">
-            <TimeInput
-              onChange={(value) => handleChangeTime("end", value)}
-              time={endTime}
-              testID="end-time-input"
-            />
+          <View style={styles.dateWrapper}>
+            <Text style={styles.timeLabel}>Fim</Text>
+            <View testID="end-time-display">
+              <TimeInput
+                onChange={(value) => handleChangeTime("end", value)}
+                time={endTime}
+                testID="end-time-input"
+              />
+            </View>
           </View>
         </View>
       </View>
 
-      <Button
-        onPress={async () => await handleAddRecord()}
-        text="Adicionar tempo"
-      />
+      <View style={styles.buttonSection}>
+        <Button
+          onPress={async () => await handleAddRecord()}
+          text="Adicionar tempo"
+        />
+      </View>
 
       {showPicker && (
         <DateTimePicker

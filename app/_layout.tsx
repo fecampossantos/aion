@@ -1,10 +1,13 @@
 import { Slot } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { theme } from "../globalStyle/theme";
 
 export default function HomeLayout() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.neutral[900] }}>
+      <StatusBar style="light" backgroundColor={theme.colors.neutral[900]} />
       <SQLiteProvider
         databaseName="chronoMainDatabase.db"
         onInit={migrateDbIfNeeded}

@@ -1,19 +1,21 @@
 import { StyleSheet } from "react-native";
-import globalStyle from "../../globalStyle";
+import { theme } from "../../globalStyle/theme";
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 2,
-    borderColor: globalStyle.black.light,
-    display: "flex",
+    backgroundColor: theme.colors.neutral[800],
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
     flexDirection: "row",
-    width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 12,
+    ...theme.shadows.sm,
   },
   text: {
-    color: globalStyle.white,
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.medium,
+    fontSize: theme.typography.fontSize.md,
   },
 });
 

@@ -1,36 +1,45 @@
 import { StyleSheet } from "react-native";
-import globalStyle from "../../globalStyle";
+import { theme } from "../../globalStyle/theme";
 
 const styles = StyleSheet.create({
   container: {
-    borderColor: globalStyle.black.light,
-    borderBottomWidth: 2,
+    backgroundColor: theme.colors.neutral[800],
+    borderRadius: theme.borderRadius.lg,
+    marginVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.sm,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    // paddingHorizontal: 10,
-    paddingVertical: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary[500],
+    ...theme.shadows.sm,
   },
   name: {
-    color: globalStyle.white,
+    color: theme.colors.white,
+    fontSize: theme.typography.fontSize.md,
+    fontFamily: theme.typography.fontFamily.medium,
+    marginLeft: theme.spacing.sm,
   },
   touchableContainer: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
     flex: 1,
+    minHeight: 40,
+    paddingRight: theme.spacing.sm,
   },
   checkBoxWrapper: {
-    paddingHorizontal: 6,
-    borderRightColor: globalStyle.white,
+    borderRightColor: theme.colors.neutral[600],
     borderRightWidth: 1,
+    paddingRight: 0,
   },
   strikeThrough: {
     textDecorationLine: "line-through",
     textDecorationStyle: "solid",
+    color: theme.colors.neutral[400],
   },
 });
 

@@ -1,3 +1,4 @@
+// Legacy color constants for backward compatibility
 const eerie_black = "#1C1C1C";
 const jet_black = "#363636";
 const night_black = "#0A0A0A";
@@ -23,4 +24,9 @@ const globalStyle = {
   }
 };
 
+// Export the new theme system
+export { default as theme } from './theme';
+export { colors, spacing, borderRadius, shadows, typography, components, layout, animation, zIndex } from './theme';
+
+// Export legacy globalStyle for backward compatibility
 export default globalStyle;

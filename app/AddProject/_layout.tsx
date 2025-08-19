@@ -4,7 +4,7 @@ import Content from "../../components/Content";
 const AddProjectLayout = () => {
   return (
     <Content.Wrapper>
-      <Content.Header left={<Content.BackButton onPress={router.back} />} />
+      <Content.Header left={<Content.BackButton onPress={router.back} />} title={"Novo projeto"} />
       <Content.Body>
         <Slot />
       </Content.Body>

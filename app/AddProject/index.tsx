@@ -1,84 +1,128 @@
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
+import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
 import TextInput from "../../components/TextInput";
 import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
 
 import styles from "./styles";
 import { useSQLiteContext } from "expo-sqlite";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
+import { theme } from "../../globalStyle/theme";
 
+/**
+ * AddProject component allows users to create new projects with name and hourly cost
+ * @returns {JSX.Element} A form for adding projects with validation and modern UI
+ */
 const AddProject = () => {
   const database = useSQLiteContext();
   const [projectName, setProjectName] = useState<string>("");
   const [projectHourlyCost, setProjectHourlyCost] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState(null);
-  const navigation = useNavigation();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      headerLeft: () => (
-        <Pressable>
-          <Text>test</Text>
-        </Pressable>
-      ),
-    });
-  }, [navigation]);
+  const handleBackPress = () => {
+    router.back();
+  };
 
   const handleAddProject = async () => {
-    if (projectName === "") {
-      setErrorMessage("O nome do projeto nao pode estar vazio");
-      return;
-    }
-    const existingProject = await database.getFirstAsync(
-      "SELECT * FROM projects WHERE name = ?;",
-      projectName
-    );
-    if (existingProject) {
-      setErrorMessage("Um projeto com esse nome já existe");
+    if (projectName.trim() === "") {
+      Alert.alert("Erro", "O nome do projeto não pode estar vazio.");
       return;
     }
 
-    const cost = projectHourlyCost === "" ? "00.00" : projectHourlyCost;
+    if (projectName.trim().length < 2) {
+      Alert.alert("Erro", "O nome do projeto deve ter pelo menos 2 caracteres.");
+      return;
+    }
 
-    await database.runAsync(
-      "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
-      projectName,
-      parseFloat(cost)
-    );
+    setIsSubmitting(true);
 
-    router.push("/");
+    try {
+      const existingProject = await database.getFirstAsync(
+        "SELECT * FROM projects WHERE name = ?;",
+        projectName.trim()
+      );
+      
+      if (existingProject) {
+        Alert.alert("Erro", "Um projeto com esse nome já existe.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const cost = projectHourlyCost === "" ? "00.00" : projectHourlyCost;
+
+      await database.runAsync(
+        "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
+        projectName.trim(),
+        parseFloat(cost)
+      );
+
+      router.push("/");
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível criar o projeto. Tente novamente.");
+      setIsSubmitting(false);
+    }
   };
 
   const handleChangeProjectName = (text: string) => {
-    setErrorMessage(null);
     setProjectName(text);
   };
 
+  const isFormValid = projectName.trim().length >= 2;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.projectInfoWrapper}>
-        <View>
-          <Text style={styles.label}>Projeto</Text>
-          <TextInput
-            onChangeText={(text: string) => handleChangeProjectName(text)}
-            value={projectName}
-            placeholder="Nome do projeto"
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <View style={styles.projectInfoSection}>
+          <Text style={styles.sectionTitle}>Informações do Projeto</Text>
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Nome do Projeto</Text>
+            <TextInput
+              onChangeText={(text: string) => handleChangeProjectName(text)}
+              value={projectName}
+              placeholder="Digite o nome do projeto..."
+              autoFocus={true}
+            />
+            {projectName.length > 0 && (
+              <Text style={[
+                styles.characterCount,
+                { color: isFormValid ? theme.colors.success[400] : theme.colors.error[400] }
+              ]}>
+                {projectName.length}/50 caracteres
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Valor por Hora (R$)</Text>
+            <CurrencyInput
+              value={projectHourlyCost}
+              onChange={(text: string) => setProjectHourlyCost(text)}
+              placeholder="00,00"
+            />
+            <Text style={styles.helperText}>
+              Deixe em branco para definir como R$ 0,00
+            </Text>
+          </View>
+        </View>
+
+        {/* Submit Button */}
+        <View style={styles.buttonContainer}>
+          <Button 
+            onPress={isFormValid && !isSubmitting ? handleAddProject : undefined}
+            text={isSubmitting ? "Criando..." : "Criar Projeto"}
           />
         </View>
-        <View>
-          <Text style={styles.label}>Valor cobrado por hora</Text>
-          <CurrencyInput
-            value={projectHourlyCost}
-            onChange={(text: string) => setProjectHourlyCost(text)}
-            placeholder="00,00"
-          />
-        </View>
-      </View>
-      <Button onPress={() => handleAddProject()} text={"adicionar projeto"} />
-      {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
