@@ -22,11 +22,19 @@ import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
 
+
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
 import { shareAsync } from "expo-sharing";
 import { generateReportHTML } from "../../utils/pdfReportService";
 import { useSQLiteContext } from "expo-sqlite";
+
+/**
+ * DateInput component displays a formatted date with a calendar icon
+ * @param {Date} date - The date to display
+ * @param {Function} onPress - Function to call when calendar icon is pressed
+ * @returns {JSX.Element} A date display with calendar icon
+ */
 
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
   <View style={styles.dateInputWapper}>
@@ -43,6 +51,10 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => (
 //   </TouchableOpacity>
 // );
 
+/**
+ * ProjectInfo component displays detailed project information with charts and date filtering
+ * @returns {JSX.Element} A scrollable view with project details, charts, and action buttons
+ */
 const ProjectInfo = () => {
   const { projectID } = useLocalSearchParams<{ projectID: string }>();
   const database = useSQLiteContext();

@@ -9,6 +9,10 @@ import Button from "../../components/Button";
 import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
 
+/**
+ * AddTask component allows users to create new tasks for a project
+ * @returns {JSX.Element} A form for adding tasks with name input and submit button
+ */
 const AddTask = () => {
   const database = useSQLiteContext();
   const { projectID } = useLocalSearchParams();
