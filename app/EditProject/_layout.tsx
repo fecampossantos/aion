@@ -4,7 +4,7 @@ import Content from "../../components/Content";
 const EditProjectLayout = () => {
   return (
     <Content.Wrapper>
-      <Content.Header title={"Novo tempo"} />
+      <Content.Header title={"Editar Projeto"} />
       <Content.Body>
         <Slot />
       </Content.Body>
