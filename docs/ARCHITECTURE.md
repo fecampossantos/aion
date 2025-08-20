@@ -2,7 +2,7 @@
 
 ## Overview
 
-Chrono follows a modular React Native architecture using Expo Router for navigation, SQLite for data persistence, and TypeScript for type safety. The app is organized into clear separation of concerns with reusable components and centralized state management.
+Aion follows a modular React Native architecture using Expo Router for navigation, SQLite for data persistence, and TypeScript for type safety. The app is organized into clear separation of concerns with reusable components and centralized state management.
 
 ## Technology Stack
 
@@ -30,7 +30,7 @@ Chrono follows a modular React Native architecture using Expo Router for navigat
 ## Project Structure
 
 ```
-chrono/
+aion/
 ├── app/                          # Application screens (Expo Router)
 │   ├── (index)/                 # Tab group for main navigation
 │   │   └── index.tsx            # Home screen - project list
@@ -90,7 +90,7 @@ The app uses Expo Router's file-based routing system where the file structure di
 export default function HomeLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SQLiteProvider databaseName="chronoMainDatabase.db" onInit={migrateDbIfNeeded}>
+      <SQLiteProvider databaseName="aionMainDatabase.db" onInit={migrateDbIfNeeded}>
         <Slot />
       </SQLiteProvider>
     </SafeAreaView>

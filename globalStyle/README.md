@@ -1,6 +1,6 @@
-# Theme System Documentation
+# Global Style System
 
-This directory contains the centralized theme system for the Chrono app, providing consistent design tokens, colors, spacing, and component styles across the entire application.
+This directory contains the centralized theme system for the Aion app, providing consistent design tokens, colors, spacing, and component styles across the entire application.
 
 ## 🎨 Available Theme Exports
 

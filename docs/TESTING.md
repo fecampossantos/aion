@@ -1,6 +1,6 @@
-# Testing Guide
+# Testing Documentation
 
-This document describes the testing setup and available commands for the Chrono project.
+This document describes the testing setup and available commands for the Aion project.
 
 ## Available Test Commands
 

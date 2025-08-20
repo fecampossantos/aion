@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Alert } from "react-native";
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
@@ -12,6 +12,7 @@ import { fullDate } from "../../utils/parser";
  */
 export const useReportGeneration = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const isGeneratingRef = useRef(false);
 
   /**
    * Gets the start of day as ISO string for database queries
@@ -58,9 +59,11 @@ export const useReportGeneration = () => {
     endDate: Date;
     getTimings: () => Promise<any[]>;
   }) => {
-    if (isGeneratingReport || !project) return;
+    if (isGeneratingRef.current || !project) return;
 
+    isGeneratingRef.current = true;
     setIsGeneratingReport(true);
+    
     try {
       // Get comprehensive timing data with task information
       const timings = await getTimings();
@@ -70,6 +73,8 @@ export const useReportGeneration = () => {
           "Nenhum dado encontrado",
           "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
         );
+        isGeneratingRef.current = false;
+        setIsGeneratingReport(false);
         return;
       }
 
@@ -122,6 +127,7 @@ export const useReportGeneration = () => {
         "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
       );
     } finally {
+      isGeneratingRef.current = false;
       setIsGeneratingReport(false);
     }
   };

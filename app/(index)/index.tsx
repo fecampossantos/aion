@@ -1,6 +1,8 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, RefreshControl, ScrollView } from "react-native";
+import { useEffect, useCallback } from "react";
 import { Entypo } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+
 
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
@@ -19,26 +21,49 @@ const Home = () => {
     isLoading,
     isPopulating,
     isClearing,
+    refreshProjects,
     handlePopulateDatabase,
     handleClearDatabase,
   } = useDatabaseManagement();
+
+  /**
+   * Handles manual refresh of projects data
+   */
+  const handleRefresh = async () => {
+    await refreshProjects();
+  };
+
+
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <Text style={styles.headerText}>Chrono</Text>
-        <Pressable
-          style={styles.addButton}
-          onPress={() => router.push("AddProject")}
-          disabled={isLoading}
-        >
-          <Entypo
-            name="plus"
-            size={theme.components.icon.medium}
-            color={theme.colors.neutral[800]}
-          />
-        </Pressable>
+        <Text style={styles.headerText}>Aion</Text>
+        <View style={styles.headerButtons}>
+          <Pressable
+            style={styles.refreshButton}
+            onPress={handleRefresh}
+            disabled={isLoading}
+          >
+            <Entypo
+              name="cycle"
+              size={theme.components.icon.medium}
+              color={theme.colors.neutral[800]}
+            />
+          </Pressable>
+          <Pressable
+            style={styles.addButton}
+            onPress={() => router.push("AddProject")}
+            disabled={isLoading}
+          >
+            <Entypo
+              name="plus"
+              size={theme.components.icon.medium}
+              color={theme.colors.neutral[800]}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.databaseButtonsContainer}>
@@ -104,7 +129,18 @@ const Home = () => {
       {isLoading ? (
         <LoadingView />
       ) : (
-        <View style={styles.projectsList}>
+        <ScrollView
+          style={styles.projectsList}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={handleRefresh}
+              tintColor={theme.colors.white}
+              colors={[theme.colors.white]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
           {projects.length > 0 ? (
             <View>
               <Text style={styles.title}>Projetos</Text>
@@ -123,7 +159,7 @@ const Home = () => {
               </Text>
             </View>
           )}
-        </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -144,7 +180,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     paddingHorizontal: theme.spacing["2xl"],
     marginBottom: theme.spacing.lg,
   },
@@ -153,6 +189,20 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily.bold,
     fontSize: theme.typography.fontSize["5xl"],
     letterSpacing: -0.5,
+  },
+  headerButtons: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+  },
+  refreshButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    width: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
+    ...theme.shadows.md,
   },
   addButton: {
     display: "flex",

@@ -1,8 +1,8 @@
 {
-  "scheme": "chrono-app",
+  "scheme": "aion-app",
   "expo": {
-    "name": "chrono",
-    "slug": "chrono",
+    "name": "aion",
+    "slug": "aion",
     "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1C1C1C"
       },
-      "package": "com.fecampossantos.chrono",
+      "package": "com.fecampossantos.aion",
       "versionCode": 5,
       "statusBar": {
         "backgroundColor": "#0f172a",

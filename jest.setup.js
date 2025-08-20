@@ -54,18 +54,34 @@ jest.mock('expo-sqlite', () => ({
 }));
 
 // Mock expo-router
+const mockRouterPush = jest.fn();
+const mockRouterReplace = jest.fn();
+const mockRouterBack = jest.fn();
+
+// Make mock functions globally available
+global.mockRouterPush = mockRouterPush;
+global.mockRouterReplace = mockRouterReplace;
+global.mockRouterBack = mockRouterBack;
+
 jest.mock('expo-router', () => ({
   router: {
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: mockRouterPush,
+    replace: mockRouterReplace,
+    back: mockRouterBack,
   },
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: mockRouterPush,
+    replace: mockRouterReplace,
+    back: mockRouterBack,
   }),
   useLocalSearchParams: () => ({}),
+  useFocusEffect: jest.fn((callback) => {
+    // Execute the callback immediately in tests to simulate focus, but only once
+    // to prevent infinite loops
+    if (typeof callback === 'function') {
+      callback();
+    }
+  }),
 }));
 
 // Mock @react-navigation/native

@@ -42,7 +42,7 @@ describe('useDatabaseManagement', () => {
     const { result } = renderHook(() => useDatabaseManagement());
 
     expect(result.current.projects).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isLoading).toBe(true); // Initially loading while fetching data
     expect(result.current.isPopulating).toBe(false);
     expect(result.current.isClearing).toBe(false);
     expect(typeof result.current.fetchAllProjects).toBe('function');

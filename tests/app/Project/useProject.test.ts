@@ -93,7 +93,7 @@ describe('useProject', () => {
 
       expect(result.current.project).toBe(undefined);
       expect(result.current.tasks).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isLoading).toBe(true);
       expect(result.current.isTimerRunning).toBe(false);
       expect(typeof result.current.handleInitTimer).toBe('function');
       expect(typeof result.current.handleStopTimer).toBe('function');

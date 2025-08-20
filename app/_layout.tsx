@@ -9,7 +9,7 @@ export default function HomeLayout() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.neutral[900] }}>
       <StatusBar style="light" />
       <SQLiteProvider
-        databaseName="chronoMainDatabase.db"
+        databaseName="aionMainDatabase.db"
         onInit={migrateDbIfNeeded}
         useSuspense
       >

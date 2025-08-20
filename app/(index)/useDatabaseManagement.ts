@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Project } from "../../interfaces/Project";
@@ -23,13 +23,27 @@ export const useDatabaseManagement = () => {
    * Fetches all projects from the database
    */
   const fetchAllProjects = async () => {
-    const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
-    setProjects(p);
+    try {
+      setIsLoading(true);
+      const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
+      setProjects(p);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  /**
+   * Refreshes the projects data from the database
+   */
+  const refreshProjects = useCallback(async () => {
+    await fetchAllProjects();
+  }, [database]);
+
+  // Fetch projects on mount
   useEffect(() => {
     fetchAllProjects();
-    setIsLoading(false);
   }, []);
 
   /**
@@ -50,7 +64,7 @@ export const useDatabaseManagement = () => {
             setIsPopulating(true);
             try {
               await populateDatabase(database);
-              await fetchAllProjects();
+              await refreshProjects();
               const stats = await getDatabaseStats(database);
               Alert.alert(
                 "Success!",
@@ -90,7 +104,7 @@ export const useDatabaseManagement = () => {
             setIsClearing(true);
             try {
               await clearDatabase(database);
-              await fetchAllProjects();
+              await refreshProjects();
               Alert.alert("Success!", "Database cleared successfully!");
             } catch (error) {
               Alert.alert(
@@ -113,6 +127,7 @@ export const useDatabaseManagement = () => {
     isPopulating,
     isClearing,
     fetchAllProjects,
+    refreshProjects,
     handlePopulateDatabase,
     handleClearDatabase,
   };

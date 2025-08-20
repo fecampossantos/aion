@@ -2,7 +2,7 @@
 
 ## Database Schema & Data Models
 
-Chrono uses SQLite for local data persistence with three main entities: Projects, Tasks, and Timings.
+Aion uses SQLite for local data persistence with three main entities: Projects, Tasks, and Timings.
 
 ## Data Models
 

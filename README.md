@@ -1,6 +1,6 @@
-# Chrono - Time Tracking App
+# Aion - Time Tracking App
 
-**Chrono** is a React Native mobile application built with Expo that helps users track time spent on projects and tasks. The app features project management, task creation, real-time timer functionality, and PDF report generation.
+**Aion** is a React Native mobile application built with Expo that helps users track time spent on projects and tasks. The app features project management, task creation, real-time timer functionality, and PDF report generation.
 
 ## 📱 Features
 
@@ -43,7 +43,7 @@ Before running this application, ensure you have:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd chrono
+   cd aion
    ```
 
 2. **Install dependencies**
@@ -99,7 +99,7 @@ Before running this application, ensure you have:
 ## 🏗️ Project Structure
 
 ```
-chrono/
+aion/
 ├── app/                     # Main application screens
 │   ├── (index)/            # Home screen
 │   ├── AddProject/         # Add project screen
@@ -234,15 +234,14 @@ This project is private and proprietary.
 ## 🐛 Known Issues & Roadmap
 
 ### Current Issues
-- PDF report generation is currently disabled (commented out in Report screen)
-- Some navigation headers need refinement
+- None (let me know if you find any 😅)
 
 ### Planned Features
-- PDF report export functionality
 - Data backup and restore
-- Project templates
-- Time tracking analytics
 - Multi-language support
+- Search bar on projects screen
+- Last worked on tasks display on projects screen
+- Search bar and pagination on tasks screen
 
 ## 📞 Support
 
@@ -251,5 +250,5 @@ For support and questions, please create an issue in the repository.
 ---
 
 **Version**: 1.1.2  
-**Package**: com.fecampossantos.chrono  
+**Package**: com.fecampossantos.aion  
 **Built with**: ❤️ using React Native and Expo

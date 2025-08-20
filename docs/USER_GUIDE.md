@@ -1,8 +1,8 @@
-# User Guide - Chrono Time Tracking App
+# User Guide - Aion Time Tracking App
 
 ## Getting Started
 
-Welcome to Chrono! This guide will walk you through all the features of the time tracking app, helping you efficiently manage your projects and track your time.
+Welcome to Aion! This guide will walk you through all the features of the time tracking app, helping you efficiently manage your projects and track your time.
 
 ## Table of Contents
 
@@ -16,9 +16,9 @@ Welcome to Chrono! This guide will walk you through all the features of the time
 
 ## First Launch
 
-When you first open Chrono, you'll see:
+When you first open Aion, you'll see:
 
-1. **Welcome Screen**: The main screen displays "Chrono" at the top
+1. **Welcome Screen**: The main screen displays "Aion" at the top
 2. **Empty State**: If no projects exist, you'll see "Você ainda não tem projetos" (You don't have projects yet)
 3. **Add Button**: A "+" button in the top-right corner to create your first project
 
@@ -121,7 +121,7 @@ Tasks have two states:
 
 ## Time Tracking
 
-The timer is the core feature of Chrono, allowing precise time tracking for any task.
+The timer is the core feature of Aion, allowing precise time tracking for any task.
 
 ### Using the Timer
 
@@ -377,7 +377,7 @@ If you need additional assistance:
 
 ### Navigation
 - **Back Navigation**: Use device back button or swipe gestures
-- **Home Navigation**: Tap "Chrono" header to return home
+- **Home Navigation**: Tap "Aion" header to return home
 
 ### Input Fields
 - **Text Input**: Standard keyboard input for all text fields

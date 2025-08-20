@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Project as IProject } from "../../interfaces/Project";
 
@@ -22,12 +22,12 @@ export const useProject = (projectID: string) => {
   const database = useSQLiteContext();
   const navigation = useNavigation();
   const router = useRouter();
-  
+
   // Check if database context is available
   if (!database) {
-    throw new Error('Database context not available');
+    throw new Error("Database context not available");
   }
-  
+
   const [tasks, setTasks] = useState<Array<TaskWithTimed>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
@@ -35,28 +35,62 @@ export const useProject = (projectID: string) => {
 
   const isTimerRunning = timerIdRunning !== null;
 
+  // Initial fetch on mount
   useEffect(() => {
-    async function getProject() {
-      try {
-        const project = await database.getFirstAsync<IProject>(
-          `SELECT * FROM projects WHERE project_id = ?;`,
-          projectID
-        );
+    if (projectID) {
+      setIsLoading(true);
+      async function getProject() {
+        try {
+          const project = await database.getFirstAsync<IProject>(
+            `SELECT * FROM projects WHERE project_id = ?;`,
+            projectID
+          );
 
-        setProject(project);
-      } catch (error) {
-        // Set project to null on error and ensure loading is false
-        setProject(null);
-      } finally {
-        setIsLoading(false);
+          setProject(project);
+        } catch (error) {
+          // Set project to null on error and ensure loading is false
+          setProject(null);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
 
-    getProject();
+      getProject();
+    }
+  }, [projectID, database]);
+
+  // Refetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (projectID) {
+        async function getProject() {
+          try {
+            const project = await database.getFirstAsync<IProject>(
+              `SELECT * FROM projects WHERE project_id = ?;`,
+              projectID
+            );
+
+            setProject(project);
+          } catch (error) {
+            // Set project to null on error
+            setProject(null);
+          }
+        }
+
+        getProject();
+      }
+    }, [projectID, database])
+  );
+
+  // Reset state when projectID changes
+  useEffect(() => {
+    setTasks([]);
+    setIsLoading(true);
+    setTimerIdRunning(null);
   }, [projectID]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', () => {
+    const unsubscribe = navigation.addListener("beforeRemove", () => {
       if (!isTimerRunning) return;
 
       Alert.alert(
@@ -109,14 +143,18 @@ ORDER BY
   };
 
   useEffect(() => {
-    getTasks();
-    setIsLoading(false);
-  }, [timerIdRunning]);
+    if (projectID) {
+      setIsLoading(true);
+      getTasks();
+    }
+  }, [projectID]);
 
   // Cleanup effect to reset timer state on unmount
   useEffect(() => {
     return () => {
       setTimerIdRunning(null);
+      setTasks([]);
+      setIsLoading(false);
     };
   }, []);
 

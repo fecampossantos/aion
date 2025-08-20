@@ -10,15 +10,7 @@ const mockAlert = jest.fn((title, message, buttons) => {
   }
 });
 
-// Mock dependencies
-jest.mock("expo-router", () => ({
-  router: {
-    push: jest.fn(),
-  },
-  useNavigation: () => ({
-    setOptions: jest.fn(),
-  }),
-}));
+// The expo-router mock is already defined in jest.setup.js
 
 jest.mock("expo-sqlite", () => ({
   useSQLiteContext: jest.fn(),
@@ -190,7 +182,7 @@ describe("AddProject Screen", () => {
       );
     });
 
-    expect(require("expo-router").router.push).toHaveBeenCalledWith("/");
+    expect(global.mockRouterReplace).toHaveBeenCalledWith("/");
   });
 
   it("creates project with default cost when hourly cost is empty", async () => {

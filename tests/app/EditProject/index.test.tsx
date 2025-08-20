@@ -30,6 +30,7 @@ jest.mock("expo-sqlite", () => ({
 jest.mock("expo-router", () => ({
   router: {
     push: jest.fn(),
+    replace: jest.fn(),
   },
   useLocalSearchParams: () => ({ projectID: "1" }),
 }));
@@ -37,6 +38,7 @@ jest.mock("expo-router", () => ({
 // Get the mocked router
 const { router } = require("expo-router");
 const mockRouterPush = router.push as jest.Mock;
+const mockRouterReplace = router.replace as jest.Mock;
 
 describe("EditProject", () => {
   const mockProject = {
@@ -51,6 +53,7 @@ describe("EditProject", () => {
     mockDatabase.getFirstAsync.mockResolvedValue(mockProject);
     mockDatabase.runAsync.mockResolvedValue(undefined);
     mockRouterPush.mockClear();
+    mockRouterReplace.mockClear();
   });
 
   it("renders correctly", async () => {
@@ -197,7 +200,7 @@ describe("EditProject", () => {
     
     // Should always navigate to home, regardless of changes
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith("/");
+      expect(mockRouterReplace).toHaveBeenCalledWith("/");
     });
   });
 
@@ -224,7 +227,7 @@ describe("EditProject", () => {
     
     await waitFor(() => {
       // Should navigate to home
-      expect(mockRouterPush).toHaveBeenCalledWith("/");
+      expect(mockRouterReplace).toHaveBeenCalledWith("/");
     });
   });
 
@@ -295,7 +298,7 @@ describe("EditProject", () => {
     
     await waitFor(() => {
       // Should navigate to home
-      expect(mockRouterPush).toHaveBeenCalledWith("/");
+      expect(mockRouterReplace).toHaveBeenCalledWith("/");
     });
   });
 

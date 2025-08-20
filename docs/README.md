@@ -1,10 +1,10 @@
 # Documentation Index
 
-Welcome to the comprehensive documentation for **Chrono**, a React Native time tracking application built with Expo.
+Welcome to the comprehensive documentation for **Aion**, a React Native time tracking application built with Expo.
 
 ## 📚 Documentation Overview
 
-This documentation provides complete information for users, developers, and contributors working with the Chrono app.
+This documentation provides complete information for users, developers, and contributors working with the Aion app.
 
 ## 📖 Available Documentation
 
@@ -184,6 +184,6 @@ Each documentation file follows a consistent structure:
 
 **Last Updated**: December 2024  
 **Version**: 1.1.2  
-**Maintained by**: Chrono Development Team
+**Maintained by**: Aion Development Team
 
 For questions about this documentation, please create an issue in the repository or contact the development team through the appropriate channels.

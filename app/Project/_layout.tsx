@@ -121,7 +121,7 @@ const ProjectLayout = () => {
       <Content.Header
         right={<HeaderRight />}
         title={<HeaderTitle />}
-        left={<Content.BackButton onPress={() => router.back()} />}
+        left={<Content.BackButton onPress={() => router.replace("/")} />}
       />
       <Content.Body>
         <Slot />

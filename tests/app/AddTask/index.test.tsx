@@ -18,6 +18,7 @@ jest.mock("expo-sqlite", () => ({
 jest.mock("expo-router", () => ({
   router: {
     push: jest.fn(),
+    back: jest.fn(),
   },
   useLocalSearchParams: () => ({ projectID: "1" }),
 }));
@@ -25,6 +26,7 @@ jest.mock("expo-router", () => ({
 // Get the mocked router
 const { router } = require("expo-router");
 const mockRouterPush = router.push as jest.Mock;
+const mockRouterBack = router.back as jest.Mock;
 
 describe("AddTask", () => {
   const mockProject = {
@@ -39,6 +41,7 @@ describe("AddTask", () => {
     mockDatabase.getFirstAsync.mockResolvedValue(mockProject);
     mockDatabase.runAsync.mockResolvedValue(undefined);
     mockRouterPush.mockClear();
+    mockRouterBack.mockClear();
   });
 
   it("renders correctly", async () => {
@@ -127,11 +130,8 @@ describe("AddTask", () => {
     fireEvent.press(addButton);
     
     await waitFor(() => {
-      // Should navigate back to project
-      expect(mockRouterPush).toHaveBeenCalledWith({
-        pathname: "Project",
-        params: { projectID: 1 },
-      });
+      // Should navigate back to previous page
+      expect(mockRouterBack).toHaveBeenCalled();
     });
   });
 
@@ -154,7 +154,7 @@ describe("AddTask", () => {
     await waitFor(() => {
       // Should call database insert and navigation
       expect(mockDatabase.runAsync).toHaveBeenCalled();
-      expect(mockRouterPush).toHaveBeenCalled();
+      expect(mockRouterBack).toHaveBeenCalled();
     });
   });
 

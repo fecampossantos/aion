@@ -1,5 +1,5 @@
 /**
- * Centralized theme configuration for the Chrono app
+ * Centralized theme configuration for the Aion app
  * Contains all UI constants, colors, spacing, shadows, and design tokens
  */
 

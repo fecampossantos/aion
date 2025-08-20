@@ -2,7 +2,7 @@
 
 ## Overview
 
-This documentation provides comprehensive information for developers working on the Chrono time tracking app. It covers setup, development workflow, testing, building, and contribution guidelines.
+This documentation provides comprehensive information for developers working on the Aion time tracking app. It covers setup, development workflow, testing, building, and contribution guidelines.
 
 ## Table of Contents
 
@@ -66,7 +66,7 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 1. **Clone Repository**
 ```bash
 git clone <repository-url>
-cd chrono
+cd aion
 ```
 
 2. **Install Dependencies**
@@ -97,7 +97,7 @@ npm test
 ### Key Directories
 
 ```
-chrono/
+aion/
 ├── app/                    # Expo Router screens
 ├── components/             # Reusable UI components  
 ├── interfaces/             # TypeScript type definitions
@@ -207,7 +207,7 @@ The app uses SQLite with local storage:
 
 ```typescript
 // Database location
-const databaseName = "chronoMainDatabase.db";
+const databaseName = "aionMainDatabase.db";
 
 // Development vs Production
 const isDevelopment = __DEV__;
@@ -406,11 +406,11 @@ eas build -p ios --profile preview
 // app.json
 {
   "expo": {
-    "name": "chrono",
-    "slug": "chrono", 
+    "name": "aion",
+    "slug": "aion", 
     "version": "1.1.2",
     "android": {
-      "package": "com.fecampossantos.chrono",
+      "package": "com.fecampossantos.aion",
       "versionCode": 5
     }
   }
@@ -576,8 +576,8 @@ module.exports = {
 
 1. **Fork Repository**
 ```bash
-git clone https://github.com/yourusername/chrono.git
-cd chrono
+git clone https://github.com/yourusername/aion.git
+cd aion
 ```
 
 2. **Create Feature Branch**
@@ -831,4 +831,4 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 
 ---
 
-**Happy Coding!** Remember to follow the guidelines and contribute to making Chrono even better.
+**Happy Coding!** Remember to follow the guidelines and contribute to making Aion even better.
