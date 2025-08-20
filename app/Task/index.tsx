@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
  */
 const Task = () => {
   const router = useRouter();
-  const { taskID, taskName } = useLocalSearchParams();
+  const { taskID, taskName, projectID } = useLocalSearchParams();
   
   const {
     timings,
@@ -136,11 +136,11 @@ const Task = () => {
   } = useTask(taskID as string);
   
   const handleAddRecordPress = () => {
-    // Get the project ID from the task
+    // Navigate to AddRecord with task and project information for prepopulation
     router.push({
       pathname: "AddRecord",
       params: {
-        projectID: taskID, // This will be used to get the project context
+        projectID: projectID,
         taskID: taskID,
         taskName: taskTitle,
       },
