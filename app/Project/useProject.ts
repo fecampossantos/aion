@@ -67,7 +67,7 @@ export const useProject = (projectID: string) => {
           {
             text: "Sair",
             style: "destructive",
-            onPress: () => router.replace("/Home"),
+            onPress: () => router.replace("/"),
           },
         ]
       );

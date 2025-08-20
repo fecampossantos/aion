@@ -1,4 +1,13 @@
-import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import TextInput from "../../components/TextInput";
@@ -36,7 +45,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: theme.colors.white,
     fontFamily: theme.typography.fontFamily.bold,
-    fontSize: theme.typography.fontSize['2xl'],
+    fontSize: theme.typography.fontSize["2xl"],
     lineHeight: theme.typography.lineHeight.tight,
   },
   scrollView: {
@@ -45,7 +54,7 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingHorizontal: theme.layout.padding.horizontal,
     paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing['3xl'],
+    paddingBottom: theme.spacing["3xl"],
   },
   projectInfoSection: {
     marginBottom: theme.spacing.xl,
@@ -127,7 +136,10 @@ const AddProject = () => {
     }
 
     if (projectName.trim().length < 2) {
-      Alert.alert("Erro", "O nome do projeto deve ter pelo menos 2 caracteres.");
+      Alert.alert(
+        "Erro",
+        "O nome do projeto deve ter pelo menos 2 caracteres."
+      );
       return;
     }
 
@@ -138,7 +150,7 @@ const AddProject = () => {
         "SELECT * FROM projects WHERE name = ?;",
         projectName.trim()
       );
-      
+
       if (existingProject) {
         Alert.alert("Erro", "Um projeto com esse nome já existe.");
         setIsSubmitting(false);
@@ -153,7 +165,7 @@ const AddProject = () => {
         parseFloat(cost)
       );
 
-      router.push("/");
+      router.replace("/");
     } catch (error) {
       Alert.alert("Erro", "Não foi possível criar o projeto. Tente novamente.");
       setIsSubmitting(false);
@@ -167,31 +179,36 @@ const AddProject = () => {
   const isFormValid = projectName.trim().length >= 2;
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollViewContent}
       >
         <View style={styles.projectInfoSection}>
           <Text style={styles.sectionTitle}>Informações do Projeto</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Nome do Projeto</Text>
             <TextInput
               onChangeText={(text: string) => handleChangeProjectName(text)}
               value={projectName}
               placeholder="Digite o nome do projeto..."
-              autoFocus={true}
             />
             {projectName.length > 0 && (
-              <Text style={[
-                styles.characterCount,
-                { color: isFormValid ? theme.colors.success[400] : theme.colors.error[400] }
-              ]}>
+              <Text
+                style={[
+                  styles.characterCount,
+                  {
+                    color: isFormValid
+                      ? theme.colors.success[400]
+                      : theme.colors.error[400],
+                  },
+                ]}
+              >
                 {projectName.length}/50 caracteres
               </Text>
             )}
@@ -212,8 +229,10 @@ const AddProject = () => {
 
         {/* Submit Button */}
         <View style={styles.buttonContainer}>
-          <Button 
-            onPress={isFormValid && !isSubmitting ? handleAddProject : undefined}
+          <Button
+            onPress={
+              isFormValid && !isSubmitting ? handleAddProject : undefined
+            }
             text={isSubmitting ? "Criando..." : "Criar Projeto"}
           />
         </View>

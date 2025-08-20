@@ -20,10 +20,7 @@ const HeaderDeleteButton = ({
           "DELETE FROM tasks WHERE task_id = ?;",
           taskID as string
         );
-        router.replace({
-          pathname: "Project",
-          params: { projectID },
-        });
+        router.back();
       }}
     >
       <Text>
@@ -51,10 +48,7 @@ const TaskLayout = () => {
         left={
           <Content.BackButton
             onPress={() =>
-              router.replace({
-                pathname: "Project",
-                params: { projectID },
-              })
+              router.back()
             }
           />
         }

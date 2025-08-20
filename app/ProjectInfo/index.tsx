@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Alert,
   StyleSheet,
 } from "react-native";
 
@@ -12,7 +11,7 @@ import Button from "../../components/Button";
 import { Feather } from "@expo/vector-icons";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { fullDate } from "../../utils/parser";
 import globalStyle from "../../globalStyle";
@@ -23,10 +22,6 @@ import { useLocalSearchParams, router } from "expo-router";
 import useReport from "./useReport";
 import { useReportGeneration } from "./useReportGeneration";
 
-import * as Print from "expo-print";
-import * as FileSystem from "expo-file-system";
-import { shareAsync } from "expo-sharing";
-import { generateReportHTML } from "../../utils/pdfReportService";
 import { useSQLiteContext } from "expo-sqlite";
 import { theme } from "../../globalStyle/theme";
 
@@ -84,8 +79,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: globalStyle.black.main,
   },
   projectStatIcon: {
     width: 32,
@@ -297,7 +290,12 @@ const ProjectStatsCard = ({ project }: { project: any }) => (
       <Text style={styles.projectStatsTitle}>Informações do Projeto</Text>
     </View>
     <View style={styles.projectStatsContent}>
-      <View style={styles.projectStatItem}>
+      <View
+        style={[
+          styles.projectStatItem,
+          { borderBottomWidth: 1, borderBottomColor: globalStyle.black.main },
+        ]}
+      >
         <View style={styles.projectStatIcon}>
           <Feather name="dollar-sign" color={globalStyle.white} size={16} />
         </View>
@@ -391,7 +389,11 @@ const ProjectInfo = () => {
         ORDER BY
           ti.created_at DESC;
         `,
-        [projectID, startDate.toISOString().slice(0, 19).replace("T", " "), endDate.toISOString().slice(0, 19).replace("T", " ")]
+        [
+          projectID,
+          startDate.toISOString().slice(0, 19).replace("T", " "),
+          endDate.toISOString().slice(0, 19).replace("T", " "),
+        ]
       );
     };
 
@@ -438,7 +440,7 @@ const ProjectInfo = () => {
         <View style={styles.chartSection}>
           <View style={styles.chartHeader}>
             <Feather name="bar-chart-2" color={globalStyle.white} size={24} />
-            <Text style={styles.chartTitle}>Atividade por Tarefa</Text>
+            <Text style={styles.chartTitle}>Atividade por dia</Text>
           </View>
           <View style={styles.chartContainer}>
             <BarChart

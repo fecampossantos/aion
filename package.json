@@ -14,7 +14,8 @@
     "test:coverage": "jest --coverage",
     "test:coverage:watch": "jest --coverage --watch",
     "build:apk": "eas build -p android --profile preview",
-    "build:androidAAB": "eas build -p android"
+    "build:androidAAB": "eas build -p android",
+    "build:dev": "eas build -p android --profile development"
   },
   "dependencies": {
     "@expo-google-fonts/open-sans": "^0.2.3",
@@ -25,6 +26,7 @@
     "expo": "^53.0.0",
     "expo-asset": "~11.1.7",
     "expo-constants": "~17.1.7",
+    "expo-dev-client": "~5.2.4",
     "expo-file-system": "~18.1.11",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",

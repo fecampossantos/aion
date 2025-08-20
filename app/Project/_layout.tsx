@@ -32,10 +32,10 @@ const ProjectLayout = () => {
         `SELECT completed FROM tasks WHERE project_id = ?;`,
         projectID as string
       );
-      
+
       const total = tasks.length;
-      const completed = tasks.filter(task => task.completed === 1).length;
-      
+      const completed = tasks.filter((task) => task.completed === 1).length;
+
       setTotalTasks(total);
       setCompletedTasks(completed);
     }
@@ -55,7 +55,7 @@ const ProjectLayout = () => {
       style={{
         padding: 8,
         borderRadius: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
       }}
     >
       <AntDesign name="infocirlceo" size={20} color="white" />
@@ -82,7 +82,7 @@ const ProjectLayout = () => {
   );
 
   const HeaderRight = () => (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
       <HeaderAddTaskButton />
       <HeaderInfoButton />
     </View>
@@ -90,20 +90,25 @@ const ProjectLayout = () => {
 
   const HeaderTitle = () => (
     <View style={{ flex: 1 }}>
-      <Text style={{ 
-        color: 'white', 
-        fontSize: 20, 
-        fontWeight: 'bold',
-        marginBottom: 4
-      }}>
+      <Text
+        style={{
+          color: "white",
+          fontSize: 20,
+          fontWeight: "bold",
+          marginBottom: 4,
+        }}
+      >
         {project?.name}
       </Text>
       {totalTasks > 0 && (
-        <Text style={{ 
-          color: 'rgba(255, 255, 255, 0.8)', 
-          fontSize: 14 
-        }}>
-          {totalTasks} tarefa{totalTasks !== 1 ? "s" : ""} • {Math.round((completedTasks / totalTasks) * 100)}% concluído
+        <Text
+          style={{
+            color: "rgba(255, 255, 255, 0.8)",
+            fontSize: 14,
+          }}
+        >
+          {totalTasks} tarefa{totalTasks !== 1 ? "s" : ""} •{" "}
+          {Math.round((completedTasks / totalTasks) * 100)}% concluído
         </Text>
       )}
     </View>
@@ -113,10 +118,10 @@ const ProjectLayout = () => {
 
   return (
     <Content.Wrapper>
-      <Content.Header 
-        right={<HeaderRight />} 
-        title={<HeaderTitle />} 
-        left={<Content.BackButton onPress={router.back}/>}
+      <Content.Header
+        right={<HeaderRight />}
+        title={<HeaderTitle />}
+        left={<Content.BackButton onPress={() => router.back()} />}
       />
       <Content.Body>
         <Slot />

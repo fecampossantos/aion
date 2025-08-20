@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -121,10 +120,6 @@ const AddTask = () => {
     getProject();
   }, [projectID]);
 
-  const handleBackPress = () => {
-    router.back();
-  };
-
   const handleAddTaskToProject = async () => {
     if (taskName.trim() === "") {
       Alert.alert("Erro", "Por favor, insira um nome para a task.");
@@ -145,10 +140,7 @@ const AddTask = () => {
         taskName.trim()
       );
 
-      router.push({
-        pathname: "Project",
-        params: { projectID: project.project_id },
-      });
+      router.back()
     } catch (error) {
       Alert.alert("Erro", "Não foi possível criar a task. Tente novamente.");
       setIsSubmitting(false);
@@ -178,7 +170,6 @@ const AddTask = () => {
               value={taskName}
               onChangeText={(text: string) => setTaskName(text)}
               placeholder="Digite o nome da task..."
-              autoFocus={true}
             />
             {taskName.length > 0 && (
               <Text

@@ -134,11 +134,7 @@ const Task = () => {
     formatTotalTime,
     handleDeleteTiming,
   } = useTask(taskID as string);
-
-  const handleBackPress = () => {
-    router.back();
-  };
-
+  
   const handleAddRecordPress = () => {
     // Get the project ID from the task
     router.push({

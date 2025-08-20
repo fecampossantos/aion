@@ -11,10 +11,7 @@ const AddRecordLayout = () => {
         left={
           <Content.BackButton
             onPress={() =>
-              router.replace({
-                pathname: "Project",
-                params: { projectID },
-              })
+              router.back()
             }
           />
         }

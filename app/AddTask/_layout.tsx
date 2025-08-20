@@ -8,16 +8,7 @@ const AddTaskLayout = () => {
     <Content.Wrapper>
       <Content.Header
         title={"Nova task"}
-        left={
-          <Content.BackButton
-            onPress={() =>
-              router.replace({
-                pathname: "Project",
-                params: { projectID },
-              })
-            }
-          />
-        }
+        left={<Content.BackButton onPress={() => router.back()} />}
       />
       <Content.Body>
         <Slot />

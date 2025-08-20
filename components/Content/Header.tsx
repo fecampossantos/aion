@@ -16,15 +16,15 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.neutral[800],
   },
   button: {
-    minWidth: theme.spacing['4xl'],
-    height: theme.spacing['4xl'],
+    minWidth: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
   titleWrapper: {
     flex: 1,
-    minHeight: theme.spacing['7xl'],
+    minHeight: theme.spacing["7xl"],
     display: "flex",
     justifyContent: "center",
     alignItems: "flex-start",
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.xl,
     color: theme.colors.white,
     fontFamily: theme.typography.fontFamily.bold,
-  }
+  },
 });
 
 /**
@@ -55,30 +55,36 @@ const Header = ({
   right?: React.ReactNode;
 }) => {
   const renderTitle = () => {
-    if (typeof title === 'string') {
+    if (typeof title === "string") {
       return (
         <View style={styles.titleWrapper}>
-          <Text style={styles.title} testID="header-title">{title}</Text>
+          <Text style={styles.title} testID="header-title">
+            {title}
+          </Text>
         </View>
       );
     }
-    
+
     if (title) {
-      return (
-        <View style={styles.titleWrapper}>
-          {title}
-        </View>
-      );
+      return <View style={styles.titleWrapper}>{title}</View>;
     }
-    
+
     return null;
   };
 
   return (
     <View style={styles.header} testID="header-container">
-      {left && <View style={styles.button} testID="header-left">{left}</View>}
+      {left && (
+        <View style={styles.button} testID="header-left">
+          {left}
+        </View>
+      )}
       {renderTitle()}
-      {right && <View style={styles.button} testID="header-right">{right}</View>}
+      {right && (
+        <View style={styles.button} testID="header-right">
+          {right}
+        </View>
+      )}
     </View>
   );
 };

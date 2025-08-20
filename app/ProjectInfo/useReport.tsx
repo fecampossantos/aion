@@ -65,7 +65,7 @@ const useReport = (projectID: string) => {
 
   const handleDeleteProject = () => {
     database.runAsync("DELETE FROM projects WHERE project_id = ?;", projectID);
-    router.push("/");
+    router.replace("/");
   };
 
   const handleClickedOnDeleteProject = () => {

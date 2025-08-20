@@ -317,10 +317,7 @@ const AddRecord = () => {
       formatJsDateToDatabase(formatCreatedAt())
     );
 
-    router.push({
-      pathname: "Project",
-      params: { projectID: project.project_id },
-    });
+    router.back();
   };
 
   const handleChangeTime = (type: "start" | "end", value: string) => {

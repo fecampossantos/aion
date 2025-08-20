@@ -169,10 +169,10 @@ const EditProject = () => {
         Alert.alert(
           "Sucesso", 
           "Projeto atualizado com sucesso!",
-          [{ text: "OK", onPress: () => router.push("/") }]
+          [{ text: "OK", onPress: () => router.replace("/") }]
         );
       } else {
-        router.push("/");
+        router.replace("/");
       }
     } catch (error) {
       console.error("Error updating project:", error);
