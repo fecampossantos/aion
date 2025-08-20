@@ -156,9 +156,9 @@ describe("PDF Report Service", () => {
       );
 
       expect(result).toContain("<style>");
-      expect(result).toContain("--primary-color: #2563eb");
-      expect(result).toContain("--success-color: #059669");
-      expect(result).toContain("--gray-900: #111827");
+      expect(result).toContain("--primary-600: #2563eb");
+      expect(result).toContain("--success-600: #059669");
+      expect(result).toContain("--neutral-900: #0f172a");
       expect(result).toContain("font-family: \"Inter\"");
       expect(result).toContain("</style>");
     });

@@ -45,8 +45,8 @@ describe("AddTask", () => {
     const { getByPlaceholderText, getByText } = render(<AddTask />);
 
     await waitFor(() => {
-      expect(getByPlaceholderText("Task")).toBeDefined();
-      expect(getByText("Adicionar task")).toBeDefined();
+      expect(getByPlaceholderText("Digite o nome da task...")).toBeDefined();
+      expect(getByText("Criar Task")).toBeDefined();
     });
   });
 
@@ -65,7 +65,7 @@ describe("AddTask", () => {
     const { getByPlaceholderText } = render(<AddTask />);
 
     await waitFor(() => {
-      const taskInput = getByPlaceholderText("Task");
+      const taskInput = getByPlaceholderText("Digite o nome da task...");
       fireEvent.changeText(taskInput, "New Task");
       
       expect(taskInput.props.value).toBe("New Task");
@@ -76,7 +76,7 @@ describe("AddTask", () => {
     const { getByText } = render(<AddTask />);
 
     await waitFor(() => {
-      const addButton = getByText("Adicionar task");
+      const addButton = getByText("Criar Task");
       fireEvent.press(addButton);
       
       // Should not call database insert when task name is empty
@@ -93,11 +93,11 @@ describe("AddTask", () => {
     });
 
     // Type task name
-    const taskInput = getByPlaceholderText("Task");
+    const taskInput = getByPlaceholderText("Digite o nome da task...");
     fireEvent.changeText(taskInput, "Test Task");
     
     // Press add button
-    const addButton = getByText("Adicionar task");
+    const addButton = getByText("Criar Task");
     fireEvent.press(addButton);
     
     await waitFor(() => {
@@ -119,11 +119,11 @@ describe("AddTask", () => {
     });
 
     // Type task name
-    const taskInput = getByPlaceholderText("Task");
+    const taskInput = getByPlaceholderText("Digite o nome da task...");
     fireEvent.changeText(taskInput, "Test Task");
     
     // Press add button
-    const addButton = getByText("Adicionar task");
+    const addButton = getByText("Criar Task");
     fireEvent.press(addButton);
     
     await waitFor(() => {
@@ -144,11 +144,11 @@ describe("AddTask", () => {
     });
 
     // Type task name
-    const taskInput = getByPlaceholderText("Task");
+    const taskInput = getByPlaceholderText("Digite o nome da task...");
     fireEvent.changeText(taskInput, "Test Task");
     
     // Press add button
-    const addButton = getByText("Adicionar task");
+    const addButton = getByText("Criar Task");
     fireEvent.press(addButton);
     
     await waitFor(() => {
@@ -163,11 +163,11 @@ describe("AddTask", () => {
 
     await waitFor(() => {
       // Leave task name empty
-      const taskInput = getByPlaceholderText("Task");
+      const taskInput = getByPlaceholderText("Digite o nome da task...");
       fireEvent.changeText(taskInput, "");
       
       // Press add button
-      const addButton = getByText("Adicionar task");
+      const addButton = getByText("Criar Task");
       fireEvent.press(addButton);
       
       // Should not call database operations
@@ -185,20 +185,16 @@ describe("AddTask", () => {
     });
 
     // Set task name to whitespace only
-    const taskInput = getByPlaceholderText("Task");
+    const taskInput = getByPlaceholderText("Digite o nome da task...");
     fireEvent.changeText(taskInput, "   ");
     
     // Press add button
-    const addButton = getByText("Adicionar task");
+    const addButton = getByText("Criar Task");
     fireEvent.press(addButton);
     
     await waitFor(() => {
-      // Should still add the task (current implementation doesn't trim)
-      expect(mockDatabase.runAsync).toHaveBeenCalledWith(
-        "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, 0);",
-        1,
-        "   "
-      );
+      // Should not add the task due to validation (whitespace is trimmed)
+      expect(mockDatabase.runAsync).not.toHaveBeenCalled();
     });
   });
 
@@ -206,7 +202,7 @@ describe("AddTask", () => {
     const { getByPlaceholderText } = render(<AddTask />);
 
     await waitFor(() => {
-      const taskInput = getByPlaceholderText("Task");
+      const taskInput = getByPlaceholderText("Digite o nome da task...");
       expect(taskInput).toBeDefined();
     });
   });
@@ -215,7 +211,7 @@ describe("AddTask", () => {
     const { getByText } = render(<AddTask />);
 
     await waitFor(() => {
-      const addButton = getByText("Adicionar task");
+      const addButton = getByText("Criar Task");
       expect(addButton).toBeDefined();
     });
   });

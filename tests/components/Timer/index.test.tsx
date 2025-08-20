@@ -28,8 +28,12 @@ describe("<Timer />", () => {
     const { getByTestId } = render(<Timer onStop={onStopMock} />);
     const timerTouchable = getByTestId(timerTouchableTestID);
 
+    // Start timer
     fireEvent.press(timerTouchable);
-    fireEvent.press(timerTouchable);
+    
+    // Stop timer using the stop button
+    const stopButton = getByTestId("timer-stop-button");
+    fireEvent.press(stopButton);
 
     expect(onStopMock).toHaveBeenCalledTimes(1);
   });
@@ -75,9 +79,10 @@ describe("<Timer />", () => {
     // Start timer
     fireEvent.press(timerTouchable);
     
-    // Wait a bit and stop timer
+    // Wait a bit and stop timer using the stop button
     await new Promise(resolve => setTimeout(resolve, 100));
-    fireEvent.press(timerTouchable);
+    const stopButton = getByTestId("timer-stop-button");
+    fireEvent.press(stopButton);
 
     expect(onStopMock).toHaveBeenCalledWith(expect.any(Number));
     expect(onStopMock).toHaveBeenCalledTimes(1);

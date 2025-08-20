@@ -8,7 +8,8 @@ jest.mock('expo-notifications', () => ({
   addNotificationReceivedListener: jest.fn(),
   addNotificationResponseReceivedListener: jest.fn(),
   removeNotificationSubscription: jest.fn(),
-  scheduleNotificationAsync: jest.fn(),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('mock-notification-id')),
+  dismissNotificationAsync: jest.fn(),
   requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
 }));
 
@@ -23,14 +24,36 @@ jest.mock('expo-haptics', () => ({
   },
 }));
 
+// Mock expo-print
+jest.mock('expo-print', () => ({
+  printToFileAsync: jest.fn(() => Promise.resolve({ uri: 'file://mock-pdf.pdf' })),
+}));
+
+// Mock expo-file-system
+jest.mock('expo-file-system', () => ({
+  documentDirectory: 'file://mock-documents/',
+  moveAsync: jest.fn(() => Promise.resolve()),
+}));
+
+// Mock expo-sharing
+jest.mock('expo-sharing', () => ({
+  shareAsync: jest.fn(() => Promise.resolve()),
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+}));
+
 jest.mock('expo-sqlite', () => ({
   useSQLiteContext: jest.fn(() => ({
-    runAsync: jest.fn(),
-    getFirstAsync: jest.fn(),
-    getAllAsync: jest.fn(),
+    runAsync: jest.fn(() => Promise.resolve({ changes: 1, lastInsertRowId: 1 })),
+    getFirstAsync: jest.fn(() => Promise.resolve({ project_id: 1, name: 'Test Project' })),
+    getAllAsync: jest.fn(() => Promise.resolve([
+      { name: 'Test Task' },
+      { timing_id: 1, task_id: 1, time: 3600, created_at: '2023-01-01T10:00:00Z' }
+    ])),
+    execAsync: jest.fn(() => Promise.resolve()),
   })),
 }));
 
+// Mock expo-router
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn(),
@@ -43,9 +66,27 @@ jest.mock('expo-router', () => ({
     back: jest.fn(),
   }),
   useLocalSearchParams: () => ({}),
+}));
+
+// Mock @react-navigation/native
+jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     setOptions: jest.fn(),
     navigate: jest.fn(),
+    addListener: jest.fn(() => jest.fn()),
+    goBack: jest.fn(),
+  }),
+  useFocusEffect: jest.fn(),
+  useIsFocused: jest.fn(() => true),
+}));
+
+// Mock @react-navigation/core
+jest.mock('@react-navigation/core', () => ({
+  useNavigation: () => ({
+    setOptions: jest.fn(),
+    navigate: jest.fn(),
+    addListener: jest.fn(() => jest.fn()),
+    goBack: jest.fn(),
   }),
 }));
 
@@ -95,7 +136,7 @@ jest.mock('@react-native-picker/picker', () => {
     );
   };
   
-  return MockPicker;
+  return { Picker: MockPicker };
 });
 
 // Mock @react-native-community/datetimepicker

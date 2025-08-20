@@ -15,6 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { colors } from "../../globalStyle/theme";
 import globalStyle from "../../globalStyle";
 import { spacing, borderRadius, shadows, typography } from "../../globalStyle/theme";
+import { useDatePicker } from "./useDatePicker";
 
 const styles = StyleSheet.create({
   container: {
@@ -234,8 +235,7 @@ const AddRecord = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<any>();
 
-  const [date, setDate] = useState<Date>(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  const { date, showPicker, showDatePicker, handleUpdateDate } = useDatePicker(new Date());
 
   const [startTime, setStartTime] = useState("0000");
   const [endTime, setEndTime] = useState("0000");
@@ -323,13 +323,6 @@ const AddRecord = () => {
     });
   };
 
-  const handleUpdateDate = (event, selectedDate) => {
-    if (event.type !== "set") return;
-
-    setDate(new Date(selectedDate));
-    setShowPicker(false);
-  };
-
   const handleChangeTime = (type: "start" | "end", value: string) => {
     const formattedTime = value.replace(/\D/g, "");
 
@@ -390,7 +383,7 @@ const AddRecord = () => {
 
       <View style={styles.dateSection}>
         <Text style={styles.dateLabel}>Data do registro</Text>
-        <DateInput date={date} onPress={() => setShowPicker(true)} />
+        <DateInput date={date} onPress={showDatePicker} />
       </View>
 
       <View style={styles.timeSection}>
@@ -432,9 +425,7 @@ const AddRecord = () => {
           value={date || new Date()}
           mode={"date"}
           maximumDate={new Date()}
-          onChange={(event, selectedDate) =>
-            handleUpdateDate(event, selectedDate)
-          }
+          onChange={handleUpdateDate}
         />
       )}
     </View>

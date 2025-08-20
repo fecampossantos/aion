@@ -21,6 +21,7 @@ import { BarChart } from "react-native-chart-kit";
 import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
+import { useReportGeneration } from "./useReportGeneration";
 
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
@@ -329,7 +330,6 @@ const ProjectStatsCard = ({ project }: { project: any }) => (
 const ProjectInfo = () => {
   const { projectID } = useLocalSearchParams<{ projectID: string }>();
   const database = useSQLiteContext();
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const {
     getTimings,
@@ -347,6 +347,8 @@ const ProjectInfo = () => {
     showChart,
   } = useReport(projectID);
 
+  const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
+
   useEffect(() => {
     getProject();
   }, [projectID]);
@@ -362,37 +364,11 @@ const ProjectInfo = () => {
   if (!project) return null;
 
   /**
-   * Gets the start of day as ISO string for database queries
-   * @param {Date} day - The date to get start of day for
-   * @returns {string} ISO string formatted for database
-   */
-  const getInitOfDay = (day: Date) => {
-    const startOfDay = new Date(day);
-    startOfDay.setHours(0, 0, 0, 0);
-    return startOfDay.toISOString().slice(0, 19).replace("T", " ");
-  };
-
-  /**
-   * Gets the end of day as ISO string for database queries
-   * @param {Date} day - The date to get end of day for
-   * @returns {string} ISO string formatted for database
-   */
-  const getEndOfDay = (day: Date) => {
-    const endOfDay = new Date(day);
-    endOfDay.setHours(23, 59, 59, 999);
-    return endOfDay.toISOString().slice(0, 19).replace("T", " ");
-  };
-
-  /**
    * Generates and shares the PDF report
    */
-  const handleGenerateReport = async () => {
-    if (isGeneratingReport || !project) return;
-
-    setIsGeneratingReport(true);
-    try {
-      // Get comprehensive timing data with task information
-      const timings = await database.getAllAsync<{
+  const onGenerateReport = async () => {
+    const getTimingsData = async () => {
+      return await database.getAllAsync<{
         task_completed: 0 | 1;
         timing_created_at: string;
         task_name: string;
@@ -415,68 +391,17 @@ const ProjectInfo = () => {
         ORDER BY
           ti.created_at DESC;
         `,
-        [projectID, getInitOfDay(startDate), getEndOfDay(endDate)]
+        [projectID, startDate.toISOString().slice(0, 19).replace("T", " "), endDate.toISOString().slice(0, 19).replace("T", " ")]
       );
+    };
 
-      if (timings.length === 0) {
-        Alert.alert(
-          "Nenhum dado encontrado",
-          "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
-        );
-        return;
-      }
-
-      const startDateSTR = fullDate(startDate.toString());
-      const endDateSTR = fullDate(endDate.toString());
-
-      const documentName = `Relatorio_${project.name.replace(
-        /[^a-zA-Z0-9]/g,
-        "_"
-      )}_${startDateSTR.replaceAll("/", "-")}_${endDateSTR.replaceAll(
-        "/",
-        "-"
-      )}`;
-
-      const html = generateReportHTML(
-        project,
-        startDateSTR,
-        endDateSTR,
-        timings,
-        documentName
-      );
-
-      const { uri } = await Print.printToFileAsync({
-        html,
-        margins: {
-          left: 20,
-          top: 20,
-          right: 20,
-          bottom: 20,
-        },
-      });
-
-      const pdfFile = `${uri.slice(
-        0,
-        uri.lastIndexOf("/") + 1
-      )}${documentName}.pdf`;
-
-      await FileSystem.moveAsync({
-        from: uri,
-        to: pdfFile,
-      });
-
-      await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
-
-      Alert.alert("Sucesso", "Relatório PDF gerado com sucesso!");
-    } catch (e) {
-      console.warn("Error generating report:", e);
-      Alert.alert(
-        "Erro ao gerar relatório",
-        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
-      );
-    } finally {
-      setIsGeneratingReport(false);
-    }
+    await handleGenerateReport({
+      project,
+      projectID,
+      startDate,
+      endDate,
+      getTimings: getTimingsData,
+    });
   };
 
   return (
@@ -534,7 +459,7 @@ const ProjectInfo = () => {
       <View style={styles.actionSection}>
         <Button
           buttonStyle={styles.generateReportButton}
-          onPress={handleGenerateReport}
+          onPress={onGenerateReport}
           text={
             isGeneratingReport
               ? "Gerando relatório..."

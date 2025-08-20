@@ -1,14 +1,12 @@
 import { ScrollView, Text, View, TouchableOpacity, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
-import { Timing as ITiming } from "../../interfaces/Timing";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
-import { useSQLiteContext } from "expo-sqlite";
 import LoadingView from "../../components/LoadingView";
 import { theme } from "../../globalStyle/theme";
+import { useTask } from "./useTask";
 
 const styles = StyleSheet.create({
   container: {
@@ -124,68 +122,18 @@ const styles = StyleSheet.create({
 const Task = () => {
   const router = useRouter();
   const { taskID, taskName } = useLocalSearchParams();
-  const database = useSQLiteContext();
-  const [timings, setTimings] = useState<Array<ITiming>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
-  const [taskTitle, setTaskTitle] = useState<string>("");
-
-  const getTimingsFromTask = async () => {
-    if (!taskID) return;
-
-    // Get task details
-    const taskResult = await database.getAllAsync<{ name: string }>(
-      "SELECT name FROM tasks WHERE task_id = ?;",
-      taskID as string
-    );
-
-    if (taskResult.length > 0) {
-      setTaskTitle(taskResult[0].name);
-    }
-
-    const timings = await database.getAllAsync<ITiming>(
-      "SELECT * FROM timings WHERE task_id = ? ORDER BY created_at DESC;",
-      taskID as string
-    );
-    setTimings(timings);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    getTimingsFromTask();
-  }, [taskID, isTimerRunning]);
-
-  const handleDeleteTiming = async (timingID: number) => {
-    await database.runAsync(
-      "DELETE FROM timings WHERE timing_id = ?;",
-      timingID
-    );
-    setIsLoading(true);
-    await getTimingsFromTask(); // Refresh timings after deletion
-  };
-
-  const onInitTimer = () => {
-    setIsTimerRunning(true);
-  };
-
-  const onStopTimer = async (time: number) => {
-    setIsTimerRunning(false);
-    await database.runAsync(
-      "INSERT INTO timings (task_id, time) VALUES (?, ?);",
-      taskID as string,
-      time
-    );
-  };
-
-  const calculateTotalTime = () => {
-    return timings.reduce((total, timing) => total + timing.time, 0);
-  };
-
-  const formatTotalTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes}m`;
-  };
+  
+  const {
+    timings,
+    isLoading,
+    isTimerRunning,
+    taskTitle,
+    onInitTimer,
+    onStopTimer,
+    calculateTotalTime,
+    formatTotalTime,
+    handleDeleteTiming,
+  } = useTask(taskID as string);
 
   const handleBackPress = () => {
     router.back();
@@ -250,14 +198,11 @@ const Task = () => {
           ) : (
             <View>
               {timings.length > 0 ? (
-                timings.map((t: ITiming, index: number) => (
+                timings.map((t) => (
                   <Timing
                     timing={t}
                     key={t.timing_id}
-                    deleteTiming={() => {
-                      setIsLoading(true);
-                      handleDeleteTiming(t.timing_id);
-                    }}
+                    deleteTiming={() => handleDeleteTiming(t.timing_id)}
                     isTimerRunning={isTimerRunning}
                   />
                 ))

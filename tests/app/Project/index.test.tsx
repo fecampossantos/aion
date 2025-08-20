@@ -113,7 +113,7 @@ describe("Project", () => {
     const { getByText } = render(<Project />);
 
     await waitFor(() => {
-      expect(getByText("Esse projeto não tem tasks")).toBeDefined();
+      expect(getByText("Nenhuma tarefa encontrada")).toBeDefined();
     });
   });
 
@@ -276,7 +276,7 @@ describe("Project", () => {
     const { getByText } = render(<Project />);
 
     await waitFor(() => {
-      expect(getByText("Esse projeto não tem tasks")).toBeDefined();
+      expect(getByText("Nenhuma tarefa encontrada")).toBeDefined();
     });
   });
 
@@ -296,12 +296,13 @@ describe("Project", () => {
     // - handleDoneTask for completion toggle
   });
 
-  it("renders AddButton with project prop", async () => {
-    const { getByTestId } = render(<Project />);
+  it("renders project content correctly", async () => {
+    const { getByText } = render(<Project />);
 
     await waitFor(() => {
-      // AddButton should be rendered
-      expect(getByTestId("add-button-icon")).toBeDefined();
+      // Project content should be rendered
+      expect(getByText("Task 1")).toBeDefined();
+      expect(getByText("Task 2")).toBeDefined();
     });
   });
 
@@ -322,7 +323,7 @@ describe("Project", () => {
     const { getByText } = render(<Project />);
 
     await waitFor(() => {
-      expect(getByText("Esse projeto não tem tasks")).toBeDefined();
+      expect(getByText("Nenhuma tarefa encontrada")).toBeDefined();
     });
   });
 

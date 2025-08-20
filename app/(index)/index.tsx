@@ -1,110 +1,27 @@
-import { useState, useEffect } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { useSQLiteContext } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 
-import { Project } from "../../interfaces/Project";
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
-import {
-  populateDatabase,
-  clearDatabase,
-  getDatabaseStats,
-} from "../../utils/databaseUtils";
+import { useDatabaseManagement } from "./useDatabaseManagement";
 
 /**
  * Home component that displays the main dashboard with projects and database management options
  * @returns The main home screen component
  */
 const Home = () => {
-  const database = useSQLiteContext();
-  const [projects, setProjects] = useState<Array<Project>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isPopulating, setIsPopulating] = useState<boolean>(false);
-  const [isClearing, setIsClearing] = useState<boolean>(false);
-
-  async function fetchAllProjects() {
-    const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
-    setProjects(p);
-  }
-
-  useEffect(() => {
-    fetchAllProjects();
-    setIsLoading(false);
-  }, []);
-
-  const handlePopulateDatabase = async () => {
-    Alert.alert(
-      "Populate Database",
-      "This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Populate",
-          onPress: async () => {
-            setIsPopulating(true);
-            try {
-              await populateDatabase(database);
-              await fetchAllProjects();
-              const stats = await getDatabaseStats(database);
-              Alert.alert(
-                "Success!",
-                `Database populated successfully!\n\nAdded:\n• ${stats.projects} projects\n• ${stats.tasks} tasks\n• ${stats.timings} time entries`
-              );
-            } catch (error) {
-              Alert.alert(
-                "Error",
-                "Failed to populate database. Please try again."
-              );
-              console.error("Population error:", error);
-            } finally {
-              setIsPopulating(false);
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handleClearDatabase = async () => {
-    Alert.alert(
-      "Clear Database",
-      "This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Clear All",
-          style: "destructive",
-          onPress: async () => {
-            setIsClearing(true);
-            try {
-              await clearDatabase(database);
-              await fetchAllProjects();
-              Alert.alert("Success!", "Database cleared successfully!");
-            } catch (error) {
-              Alert.alert(
-                "Error",
-                "Failed to clear database. Please try again."
-              );
-              console.error("Clear error:", error);
-            } finally {
-              setIsClearing(false);
-            }
-          },
-        },
-      ]
-    );
-  };
+  const {
+    projects,
+    isLoading,
+    isPopulating,
+    isClearing,
+    handlePopulateDatabase,
+    handleClearDatabase,
+  } = useDatabaseManagement();
 
   return (
     <View style={styles.container}>
@@ -191,7 +108,7 @@ const Home = () => {
           {projects.length > 0 ? (
             <View>
               <Text style={styles.title}>Projetos</Text>
-              {projects.map((project: Project) => (
+              {projects.map((project) => (
                 <ProjectCard project={project} key={project.project_id} />
               ))}
             </View>

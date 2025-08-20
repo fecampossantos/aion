@@ -117,9 +117,8 @@ describe("AddRecord Component", () => {
     const { getByText } = render(<AddRecord />);
 
     await waitFor(() => {
-      expect(getByText("Em")).toBeDefined();
-      expect(getByText("De")).toBeDefined();
-      expect(getByText("Até")).toBeDefined();
+      expect(getByText("Início")).toBeDefined();
+      expect(getByText("Fim")).toBeDefined();
     });
   });
 

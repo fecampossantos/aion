@@ -14,6 +14,7 @@ import { shareAsync } from "expo-sharing";
 import { generateReportHTML } from "../../utils/pdfReportService";
 import { Project } from "../../interfaces/Project";
 import { theme } from "../../globalStyle/theme";
+import { useReportGeneration } from "../ProjectInfo/useReportGeneration";
 
 const styles = StyleSheet.create({
   container: {
@@ -261,7 +262,8 @@ const Report = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState(null);
   const [dateShown, setDateShown] = useState<"start" | "end" | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
 
   /**
    * Shows the date picker for the specified date type
@@ -291,10 +293,7 @@ const Report = () => {
   /**
    * Generates and shares the PDF report
    */
-  const handleGenerateReport = async () => {
-    if (isGenerating) return;
-    
-    setIsGenerating(true);
+  const onGenerateReport = async () => {
     try {
       // Get project details
       const projectData = await database.getFirstAsync<Project>(
@@ -307,111 +306,46 @@ const Report = () => {
         return;
       }
 
-      // Get comprehensive timing data with task information
-      const timings = await database.getAllAsync<TimingsResult>(
-        `
-        SELECT
-          tk.completed as task_completed,
-          tk.name as task_name,
-          tk.created_at as task_created_at,
-          ti.created_at as timing_created_at,
-          ti.time as timing_timed
-        FROM tasks tk
-        LEFT JOIN timings ti ON tk.task_id = ti.task_id
-        WHERE
-          tk.project_id = ? 
-          AND ti.created_at BETWEEN ? AND ?
-          AND ti.time > 0
-        ORDER BY
-          ti.created_at DESC;
-        `,
-        [
-          typeof project === 'string' ? project : (project as any)?.project_id,
-          getInitOfDay(startDate), 
-          getEndOfDay(endDate)
-        ]
-      );
-
-      if (timings.length === 0) {
-        Alert.alert(
-          "Nenhum dado encontrado", 
-          "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
+      const getTimingsData = async () => {
+        return await database.getAllAsync<TimingsResult>(
+          `
+          SELECT
+            tk.completed as task_completed,
+            tk.name as task_name,
+            tk.created_at as task_created_at,
+            ti.created_at as timing_created_at,
+            ti.time as timing_timed
+          FROM tasks tk
+          LEFT JOIN timings ti ON tk.task_id = ti.task_id
+          WHERE
+            tk.project_id = ? 
+            AND ti.created_at BETWEEN ? AND ?
+            AND ti.time > 0
+          ORDER BY
+            ti.created_at DESC;
+          `,
+          [
+            typeof project === 'string' ? project : (project as any)?.project_id,
+            startDate.toISOString().slice(0, 19).replace("T", " "), 
+            endDate.toISOString().slice(0, 19).replace("T", " ")
+          ]
         );
-        return;
-      }
+      };
 
-      const startDateSTR = fullDate(startDate.toString());
-      const endDateSTR = fullDate(endDate.toString());
-
-      const documentName = `Relatorio_${projectData.name.replace(/[^a-zA-Z0-9]/g, '_')}_${startDateSTR.replaceAll(
-        "/",
-        "-"
-      )}_${endDateSTR.replaceAll("/", "-")}`;
-
-      const html = generateReportHTML(
-        projectData,
-        startDateSTR,
-        endDateSTR,
-        timings,
-        documentName
-      );
-
-      const { uri } = await Print.printToFileAsync({ 
-        html,
-        margins: {
-          left: 20,
-          top: 20,
-          right: 20,
-          bottom: 20,
-        }
+      await handleGenerateReport({
+        project: projectData,
+        projectID: typeof project === 'string' ? project : (project as any)?.project_id,
+        startDate,
+        endDate,
+        getTimings: getTimingsData,
       });
-
-      const pdfFile = `${uri.slice(
-        0,
-        uri.lastIndexOf("/") + 1
-      )}${documentName}.pdf`;
-
-      await FileSystem.moveAsync({
-        from: uri,
-        to: pdfFile,
-      });
-
-      await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
-      
-      Alert.alert("Sucesso", "Relatório PDF gerado com sucesso!");
     } catch (e) {
       console.warn("Error generating report:", e);
       Alert.alert(
         "Erro ao gerar relatório", 
         "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
       );
-    } finally {
-      setIsGenerating(false);
     }
-  };
-
-  /**
-   * Gets the start of day as ISO string for database queries
-   * @param day - The date to get start of day for
-   * @returns ISO string formatted for database
-   */
-  const getInitOfDay = (day: Date) => {
-    const startOfDay = new Date(day);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    return startOfDay.toISOString().slice(0, 19).replace("T", " ");
-  };
-
-  /**
-   * Gets the end of day as ISO string for database queries
-   * @param day - The date to get end of day for
-   * @returns ISO string formatted for database
-   */
-  const getEndOfDay = (day: Date) => {
-    const endOfDay = new Date(day);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return endOfDay.toISOString().slice(0, 19).replace("T", " ");
   };
 
   return (
@@ -446,11 +380,11 @@ const Report = () => {
       
       <View style={styles.actionSection}>
         <Button 
-          onPress={handleGenerateReport} 
-          text={isGenerating ? "Gerando relatório..." : "Gerar Relatório PDF"}
+          onPress={onGenerateReport} 
+          text={isGeneratingReport ? "Gerando relatório..." : "Gerar Relatório PDF"}
           buttonStyle={styles.generateButton}
         />
-        {isGenerating && (
+        {isGeneratingReport && (
           <View style={styles.loadingInfo}>
             <Feather name="loader" color={globalStyle.white} size={16} />
             <Text style={styles.loadingText}>Processando dados e gerando PDF...</Text>

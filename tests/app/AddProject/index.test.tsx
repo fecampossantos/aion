@@ -2,6 +2,14 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import AddProject from "../../../app/AddProject";
 
+// Mock Alert
+const mockAlert = jest.fn((title, message, buttons) => {
+  // Automatically press the first button (usually "OK")
+  if (buttons && buttons[0] && buttons[0].onPress) {
+    buttons[0].onPress();
+  }
+});
+
 // Mock dependencies
 jest.mock("expo-router", () => ({
   router: {
@@ -47,11 +55,16 @@ jest.mock("../../../components/CurrencyInput", () => {
 jest.mock("../../../components/Button", () => {
   const React = require("react");
   const { Pressable, Text } = require("react-native");
-  return ({ onPress, text, ...props }) => (
-    <Pressable testID="button" onPress={onPress} {...props}>
-      <Text>{text}</Text>
-    </Pressable>
-  );
+  return ({ onPress, text, ...props }) => {
+    const handlePress = () => {
+      if (onPress) onPress();
+    };
+    return (
+      <Pressable testID="button" onPress={handlePress} {...props}>
+        <Text>{text}</Text>
+      </Pressable>
+    );
+  };
 });
 
 describe("AddProject Screen", () => {
@@ -65,17 +78,21 @@ describe("AddProject Screen", () => {
     require("expo-sqlite").useSQLiteContext.mockReturnValue(mockDatabase);
     mockDatabase.getFirstAsync.mockResolvedValue(null); // No existing project by default
     mockDatabase.runAsync.mockResolvedValue(undefined);
+    
+    // Mock Alert
+    const RN = require("react-native");
+    RN.Alert.alert = mockAlert;
   });
 
   it("renders correctly with all form elements", () => {
     const { getByText, getByTestId } = render(<AddProject />);
 
-    expect(getByText("Projeto")).toBeDefined();
-    expect(getByText("Valor cobrado por hora")).toBeDefined();
+    expect(getByText("Informações do Projeto")).toBeDefined();
+    expect(getByText("Valor por Hora (R$)")).toBeDefined();
     expect(getByTestId("text-input")).toBeDefined();
     expect(getByTestId("currency-input")).toBeDefined();
     expect(getByTestId("button")).toBeDefined();
-    expect(getByText("adicionar projeto")).toBeDefined();
+    expect(getByText("Criar Projeto")).toBeDefined();
   });
 
   it("updates project name when text input changes", () => {
@@ -99,12 +116,35 @@ describe("AddProject Screen", () => {
   it("shows error when project name is empty", async () => {
     const { getByTestId, getByText } = render(<AddProject />);
 
-    const button = getByTestId("button");
-    fireEvent.press(button);
+    // Check initial state
+    const textInput = getByTestId("text-input");
 
-    await waitFor(() => {
-      expect(getByText("O nome do projeto nao pode estar vazio")).toBeDefined();
-    });
+    const button = getByTestId("button");
+    
+    // When project name is empty, the button should be disabled (onPress is undefined)
+    expect(button.props.onPress).toBeUndefined();
+    
+    // The button should not call handleAddProject when disabled
+    fireEvent.press(button);
+    
+    // No Alert should be shown since the button is disabled
+    expect(mockAlert).not.toHaveBeenCalled();
+  });
+
+  it("shows error when project name is too short", async () => {
+    const { getByTestId } = render(<AddProject />);
+
+    const textInput = getByTestId("text-input");
+    fireEvent.changeText(textInput, "A"); // 1 character
+
+    const button = getByTestId("button");
+    
+    // Button should be disabled for 1 character (length < 2)
+    expect(button.props.onPress).toBeUndefined();
+    
+    // No validation should run since button is disabled
+    fireEvent.press(button);
+    expect(mockAlert).not.toHaveBeenCalled();
   });
 
   it("shows error when project with same name already exists", async () => {
@@ -119,7 +159,10 @@ describe("AddProject Screen", () => {
     fireEvent.press(button);
 
     await waitFor(() => {
-      expect(getByText("Um projeto com esse nome já existe")).toBeDefined();
+      expect(mockAlert).toHaveBeenCalledWith(
+        "Erro",
+        "Um projeto com esse nome já existe."
+      );
     });
 
     expect(mockDatabase.getFirstAsync).toHaveBeenCalledWith(
@@ -177,7 +220,7 @@ describe("AddProject Screen", () => {
 
     // Wait for error to appear
     waitFor(() => {
-      expect(getByText("O nome do projeto nao pode estar vazio")).toBeDefined();
+      expect(getByText("O nome do projeto não pode estar vazio")).toBeDefined();
     });
 
     // Then change the project name
@@ -194,7 +237,7 @@ describe("AddProject Screen", () => {
     const textInput = getByTestId("text-input");
     const currencyInput = getByTestId("currency-input");
 
-    expect(textInput.props.placeholder).toBe("Nome do projeto");
+    expect(textInput.props.placeholder).toBe("Digite o nome do projeto...");
     expect(currencyInput.props.placeholder).toBe("00,00");
   });
 

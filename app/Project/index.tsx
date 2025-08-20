@@ -1,14 +1,10 @@
-import { useEffect, useState } from "react";
-import { Alert, Text, Pressable, View, ScrollView, StyleSheet } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
-import { Project as IProject } from "../../interfaces/Project";
-import Task from "../../components/Task";
+import { Text, Pressable, View, ScrollView, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { theme } from "../../globalStyle/theme";
-
-import { useSQLiteContext } from "expo-sqlite";
+import Task from "../../components/Task";
 import LoadingView from "../../components/LoadingView";
+import { useLocalSearchParams } from "expo-router";
+import { useProject } from "./useProject";
 
 const styles = StyleSheet.create({
   container: {
@@ -94,111 +90,22 @@ const styles = StyleSheet.create({
   },
 });
 
-interface TaskWithTimed {
-  task_id: number;
-  name: string;
-  completed: 0 | 1;
-  task_created_at: string;
-  timed_until_now: number;
-}
-
 /**
  * Project component displays a project with its tasks and manages task operations
  * @returns {JSX.Element} A view showing project tasks with timer and completion functionality
  */
 const Project = () => {
-  const router = useRouter();
-  const navigation = useNavigation();
-  const database = useSQLiteContext();
-  const [tasks, setTasks] = useState<Array<TaskWithTimed>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
-  const isTimerRunning = timerIdRunning !== null;
-
   const { projectID } = useLocalSearchParams();
-  const [project, setProject] = useState<IProject>();
-
-  useEffect(() => {
-    async function getProject() {
-      const project = await database.getFirstAsync<IProject>(
-        `SELECT * FROM projects WHERE project_id = ?;`,
-        projectID as string
-      );
-
-      setProject(project);
-    }
-
-    getProject();
-  }, [projectID]);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', () => {
-      if (!isTimerRunning) return;
-
-      Alert.alert(
-        "Parar timer?",
-        "Seu timer ainda esta rodando. Se voce sair, perdera o tempo!",
-        [
-          { text: "Continuar aqui", style: "cancel", onPress: () => {} },
-          {
-            text: "Sair",
-            style: "destructive",
-            onPress: () => router.replace("/Home"),
-          },
-        ]
-      );
-    });
-
-    return unsubscribe;
-  }, [navigation, isTimerRunning]);
-
-  async function getTasks() {
-    const allTasks = await database.getAllAsync<TaskWithTimed>(
-      `SELECT 
-  t.task_id,
-  t.name,
-  t.completed,
-  t.created_at AS task_created_at,
-  COALESCE(SUM(ti.time), 0) AS timed_until_now
-FROM 
-  tasks t
-LEFT JOIN 
-  timings ti ON t.task_id = ti.task_id
-WHERE 
-  t.project_id = ?
-GROUP BY 
-  t.task_id, t.name, t.completed, t.created_at
-ORDER BY 
-  t.created_at;`,
-      projectID as string
-    );
-
-    setTasks(allTasks);
-  }
-
-  useEffect(() => {
-    getTasks();
-    setIsLoading(false);
-  }, [timerIdRunning]);
-
-  const handleNavigateToTask = (task: TaskWithTimed) => {
-    if (isTimerRunning) return;
-    router.push({
-      pathname: "/Task",
-      params: { taskID: task.task_id, taskName: task.name, projectID },
-    });
-  };
-
-  const handleDoneTask = async (value: boolean, task: TaskWithTimed) => {
-    const toInsert = value ? 1 : 0;
-
-    await database.runAsync(
-      "UPDATE tasks SET completed = ? WHERE task_id = ?;",
-      toInsert,
-      task.task_id
-    );
-    getTasks();
-  };
+  
+  const {
+    tasks,
+    isLoading,
+    project,
+    handleNavigateToTask,
+    handleDoneTask,
+    handleInitTimer,
+    handleStopTimer,
+  } = useProject(projectID as string);
 
   if (!project) return <LoadingView />;
 
@@ -240,16 +147,14 @@ ORDER BY
             <LoadingView />
           ) : tasks.length > 0 ? (
             <View>
-              {tasks.map((task: TaskWithTimed) => (
+              {tasks.map((task) => (
                 <Task
                   task={task}
                   key={task.task_id}
                   onPress={() => handleNavigateToTask(task)}
-                  disableTimer={
-                    timerIdRunning !== null && timerIdRunning !== task.task_id
-                  }
-                  onInitTimer={() => setTimerIdRunning(task.task_id)}
-                  onStopTimer={() => setTimerIdRunning(null)}
+                  disableTimer={false}
+                  onInitTimer={() => handleInitTimer(task.task_id)}
+                  onStopTimer={handleStopTimer}
                   showTimedUntilNowOnTimer={task.timed_until_now}
                   handleDoneTask={handleDoneTask}
                 />

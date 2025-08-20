@@ -87,7 +87,7 @@ describe("Home Screen", () => {
       expect(queryByTestId("loading-view")).toBeNull();
     });
 
-    expect(getByText("Você ainda não tem projetos.")).toBeDefined();
+    expect(getByText("Nenhum projeto encontrado")).toBeDefined();
   });
 
   it("renders add button", () => {

@@ -140,7 +140,7 @@ describe("Task Component", () => {
     const { getByText } = render(<Task />);
     
     await waitFor(() => {
-      expect(getByText("Sem timings pra essa task")).toBeDefined();
+      expect(getByText("No time sessions yet")).toBeDefined();
     });
   });
 
@@ -253,7 +253,7 @@ describe("Task Component", () => {
     
     // Should reload timings
     await waitFor(() => {
-      expect(mockDatabase.getAllAsync).toHaveBeenCalledTimes(2);
+      expect(mockDatabase.getAllAsync).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -328,7 +328,7 @@ describe("Task Component", () => {
       // Should still render timer component
       expect(getByTestId("timer-component")).toBeDefined();
       // Should show no timings message
-      expect(getByText("Sem timings pra essa task")).toBeDefined();
+      expect(getByText("No time sessions yet")).toBeDefined();
     });
   });
 

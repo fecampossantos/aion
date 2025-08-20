@@ -2,6 +2,18 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import EditProject from "../../../app/EditProject";
 
+// Mock Alert
+jest.mock("react-native", () => {
+  const RN = jest.requireActual("react-native");
+  RN.Alert.alert = jest.fn((title, message, buttons) => {
+    // Automatically press the first button (usually "OK")
+    if (buttons && buttons[0] && buttons[0].onPress) {
+      buttons[0].onPress();
+    }
+  });
+  return RN;
+});
+
 // Mock implementations
 const mockDatabase = {
   getFirstAsync: jest.fn(),
@@ -45,11 +57,11 @@ describe("EditProject", () => {
     const { getByPlaceholderText, getByText } = render(<EditProject />);
 
     await waitFor(() => {
-      expect(getByPlaceholderText("Nome do projeto")).toBeDefined();
-      expect(getByPlaceholderText("00,00")).toBeDefined();
-      expect(getByText("editar projeto")).toBeDefined();
-      expect(getByText("Projeto")).toBeDefined();
-      expect(getByText("Valor cobrado por hora")).toBeDefined();
+      expect(getByPlaceholderText("Digite o nome do projeto")).toBeDefined();
+      expect(getByPlaceholderText("0,00")).toBeDefined();
+      expect(getByText("💾 Salvar Alterações")).toBeDefined();
+      expect(getByText("Nome do Projeto")).toBeDefined();
+      expect(getByText("Valor por Hora")).toBeDefined();
     });
   });
 
@@ -68,8 +80,8 @@ describe("EditProject", () => {
     const { getByPlaceholderText } = render(<EditProject />);
 
     await waitFor(() => {
-      const nameInput = getByPlaceholderText("Nome do projeto");
-      const costInput = getByPlaceholderText("00,00");
+      const nameInput = getByPlaceholderText("Digite o nome do projeto");
+      const costInput = getByPlaceholderText("0,00");
       
       expect(nameInput.props.value).toBe("Test Project");
       expect(costInput.props.value).toBe("25,00");
@@ -80,7 +92,7 @@ describe("EditProject", () => {
     const { getByPlaceholderText } = render(<EditProject />);
 
     await waitFor(() => {
-      const nameInput = getByPlaceholderText("Nome do projeto");
+      const nameInput = getByPlaceholderText("Digite o nome do projeto");
       fireEvent.changeText(nameInput, "Updated Project Name");
       
       expect(nameInput.props.value).toBe("Updated Project Name");
@@ -91,7 +103,7 @@ describe("EditProject", () => {
     const { getByPlaceholderText } = render(<EditProject />);
 
     await waitFor(() => {
-      const costInput = getByPlaceholderText("00,00");
+      const costInput = getByPlaceholderText("0,00");
       fireEvent.changeText(costInput, "30,50");
       
       expect(costInput.props.value).toBe("30,50");
@@ -107,15 +119,15 @@ describe("EditProject", () => {
     });
 
     // Clear the project name
-    const nameInput = getByPlaceholderText("Nome do projeto");
+    const nameInput = getByPlaceholderText("Digite o nome do projeto");
     fireEvent.changeText(nameInput, "");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
-      expect(getByText("O nome do projeto nao pode estar vazio")).toBeDefined();
+      expect(getByText("O nome do projeto não pode estar vazio")).toBeDefined();
     });
   });
 
@@ -132,11 +144,11 @@ describe("EditProject", () => {
     });
 
     // Change project name to existing one
-    const nameInput = getByPlaceholderText("Nome do projeto");
+    const nameInput = getByPlaceholderText("Digite o nome do projeto");
     fireEvent.changeText(nameInput, "Existing Project");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
@@ -153,21 +165,21 @@ describe("EditProject", () => {
     });
 
     // First, trigger an error
-    const nameInput = getByPlaceholderText("Nome do projeto");
+    const nameInput = getByPlaceholderText("Digite o nome do projeto");
     fireEvent.changeText(nameInput, "");
     
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
-      expect(getByText("O nome do projeto nao pode estar vazio")).toBeDefined();
+      expect(getByText("O nome do projeto não pode estar vazio")).toBeDefined();
     });
 
     // Now change the name to clear the error
     fireEvent.changeText(nameInput, "New Name");
     
     await waitFor(() => {
-      expect(queryByText("O nome do projeto nao pode estar vazio")).toBeNull();
+      expect(queryByText("O nome do projeto não pode estar vazio")).toBeNull();
     });
   });
 
@@ -180,7 +192,7 @@ describe("EditProject", () => {
     });
 
     // Press edit button without making changes
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     // Should always navigate to home, regardless of changes
@@ -203,11 +215,11 @@ describe("EditProject", () => {
     });
 
     // Update project name
-    const nameInput = getByPlaceholderText("Nome do projeto");
+    const nameInput = getByPlaceholderText("Digite o nome do projeto");
     fireEvent.changeText(nameInput, "Updated Project");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
@@ -225,11 +237,11 @@ describe("EditProject", () => {
     });
 
     // Clear hourly cost
-    const costInput = getByPlaceholderText("00,00");
+    const costInput = getByPlaceholderText("0,00");
     fireEvent.changeText(costInput, "");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
@@ -252,13 +264,13 @@ describe("EditProject", () => {
     });
 
     // Keep the same project name and cost
-    const nameInput = getByPlaceholderText("Nome do projeto");
-    const costInput = getByPlaceholderText("00,00");
+    const nameInput = getByPlaceholderText("Digite o nome do projeto");
+    const costInput = getByPlaceholderText("0,00");
     expect(nameInput.props.value).toBe("Test Project");
     expect(costInput.props.value).toBe("25,00");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
@@ -276,7 +288,7 @@ describe("EditProject", () => {
     });
 
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     
     // Should not throw when pressing the button
     expect(() => fireEvent.press(editButton)).not.toThrow();
@@ -309,8 +321,8 @@ describe("EditProject", () => {
       expect(mockDatabase.getFirstAsync).toHaveBeenCalled();
     });
 
-    // Check that hourly cost is formatted with comma and two decimal places
-    const costInput = getByPlaceholderText("00,00");
+        // Check that hourly cost is formatted with comma and two decimal places  
+    const costInput = getByPlaceholderText("0,00");
     expect(costInput.props.value).toBe("25,00");
   });
 
@@ -323,11 +335,11 @@ describe("EditProject", () => {
     });
 
     // Set hourly cost with comma
-    const costInput = getByPlaceholderText("00,00");
+    const costInput = getByPlaceholderText("0,00");
     fireEvent.changeText(costInput, "45,75");
     
     // Press edit button
-    const editButton = getByText("editar projeto");
+    const editButton = getByText("💾 Salvar Alterações");
     fireEvent.press(editButton);
     
     await waitFor(() => {
