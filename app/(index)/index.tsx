@@ -100,7 +100,9 @@ const Home = () => {
       {/* Last Worked Task Section */}
       {lastWorkedTask && !isLoading && (
         <View style={styles.lastWorkedTaskContainer}>
-          <Text style={styles.lastWorkedTaskTitle}>Última Tarefa Trabalhada</Text>
+          <Text style={styles.lastWorkedTaskTitle}>
+            Última Tarefa Trabalhada
+          </Text>
           <View style={styles.lastWorkedTaskCard}>
             <Text style={styles.lastWorkedTaskProjectName}>
               {lastWorkedTask.project_name}
@@ -409,6 +411,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     marginBottom: theme.spacing.sm,
     letterSpacing: 0.3,
+  },
   searchBarContainer: {
     width: "100%",
     paddingHorizontal: theme.spacing["2xl"],
