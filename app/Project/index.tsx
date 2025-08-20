@@ -3,8 +3,11 @@ import { StatusBar } from "expo-status-bar";
 import { theme } from "../../globalStyle/theme";
 import Task from "../../components/Task";
 import LoadingView from "../../components/LoadingView";
+import Pagination from "../../components/Pagination";
+import ToggleSwitch from "../../components/ToggleSwitch";
 import { useLocalSearchParams } from "expo-router";
 import { useProject } from "./useProject";
+import SearchBar from "../../components/SearchBar";
 
 const styles = StyleSheet.create({
   container: {
@@ -12,13 +15,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.neutral[900],
     paddingTop: theme.spacing.md,
   },
-  
+
   // Stats Section
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing['2xl'],
+    marginBottom: theme.spacing["2xl"],
   },
   statCard: {
     flex: 1,
@@ -32,7 +35,7 @@ const styles = StyleSheet.create({
   statNumber: {
     color: theme.colors.primary[500],
     fontFamily: theme.typography.fontFamily.bold,
-    fontSize: theme.typography.fontSize['3xl'],
+    fontSize: theme.typography.fontSize["3xl"],
     marginBottom: theme.spacing.xs,
   },
   statLabel: {
@@ -43,7 +46,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: "center",
   },
-  
+
   // Tasks Section
   tasksSection: {
     flex: 1,
@@ -60,18 +63,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tasksListContent: {
-    paddingBottom: theme.spacing['4xl'],
+    paddingBottom: theme.spacing["4xl"],
   },
-  
+
   // Empty State
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: theme.spacing['4xl'],
-    paddingHorizontal: theme.spacing['2xl'],
+    paddingVertical: theme.spacing["4xl"],
+    paddingHorizontal: theme.spacing["2xl"],
   },
   emptyStateIcon: {
-    fontSize: theme.typography.fontSize['5xl'],
+    fontSize: theme.typography.fontSize["5xl"],
     marginBottom: theme.spacing.lg,
   },
   emptyStateTitle: {
@@ -88,6 +91,29 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: theme.typography.lineHeight.normal,
   },
+
+  // Search and Pagination
+  searchSection: {
+    paddingHorizontal: theme.layout.padding.horizontal,
+    marginBottom: theme.spacing.md,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.md,
+    minHeight: 50,
+  },
+  toggleContainer: {
+    flexShrink: 0,
+    alignItems: "flex-end",
+  },
+  resultsInfo: {
+    color: theme.colors.neutral[400],
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.fontSize.sm,
+    textAlign: "center",
+    marginBottom: theme.spacing.md,
+  },
 });
 
 /**
@@ -96,23 +122,32 @@ const styles = StyleSheet.create({
  */
 const Project = () => {
   const { projectID } = useLocalSearchParams();
-  
+
   const {
     tasks,
+    filteredTasks,
     isLoading,
     project,
+    currentPage,
+    searchQuery,
+    showCompleted,
     handleNavigateToTask,
     handleDoneTask,
     handleInitTimer,
     handleStopTimer,
+    getPaginatedTasks,
+    getTotalPages,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+    handleSearchChange,
+    handleShowCompletedToggle,
   } = useProject(projectID as string);
 
   if (!project) return <LoadingView />;
 
   const completedTasks = tasks.filter((task) => task.completed === 1).length;
   const totalTasks = tasks.length;
-  const completionRate =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
     <ScrollView
@@ -143,11 +178,36 @@ const Project = () => {
         <View style={styles.tasksSection}>
           <Text style={styles.sectionTitle}>Tarefas</Text>
 
+          <View style={styles.searchSection}>
+            <View style={styles.searchRow}>
+              <SearchBar
+                value={searchQuery}
+                onChangeText={handleSearchChange}
+                placeholder="Search by task name..."
+              />
+              <View style={styles.toggleContainer}>
+                <ToggleSwitch
+                  value={showCompleted}
+                  onValueChange={handleShowCompletedToggle}
+                  label="show completed"
+                  size="small"
+                  labelPlacement="top"
+                />
+              </View>
+            </View>
+          </View>
+
           {isLoading ? (
             <LoadingView />
           ) : tasks.length > 0 ? (
             <View>
-              {tasks.map((task) => (
+              <Text style={styles.resultsInfo}>
+                Showing {getPaginatedTasks().length} of {filteredTasks.length}{" "}
+                tasks
+                {searchQuery ? ` with name containing "${searchQuery}"` : ""}
+              </Text>
+
+              {getPaginatedTasks().map((task) => (
                 <Task
                   task={task}
                   key={task.task_id}
@@ -159,15 +219,27 @@ const Project = () => {
                   handleDoneTask={handleDoneTask}
                 />
               ))}
+
+              {getTotalPages() > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={getTotalPages()}
+                  onPageChange={goToPage}
+                  onNextPage={goToNextPage}
+                  onPreviousPage={goToPreviousPage}
+                />
+              )}
             </View>
           ) : (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateIcon}>📋</Text>
               <Text style={styles.emptyStateTitle}>
-                Nenhuma tarefa encontrada
+                {searchQuery ? "No tasks found" : "Nenhuma tarefa encontrada"}
               </Text>
               <Text style={styles.emptyStateSubtitle}>
-                Comece criando sua primeira tarefa para este projeto
+                {searchQuery
+                  ? "Try adjusting your search terms"
+                  : "Comece criando sua primeira tarefa para este projeto"}
               </Text>
             </View>
           )}

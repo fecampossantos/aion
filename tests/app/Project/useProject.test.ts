@@ -337,6 +337,179 @@ describe('useProject', () => {
 
   });
 
+  describe('showCompleted toggle functionality', () => {
+    const mockDatabase = {
+      execAsync: jest.fn(),
+      getAllAsync: jest.fn(),
+      getFirstAsync: jest.fn(),
+      runAsync: jest.fn(),
+    };
+
+    const mockTasksWithTimed = [
+      {
+        task_id: 1,
+        name: 'Incomplete Task 1',
+        completed: 0,
+        task_created_at: '2024-01-01T00:00:00.000Z',
+        timed_until_now: 0,
+      },
+      {
+        task_id: 2,
+        name: 'Completed Task 1',
+        completed: 1,
+        task_created_at: '2024-01-01T00:00:00.000Z',
+        timed_until_now: 3600,
+      },
+      {
+        task_id: 3,
+        name: 'Incomplete Task 2',
+        completed: 0,
+        task_created_at: '2024-01-01T00:00:00.000Z',
+        timed_until_now: 1800,
+      },
+      {
+        task_id: 4,
+        name: 'Completed Task 2',
+        completed: 1,
+        task_created_at: '2024-01-01T00:00:00.000Z',
+        timed_until_now: 7200,
+      },
+    ];
+
+    beforeEach(() => {
+      mockUseSQLiteContext.mockReturnValue(mockDatabase as any);
+      
+      // Mock getFirstAsync for project
+      mockDatabase.getFirstAsync.mockResolvedValue(mockProject);
+      
+      // Mock getAllAsync for tasks
+      mockDatabase.getAllAsync.mockResolvedValue(mockTasksWithTimed);
+    });
+
+    it('should initialize with showCompleted as false', () => {
+      const { result } = renderHook(() => useProject(mockProjectID));
+
+      expect(result.current.showCompleted).toBe(false);
+    });
+
+    it('should show only incomplete tasks when showCompleted is false (default)', async () => {
+      const { result } = renderHook(() => useProject(mockProjectID));
+
+      // Wait for tasks to load
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Should show only incomplete tasks (completed === 0)
+      const incompleteTasks = mockTasksWithTimed.filter(task => task.completed === 0);
+      expect(result.current.filteredTasks).toEqual(incompleteTasks);
+      expect(result.current.filteredTasks).toHaveLength(2);
+      expect(result.current.filteredTasks[0].name).toBe('Incomplete Task 1');
+      expect(result.current.filteredTasks[1].name).toBe('Incomplete Task 2');
+    });
+
+    it('should show all tasks when showCompleted is true (toggled)', async () => {
+      const { result } = renderHook(() => useProject(mockProjectID));
+
+      // Wait for tasks to load
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Toggle showCompleted to true
+      act(() => {
+        result.current.handleShowCompletedToggle(true);
+      });
+
+      // Should show all tasks (both completed and incomplete)
+      expect(result.current.showCompleted).toBe(true);
+      expect(result.current.filteredTasks).toEqual(mockTasksWithTimed);
+      expect(result.current.filteredTasks).toHaveLength(4);
+    });
+
+    it('should filter tasks correctly when toggling showCompleted', async () => {
+      const { result } = renderHook(() => useProject(mockProjectID));
+
+      // Wait for tasks to load
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Initially should show only incomplete tasks
+      expect(result.current.showCompleted).toBe(false);
+      expect(result.current.filteredTasks).toHaveLength(2);
+
+      // Toggle to show all tasks
+      act(() => {
+        result.current.handleShowCompletedToggle(true);
+      });
+
+      expect(result.current.showCompleted).toBe(true);
+      expect(result.current.filteredTasks).toHaveLength(4);
+
+      // Toggle back to show only incomplete tasks
+      act(() => {
+        result.current.handleShowCompletedToggle(false);
+      });
+
+      expect(result.current.showCompleted).toBe(false);
+      expect(result.current.filteredTasks).toHaveLength(2);
+    });
+
+    it('should reset showCompleted to false when projectID changes', async () => {
+      const { result, rerender } = renderHook(
+        ({ projectID }) => useProject(projectID),
+        { initialProps: { projectID: mockProjectID } }
+      );
+
+      // Wait for tasks to load
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Toggle showCompleted to true
+      act(() => {
+        result.current.handleShowCompletedToggle(true);
+      });
+
+      expect(result.current.showCompleted).toBe(true);
+
+      // Change projectID
+      rerender({ projectID: 'new-project-456' });
+
+      // showCompleted should be reset to false
+      expect(result.current.showCompleted).toBe(false);
+    });
+
+    it('should combine showCompleted filter with search query', async () => {
+      const { result } = renderHook(() => useProject(mockProjectID));
+
+      // Wait for tasks to load
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Set search query
+      act(() => {
+        result.current.handleSearchChange('Task 1');
+      });
+
+      // Should show only incomplete tasks matching search (default showCompleted = false)
+      expect(result.current.filteredTasks).toHaveLength(1);
+      expect(result.current.filteredTasks[0].name).toBe('Incomplete Task 1');
+
+      // Toggle to show all tasks
+      act(() => {
+        result.current.handleShowCompletedToggle(true);
+      });
+
+      // Should show all tasks matching search
+      expect(result.current.filteredTasks).toHaveLength(2);
+      expect(result.current.filteredTasks[0].name).toBe('Incomplete Task 1');
+      expect(result.current.filteredTasks[1].name).toBe('Completed Task 1');
+    });
+  });
+
   describe('hook lifecycle', () => {
     it('should cleanup timer state on unmount', () => {
       const { result, unmount } = renderHook(() => useProject(mockProjectID));

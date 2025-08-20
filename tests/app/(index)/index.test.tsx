@@ -34,6 +34,19 @@ jest.mock("../../../components/LoadingView", () => {
   return () => <Text testID="loading-view">Loading...</Text>;
 });
 
+jest.mock("../../../components/SearchBar", () => {
+  const React = require("react");
+  const { TextInput, TouchableOpacity } = require("react-native");
+  return ({ value, onChangeText, placeholder, onClear }) => (
+    <TextInput
+      testID="search-input"
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+    />
+  );
+});
+
 describe("Home Screen", () => {
   const mockDatabase = {
     getAllAsync: jest.fn(),
@@ -105,10 +118,79 @@ describe("Home Screen", () => {
       expect(queryByTestId("loading-view")).toBeNull();
     });
 
-    const addIcon = getByTestId("entypo-plus");
-    fireEvent.press(addIcon.parent);
+    const addButton = getByTestId("entypo-plus");
+    fireEvent.press(addButton);
 
     expect(require("expo-router").router.push).toHaveBeenCalledWith("AddProject");
+  });
+
+  it("renders search bar with correct placeholder", async () => {
+    const { getByTestId, getByPlaceholderText, queryByTestId } = render(<Home />);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading-view")).toBeNull();
+    });
+
+    expect(getByTestId("search-input")).toBeDefined();
+    expect(getByPlaceholderText("Buscar projetos...")).toBeDefined();
+  });
+
+  it("filters projects when searching", async () => {
+    const { getByTestId, getByText, queryByText, queryByTestId } = render(<Home />);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading-view")).toBeNull();
+    });
+
+    const searchInput = getByTestId("search-input");
+    
+    // Search for "Project 1"
+    fireEvent.changeText(searchInput, "Project 1");
+    
+    expect(getByText("Project 1")).toBeDefined();
+    expect(queryByText("Project 2")).toBeNull();
+  });
+
+  it("shows search empty state when no projects match search", async () => {
+    const { getByTestId, getByText, queryByText, queryByTestId } = render(<Home />);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading-view")).toBeNull();
+    });
+
+    const searchInput = getByTestId("search-input");
+    
+    // Search for non-existent project
+    fireEvent.changeText(searchInput, "NonExistent");
+    
+    expect(getByText("🔍")).toBeDefined();
+    expect(getByText("Nenhum projeto encontrado")).toBeDefined();
+    expect(getByText("Tente ajustar sua busca ou criar um novo projeto")).toBeDefined();
+  });
+
+  it("shows all projects when search is cleared", async () => {
+    const { getByTestId, getByText, queryByText, queryByTestId } = render(<Home />);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading-view")).toBeNull();
+    });
+
+    const searchInput = getByTestId("search-input");
+    
+    // Search for "Project 1"
+    fireEvent.changeText(searchInput, "Project 1");
+    expect(queryByText("Project 2")).toBeNull();
+    
+    // Clear search
+    fireEvent.changeText(searchInput, "");
+    expect(getByText("Project 1")).toBeDefined();
+    expect(getByText("Project 2")).toBeDefined();
+  });
+
+  it("fetches projects from database on mount", () => {
+    render(<Home />);
+
+    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith("SELECT * FROM projects;");
   });
 
   it("fetches projects from database on mount", () => {

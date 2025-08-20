@@ -28,9 +28,44 @@ export const useDatabaseManagement = () => {
   const database = useSQLiteContext();
   const [projects, setProjects] = useState<Array<Project>>([]);
   const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(null);
+  const [filteredProjects, setFilteredProjects] = useState<Array<Project>>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
+
+  /**
+   * Filters projects based on search query
+   * @param {string} query - Search query to filter projects by name
+   */
+  const filterProjects = useCallback((query: string) => {
+    if (!query.trim()) {
+      setFilteredProjects(projects);
+      return;
+    }
+    
+    const filtered = projects.filter((project) =>
+      project.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredProjects(filtered);
+  }, [projects]);
+
+  /**
+   * Handles search query changes
+   * @param {string} query - New search query
+   */
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    filterProjects(query);
+  }, [filterProjects]);
+
+  /**
+   * Clears the search query and resets filtered projects
+   */
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setFilteredProjects(projects);
+  }, [projects]);
 
   /**
    * Fetches all projects from the database
@@ -40,6 +75,7 @@ export const useDatabaseManagement = () => {
       setIsLoading(true);
       const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
       setProjects(p);
+      setFilteredProjects(p);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
@@ -101,6 +137,11 @@ export const useDatabaseManagement = () => {
     fetchAllProjects();
     fetchLastWorkedTask();
   }, []);
+
+  // Update filtered projects when projects change
+  useEffect(() => {
+    filterProjects(searchQuery);
+  }, [projects, filterProjects, searchQuery]);
 
   /**
    * Handles populating the database with sample data
@@ -180,6 +221,8 @@ export const useDatabaseManagement = () => {
   return {
     projects,
     lastWorkedTask,
+    filteredProjects,
+    searchQuery,
     isLoading,
     isPopulating,
     isClearing,
@@ -187,5 +230,7 @@ export const useDatabaseManagement = () => {
     refreshProjects,
     handlePopulateDatabase,
     handleClearDatabase,
+    handleSearch,
+    clearSearch,
   };
 };

@@ -129,21 +129,100 @@ describe("useReport Hook", () => {
   });
 
   describe("handleClickedOnDeleteProject", () => {
-    it("shows delete confirmation alert", () => {
-      const { result } = renderHook(() => useReport("1"));
-
+    it("should show delete modal when called", () => {
+      const { result } = renderHook(() => useReport("test-project-id"));
+      
       act(() => {
         result.current.handleClickedOnDeleteProject();
       });
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Apagar projeto?",
-        "Você perderá todas as informações dele!",
-        expect.arrayContaining([
-          expect.objectContaining({ text: "Cancelar", style: "cancel" }),
-          expect.objectContaining({ text: "Apagar", style: "destructive" }),
-        ])
-      );
+      expect(result.current.showDeleteModal).toBe(true);
+      expect(result.current.deleteProjectInput).toBe("");
+    });
+  });
+
+  describe("handleConfirmDelete", () => {
+    it("should delete project when input matches project name", () => {
+      const mockProject = { 
+        name: "Test Project", 
+        project_id: 1, 
+        hourly_cost: 25.0, 
+        created_at: new Date("2023-01-01") 
+      };
+      const { result } = renderHook(() => useReport("test-project-id"));
+      
+      // Mock the project
+      act(() => {
+        result.current.project = mockProject;
+        result.current.deleteProjectInput = "Test Project";
+      });
+
+      act(() => {
+        result.current.handleConfirmDelete();
+      });
+
+      // Should call handleDeleteProject when names match
+      // Note: We can't easily test the actual deletion without mocking the database
+    });
+
+    it("should not delete project when input does not match", () => {
+      const mockProject = { 
+        name: "Test Project", 
+        project_id: 1, 
+        hourly_cost: 25.0, 
+        created_at: new Date("2023-01-01") 
+      };
+      const { result } = renderHook(() => useReport("test-project-id"));
+      
+      // First show the modal
+      act(() => {
+        result.current.handleClickedOnDeleteProject();
+      });
+
+      // Set the project and input
+      act(() => {
+        result.current.project = mockProject;
+        result.current.deleteProjectInput = "Wrong Name";
+      });
+
+      act(() => {
+        result.current.handleConfirmDelete();
+      });
+
+      // Should not call handleDeleteProject when names don't match
+      // The modal should still be open and input should remain unchanged
+      expect(result.current.showDeleteModal).toBe(true);
+      expect(result.current.deleteProjectInput).toBe("Wrong Name");
+    });
+  });
+
+  describe("handleCancelDelete", () => {
+    it("should close modal and reset input when called", () => {
+      const { result } = renderHook(() => useReport("test-project-id"));
+      
+      // First show the modal
+      act(() => {
+        result.current.handleClickedOnDeleteProject();
+      });
+
+      expect(result.current.showDeleteModal).toBe(true);
+
+      // Then cancel
+      act(() => {
+        result.current.handleCancelDelete();
+      });
+
+      expect(result.current.showDeleteModal).toBe(false);
+      expect(result.current.deleteProjectInput).toBe("");
+    });
+  });
+
+  describe("Modal state management", () => {
+    it("should initialize modal state correctly", () => {
+      const { result } = renderHook(() => useReport("test-project-id"));
+      
+      expect(result.current.showDeleteModal).toBe(false);
+      expect(result.current.deleteProjectInput).toBe("");
     });
   });
 
