@@ -1,11 +1,16 @@
-import { View, Text, Pressable, RefreshControl, ScrollView } from "react-native";
-import { useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 
-
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
+import SearchBar from "../../components/SearchBar";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
@@ -17,13 +22,16 @@ import { useDatabaseManagement } from "./useDatabaseManagement";
  */
 const Home = () => {
   const {
-    projects,
+    filteredProjects,
+    searchQuery,
     isLoading,
     isPopulating,
     isClearing,
     refreshProjects,
     handlePopulateDatabase,
     handleClearDatabase,
+    handleSearch,
+    clearSearch,
   } = useDatabaseManagement();
 
   /**
@@ -32,8 +40,6 @@ const Home = () => {
   const handleRefresh = async () => {
     await refreshProjects();
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -126,6 +132,15 @@ const Home = () => {
         </Pressable>
       </View>
 
+      <View style={styles.searchBarContainer}>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={handleSearch}
+          placeholder="Buscar projetos..."
+          onClear={clearSearch}
+        />
+      </View>
+
       {isLoading ? (
         <LoadingView />
       ) : (
@@ -141,12 +156,22 @@ const Home = () => {
           }
           showsVerticalScrollIndicator={false}
         >
-          {projects.length > 0 ? (
+          {filteredProjects.length > 0 ? (
             <View>
               <Text style={styles.title}>Projetos</Text>
-              {projects.map((project) => (
+              {filteredProjects.map((project) => (
                 <ProjectCard project={project} key={project.project_id} />
               ))}
+            </View>
+          ) : searchQuery ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>🔍</Text>
+              <Text style={styles.emptyStateTitle}>
+                Nenhum projeto encontrado
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                Tente ajustar sua busca ou criar um novo projeto
+              </Text>
             </View>
           ) : (
             <View style={styles.emptyState}>
@@ -305,6 +330,13 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginBottom: theme.spacing.xs,
     letterSpacing: 0.5,
+  },
+  searchBarContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+    height: 50,
   },
 });
 
