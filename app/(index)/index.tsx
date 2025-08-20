@@ -97,35 +97,6 @@ const Home = () => {
         </View>
       </View>
 
-      {/* Last Worked Task Section */}
-      {lastWorkedTask && !isLoading && (
-        <View style={styles.lastWorkedTaskContainer}>
-          <Text style={styles.lastWorkedTaskTitle}>
-            Última Tarefa Trabalhada
-          </Text>
-          <View style={styles.lastWorkedTaskCard}>
-            <Text style={styles.lastWorkedTaskProjectName}>
-              {lastWorkedTask.project_name}
-            </Text>
-            <Task
-              task={{
-                task_id: lastWorkedTask.task_id,
-                name: lastWorkedTask.name,
-                completed: lastWorkedTask.completed,
-                task_created_at: lastWorkedTask.task_created_at,
-                timed_until_now: lastWorkedTask.timed_until_now,
-              }}
-              onPress={handleNavigateToLastWorkedTask}
-              disableTimer={true}
-              onInitTimer={handleInitTimer}
-              onStopTimer={handleStopTimer}
-              showTimedUntilNowOnTimer={lastWorkedTask.timed_until_now}
-              handleDoneTask={handleDoneTask}
-            />
-          </View>
-        </View>
-      )}
-
       <View style={styles.databaseButtonsContainer}>
         <Pressable
           style={[styles.databaseButton, styles.populateButton]}
@@ -239,6 +210,33 @@ const Home = () => {
             </View>
           )}
         </ScrollView>
+      )}
+
+      {/* Last Worked Task Section */}
+      {lastWorkedTask && !isLoading && (
+        <View style={styles.lastWorkedTaskContainer}>
+          <Text style={styles.lastWorkedTaskTitle}>
+            Última Tarefa Trabalhada
+          </Text>
+          <Text style={styles.lastWorkedTaskProjectName}>
+            {lastWorkedTask.project_name}
+          </Text>
+          <Task
+            task={{
+              task_id: lastWorkedTask.task_id,
+              name: lastWorkedTask.name,
+              completed: lastWorkedTask.completed,
+              task_created_at: lastWorkedTask.task_created_at,
+              timed_until_now: lastWorkedTask.timed_until_now,
+            }}
+            onPress={handleNavigateToLastWorkedTask}
+            disableTimer={true}
+            onInitTimer={handleInitTimer}
+            onStopTimer={handleStopTimer}
+            showTimedUntilNowOnTimer={lastWorkedTask.timed_until_now}
+            handleDoneTask={handleDoneTask}
+          />
+        </View>
       )}
     </View>
   );
@@ -396,14 +394,6 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.lg,
     marginBottom: theme.spacing.md,
     letterSpacing: 0.5,
-  },
-  lastWorkedTaskCard: {
-    backgroundColor: theme.colors.neutral[800],
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    ...theme.shadows.sm,
-    borderLeftWidth: 4,
-    borderLeftColor: theme.colors.success[500],
   },
   lastWorkedTaskProjectName: {
     color: theme.colors.neutral[400],
