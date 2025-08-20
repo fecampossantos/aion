@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  Modal,
 } from "react-native";
 
 import Button from "../../components/Button";
@@ -24,6 +25,7 @@ import { useReportGeneration } from "./useReportGeneration";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { theme } from "../../globalStyle/theme";
+import TextInput from "../../components/TextInput";
 
 const styles = StyleSheet.create({
   container: {
@@ -229,6 +231,53 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
   },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.colors.neutral[800],
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 24,
+    width: "90%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    color: globalStyle.white,
+    fontSize: 20,
+    fontFamily: globalStyle.font.bold,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  modalDescription: {
+    color: globalStyle.white,
+    fontSize: 14,
+    fontFamily: globalStyle.font.regular,
+    textAlign: "center",
+    marginBottom: 20,
+    opacity: 0.8,
+    lineHeight: 20,
+  },
+  modalInput: {
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+  },
+  cancelButton: {
+    backgroundColor: theme.colors.neutral[600],
+  },
+  modalDeleteButton: {
+    backgroundColor: theme.colors.error[500],
+  },
 });
 
 export const chartConfig = {
@@ -343,6 +392,12 @@ const ProjectInfo = () => {
     dateShown,
     project,
     showChart,
+    // Modal state and handlers
+    showDeleteModal,
+    deleteProjectInput,
+    setDeleteProjectInput,
+    handleConfirmDelete,
+    handleCancelDelete,
   } = useReport(projectID);
 
   const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
@@ -518,6 +573,58 @@ const ProjectInfo = () => {
           maximumDate={new Date()}
         />
       )}
+
+      {/* Delete Project Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelDelete}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Apagar Projeto</Text>
+            <Text style={styles.modalDescription}>
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome do
+              projeto:{" "}
+              <Text style={{ fontFamily: globalStyle.font.bold }}>
+                {project?.name}
+              </Text>
+            </Text>
+
+            <View style={styles.modalInput}>
+              <TextInput
+                value={deleteProjectInput}
+                onChangeText={setDeleteProjectInput}
+                placeholder="Digite o nome do projeto"
+                testID="delete-project-input"
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Button
+                buttonStyle={[styles.modalButton, styles.cancelButton]}
+                onPress={handleCancelDelete}
+                text="Cancelar"
+                textStyle={{
+                  color: globalStyle.white,
+                  fontFamily: globalStyle.font.medium,
+                }}
+              />
+              <Button
+                buttonStyle={[styles.modalButton, styles.modalDeleteButton]}
+                onPress={handleConfirmDelete}
+                text="Apagar Projeto"
+                textStyle={{
+                  color: globalStyle.white,
+                  fontFamily: globalStyle.font.medium,
+                }}
+                disabled={project ? deleteProjectInput !== project.name : true}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };

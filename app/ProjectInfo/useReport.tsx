@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
-import { Alert } from "react-native";
 import { Project as IProject } from "../../interfaces/Project";
 import { getEndOfDay, getInitOfDay, prepareResultSet } from "./utils";
 
@@ -25,6 +24,10 @@ const useReport = (projectID: string) => {
   const [showChart, setShowChart] = useState(false);
 
   const [project, setProject] = useState<IProject>();
+  
+  // Modal state for delete confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteProjectInput, setDeleteProjectInput] = useState("");
 
   async function getProject() {
     const project = await database.getFirstAsync<IProject>(
@@ -63,20 +66,37 @@ const useReport = (projectID: string) => {
     }
   }
 
+  /**
+   * Handles the actual deletion of the project
+   */
   const handleDeleteProject = () => {
     database.runAsync("DELETE FROM projects WHERE project_id = ?;", projectID);
     router.replace("/");
   };
 
+  /**
+   * Shows the delete confirmation modal
+   */
   const handleClickedOnDeleteProject = () => {
-    Alert.alert("Apagar projeto?", "Você perderá todas as informações dele!", [
-      { text: "Cancelar", style: "cancel", onPress: () => {} },
-      {
-        text: "Apagar",
-        style: "destructive",
-        onPress: () => handleDeleteProject(),
-      },
-    ]);
+    setShowDeleteModal(true);
+    setDeleteProjectInput("");
+  };
+
+  /**
+   * Handles the delete confirmation with project name validation
+   */
+  const handleConfirmDelete = () => {
+    if (project && deleteProjectInput === project.name) {
+      handleDeleteProject();
+    }
+  };
+
+  /**
+   * Closes the delete modal and resets input
+   */
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteProjectInput("");
   };
 
   const handleUpdateDate = (event, selectedDate) => {
@@ -109,6 +129,12 @@ const useReport = (projectID: string) => {
     dateShown,
     project,
     showChart,
+    // Modal state and handlers
+    showDeleteModal,
+    deleteProjectInput,
+    setDeleteProjectInput,
+    handleConfirmDelete,
+    handleCancelDelete,
   };
 };
 

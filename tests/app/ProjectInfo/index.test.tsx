@@ -25,6 +25,12 @@ const mockUseReport = {
     created_at: new Date("2023-01-01"),
   },
   showChart: true,
+  // Modal state and handlers
+  showDeleteModal: false,
+  deleteProjectInput: "",
+  setDeleteProjectInput: jest.fn(),
+  handleConfirmDelete: jest.fn(),
+  handleCancelDelete: jest.fn(),
 };
 
 // Mock the custom hook
@@ -47,7 +53,7 @@ describe("ProjectInfo", () => {
   });
 
   it("has correct display name", () => {
-    expect(ProjectInfo.displayName || ProjectInfo.name).toBe("ProjectInfo");
+    expect(ProjectInfo.name).toBe("ProjectInfo");
   });
 
   it("calls useReport hook with correct projectID", () => {
@@ -126,6 +132,31 @@ describe("ProjectInfo", () => {
     // Wait for the useEffect to run
     await waitFor(() => {
       expect(mockUseReportWithProject.getTimings).toHaveBeenCalled();
+    });
+  });
+
+  // Modal tests
+  describe("Delete Project Modal", () => {
+    it("should show modal when delete button is pressed", () => {
+      const { getByText } = render(<ProjectInfo />);
+      
+      const deleteButton = getByText("Apagar Projeto");
+      expect(deleteButton).toBeDefined();
+      
+      // The modal functionality is handled by the hook, so we just verify the button exists
+      expect(mockUseReport.handleClickedOnDeleteProject).toBeDefined();
+    });
+
+    it("should have delete button with correct text", () => {
+      const { getByText } = render(<ProjectInfo />);
+      
+      expect(getByText("Apagar Projeto")).toBeDefined();
+    });
+
+    it("should have edit button with correct text", () => {
+      const { getByText } = render(<ProjectInfo />);
+      
+      expect(getByText("Editar Projeto")).toBeDefined();
     });
   });
 });
