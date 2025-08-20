@@ -495,12 +495,12 @@ const ProjectInfo = () => {
                 params: { projectID: project.project_id },
               })
             }
-            text="✏️ Editar Projeto"
+            text="Editar Projeto"
           />
           <Button
             buttonStyle={styles.deleteButton}
             onPress={() => handleClickedOnDeleteProject()}
-            text="🗑️ Apagar Projeto"
+            text="Apagar Projeto"
           />
         </View>
       </View>
