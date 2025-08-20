@@ -32,7 +32,11 @@
       "navigationBar": {
         "backgroundColor": "#0f172a",
         "barStyle": "light"
-      }
+      },
+      "permissions": [
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

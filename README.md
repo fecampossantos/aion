@@ -12,6 +12,7 @@
 - **Data Persistence**: SQLite database for reliable local data storage
 
 ### Advanced Features
+- **Data Backup & Restore**: Export all data to JSON files and save to device storage
 - **PDF Reports**: Generate detailed time reports for projects (feature in development)
 - **Cost Calculation**: Automatic calculation of project costs based on time tracked and hourly rates
 - **Haptic Feedback**: Enhanced user experience with tactile feedback

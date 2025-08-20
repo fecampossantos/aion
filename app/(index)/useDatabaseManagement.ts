@@ -7,6 +7,12 @@ import {
   clearDatabase,
   getDatabaseStats,
 } from "../../utils/databaseUtils";
+import {
+  downloadBackup,
+  restoreFromFile,
+  getBackupStats,
+  BackupData,
+} from "../../utils/backupUtils";
 
 /**
  * Custom hook for managing database operations
@@ -18,6 +24,8 @@ export const useDatabaseManagement = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
+  const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
 
   /**
    * Fetches all projects from the database
@@ -121,14 +129,82 @@ export const useDatabaseManagement = () => {
     );
   };
 
+  /**
+   * Handles creating and downloading a backup of all data
+   */
+  const handleBackupData = async () => {
+    Alert.alert(
+      "Create Backup",
+      "This will create a backup file with all your projects, tasks, and time tracking data. The file will be saved to your device.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Create Backup",
+          onPress: async () => {
+            setIsBackingUp(true);
+            try {
+              await downloadBackup(database);
+              Alert.alert(
+                "Backup Complete",
+                "Your data has been successfully backed up and saved to your device. You can now share or store this file safely."
+              );
+            } catch (error) {
+              Alert.alert(
+                "Backup Failed",
+                `Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`
+              );
+              console.error("Backup error:", error);
+            } finally {
+              setIsBackingUp(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  /**
+   * Handles restoring data from a backup file
+   * Note: For now, this is a placeholder. In a full implementation,
+   * you would add expo-document-picker to select backup files
+   */
+  const handleRestoreData = async () => {
+    Alert.alert(
+      "Restore Data",
+      "To restore your data from a backup file:\n\n1. Make sure you have a backup file (.json) saved on your device\n2. Contact support or use the file manager approach\n\nNote: This will replace ALL current data!",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Learn More",
+          onPress: () => {
+            Alert.alert(
+              "Restore Instructions",
+              "To restore data:\n\n1. Create a backup first (recommended)\n2. Place your backup file in the app's document directory\n3. The restore feature will be available in a future update with file picker support\n\nFor now, you can use the backup feature to save your data safely."
+            );
+          },
+        },
+      ]
+    );
+  };
+
   return {
     projects,
     isLoading,
     isPopulating,
     isClearing,
+    isBackingUp,
+    isRestoring,
     fetchAllProjects,
     refreshProjects,
     handlePopulateDatabase,
     handleClearDatabase,
+    handleBackupData,
+    handleRestoreData,
   };
 };
