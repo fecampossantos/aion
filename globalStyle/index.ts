@@ -14,6 +14,7 @@ const globalStyle = {
   font: {
     regular: "OpenSans_400Regular",
     medium: "OpenSans_500Medium",
+    semiBold: "OpenSans_600SemiBold",
     bold: "OpenSans_700Bold",
     italicRegular: "OpenSans_400Regular_Italic",
     italicMedium: "OpenSans_500Medium_Italic",

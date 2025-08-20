@@ -3,8 +3,30 @@ import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { theme } from "../globalStyle/theme";
+import { useGoogleFonts } from "../globalStyle/fonts";
+import { View, Text } from "react-native";
 
 export default function HomeLayout() {
+  const { fontsLoaded, fontError } = useGoogleFonts();
+
+  // Show loading screen while fonts are loading
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.colors.neutral[900], justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: theme.colors.white, fontSize: 18 }}>Loading fonts...</Text>
+      </View>
+    );
+  }
+
+  // Show error screen if fonts fail to load
+  if (fontError) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.colors.neutral[900], justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: theme.colors.error[500], fontSize: 18 }}>Error loading fonts</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.neutral[900] }}>
       <StatusBar style="light" />

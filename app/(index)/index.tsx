@@ -39,7 +39,7 @@ const Home = () => {
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <Text style={styles.headerText}>Aion</Text>
+        <Text style={styles.headerText}>aion</Text>
         <View style={styles.headerButtons}>
           <Pressable
             style={styles.refreshButton}
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.bold,
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.fontSize["5xl"],
     letterSpacing: -0.5,
   },
