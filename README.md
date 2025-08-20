@@ -242,6 +242,9 @@ This project is private and proprietary.
 - Search bar on projects screen
 - Last worked on tasks display on projects screen
 - Search bar and pagination on tasks screen
+- Tasks analysis (burndown chart)
+- Prepopulate the add record page with task where it was opened from
+- Add multiple report options UIs
 
 ## 📞 Support
 
