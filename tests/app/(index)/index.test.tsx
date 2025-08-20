@@ -63,7 +63,7 @@ describe("Home Screen", () => {
   it("renders correctly with header", async () => {
     const { getByText } = render(<Home />);
 
-    expect(getByText("Aion")).toBeDefined();
+    expect(getByText("aion")).toBeDefined();
   });
 
   it("displays projects after loading", async () => {

@@ -8,6 +8,18 @@ import {
   getDatabaseStats,
 } from "../../utils/databaseUtils";
 
+// Interface for the last worked task with project info
+interface LastWorkedTask {
+  task_id: number;
+  name: string;
+  completed: 0 | 1;
+  task_created_at: string;
+  timed_until_now: number;
+  project_id: number;
+  project_name: string;
+  last_timing_date: string;
+}
+
 /**
  * Custom hook for managing database operations
  * @returns {Object} Database management functions and state
@@ -15,6 +27,7 @@ import {
 export const useDatabaseManagement = () => {
   const database = useSQLiteContext();
   const [projects, setProjects] = useState<Array<Project>>([]);
+  const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
@@ -35,15 +48,58 @@ export const useDatabaseManagement = () => {
   };
 
   /**
+   * Fetches the last worked task based on the most recent timing entry
+   */
+  const fetchLastWorkedTask = async () => {
+    try {
+      // First check if there are any timings at all
+      const hasTimings = await database.getFirstAsync<{ count: number }>(
+        "SELECT COUNT(*) as count FROM timings;"
+      );
+      
+      if (!hasTimings || hasTimings.count === 0) {
+        setLastWorkedTask(null);
+        return;
+      }
+
+      const query = `
+        SELECT 
+          t.task_id,
+          t.name,
+          t.completed,
+          t.created_at as task_created_at,
+          COALESCE(SUM(tim.time), 0) as timed_until_now,
+          t.project_id,
+          p.name as project_name,
+          MAX(tim.created_at) as last_timing_date
+        FROM tasks t
+        JOIN projects p ON t.project_id = p.project_id
+        JOIN timings tim ON t.task_id = tim.task_id
+        GROUP BY t.task_id, t.name, t.completed, t.created_at, t.project_id, p.name
+        ORDER BY last_timing_date DESC
+        LIMIT 1;
+      `;
+      
+      const result = await database.getFirstAsync<LastWorkedTask>(query);
+      setLastWorkedTask(result || null);
+    } catch (error) {
+      console.error("Error fetching last worked task:", error);
+      setLastWorkedTask(null);
+    }
+  };
+
+  /**
    * Refreshes the projects data from the database
    */
   const refreshProjects = useCallback(async () => {
     await fetchAllProjects();
+    await fetchLastWorkedTask();
   }, [database]);
 
-  // Fetch projects on mount
+  // Fetch projects and last worked task on mount
   useEffect(() => {
     fetchAllProjects();
+    fetchLastWorkedTask();
   }, []);
 
   /**
@@ -123,6 +179,7 @@ export const useDatabaseManagement = () => {
 
   return {
     projects,
+    lastWorkedTask,
     isLoading,
     isPopulating,
     isClearing,

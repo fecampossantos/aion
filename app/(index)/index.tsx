@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
+import Task from "../../components/Task";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
@@ -18,6 +19,7 @@ import { useDatabaseManagement } from "./useDatabaseManagement";
 const Home = () => {
   const {
     projects,
+    lastWorkedTask,
     isLoading,
     isPopulating,
     isClearing,
@@ -31,6 +33,28 @@ const Home = () => {
    */
   const handleRefresh = async () => {
     await refreshProjects();
+  };
+
+  /**
+   * Handles navigation to the specific task
+   */
+  const handleNavigateToLastWorkedTask = () => {
+    if (lastWorkedTask) {
+      router.push(`/Task?taskID=${lastWorkedTask.task_id}`);
+    }
+  };
+
+  /**
+   * Dummy handlers for task operations (not needed for read-only display)
+   */
+  const handleDoneTask = (isChecked: boolean, task: any) => {
+    // Do nothing - this is a read-only display
+  };
+  const handleInitTimer = () => {
+    // Do nothing - timer is disabled
+  };
+  const handleStopTimer = () => {
+    // Do nothing - timer is disabled
   };
 
 
@@ -65,6 +89,33 @@ const Home = () => {
           </Pressable>
         </View>
       </View>
+
+      {/* Last Worked Task Section */}
+      {lastWorkedTask && !isLoading && (
+        <View style={styles.lastWorkedTaskContainer}>
+          <Text style={styles.lastWorkedTaskTitle}>Última Tarefa Trabalhada</Text>
+          <View style={styles.lastWorkedTaskCard}>
+            <Text style={styles.lastWorkedTaskProjectName}>
+              {lastWorkedTask.project_name}
+            </Text>
+            <Task
+              task={{
+                task_id: lastWorkedTask.task_id,
+                name: lastWorkedTask.name,
+                completed: lastWorkedTask.completed,
+                task_created_at: lastWorkedTask.task_created_at,
+                timed_until_now: lastWorkedTask.timed_until_now,
+              }}
+              onPress={handleNavigateToLastWorkedTask}
+              disableTimer={true}
+              onInitTimer={handleInitTimer}
+              onStopTimer={handleStopTimer}
+              showTimedUntilNowOnTimer={lastWorkedTask.timed_until_now}
+              handleDoneTask={handleDoneTask}
+            />
+          </View>
+        </View>
+      )}
 
       <View style={styles.databaseButtonsContainer}>
         <Pressable
@@ -305,6 +356,33 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginBottom: theme.spacing.xs,
     letterSpacing: 0.5,
+  },
+  lastWorkedTaskContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginBottom: theme.spacing.lg,
+  },
+  lastWorkedTaskTitle: {
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.lg,
+    marginBottom: theme.spacing.md,
+    letterSpacing: 0.5,
+  },
+  lastWorkedTaskCard: {
+    backgroundColor: theme.colors.neutral[800],
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    ...theme.shadows.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.success[500],
+  },
+  lastWorkedTaskProjectName: {
+    color: theme.colors.neutral[400],
+    fontFamily: theme.typography.fontFamily.medium,
+    fontSize: theme.typography.fontSize.sm,
+    marginBottom: theme.spacing.sm,
+    letterSpacing: 0.3,
   },
 });
 
