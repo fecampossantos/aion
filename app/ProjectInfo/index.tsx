@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { fullDate } from "../../utils/parser";
 import globalStyle from "../../globalStyle";
 
-import { BarChart } from "react-native-chart-kit";
+import { BarChart, LineChart } from "react-native-chart-kit";
 import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
@@ -231,6 +231,29 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
   },
+  burndownLegend: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 24,
+    marginTop: 16,
+    paddingHorizontal: 20,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  legendText: {
+    color: globalStyle.white,
+    fontSize: 14,
+    fontFamily: globalStyle.font.regular,
+    opacity: 0.9,
+  },
   // Modal styles
   modalOverlay: {
     flex: 1,
@@ -380,18 +403,21 @@ const ProjectInfo = () => {
 
   const {
     getTimings,
+    getBurndownData,
     getProject,
     endDate,
     handleShowDatePicker,
     startDate,
     handleClickedOnDeleteProject,
     resultSet,
+    burndownData,
     showDatePicker,
     datePickerValue,
     handleUpdateDate,
     dateShown,
     project,
     showChart,
+    showBurndownChart,
     // Modal state and handlers
     showDeleteModal,
     deleteProjectInput,
@@ -409,6 +435,7 @@ const ProjectInfo = () => {
   useEffect(() => {
     async function render() {
       await getTimings();
+      await getBurndownData();
     }
     if (!project) return;
     render();
@@ -513,6 +540,58 @@ const ProjectInfo = () => {
         </View>
       )}
 
+      {showBurndownChart && burndownData && (
+        <View style={styles.chartSection}>
+          <View style={styles.chartHeader}>
+            <Feather name="trending-down" color={globalStyle.white} size={24} />
+            <Text style={styles.chartTitle}>Burndown Chart</Text>
+          </View>
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={burndownData}
+              width={Dimensions.get("screen").width - 48}
+              height={Dimensions.get("screen").height * 0.35}
+              yAxisLabel=""
+              yAxisSuffix=" tasks"
+              chartConfig={{
+                ...chartConfig,
+                decimalPlaces: 0,
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                },
+              }}
+              bezier={false}
+              style={styles.chart}
+              withHorizontalLines={true}
+              withVerticalLines={false}
+              fromZero={true}
+              withVerticalLabels={false}
+            />
+          </View>
+          <View style={styles.burndownLegend}>
+            <View style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  { backgroundColor: "rgba(156, 163, 175, 1)" },
+                ]}
+              />
+              <Text style={styles.legendText}>Ideal</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  { backgroundColor: "rgba(59, 130, 246, 1)" },
+                ]}
+              />
+              <Text style={styles.legendText}>Atual</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       <View style={styles.actionSection}>
         <Button
           buttonStyle={styles.generateReportButton}
@@ -574,7 +653,6 @@ const ProjectInfo = () => {
         />
       )}
 
-      {/* Delete Project Confirmation Modal */}
       <Modal
         visible={showDeleteModal}
         transparent={true}
