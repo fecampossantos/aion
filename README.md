@@ -241,7 +241,6 @@ This project is private and proprietary.
 - Multi-language support
 - Last worked on tasks display on projects screen - _in progress on background agents_
 - Tasks analysis (burndown chart) - _in progress on background agents_
-- Prepopulate the add record page with task where it was opened from - _in progress on background agents_
 
 ## 📞 Support
 
