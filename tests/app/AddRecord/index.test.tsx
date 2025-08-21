@@ -347,4 +347,6 @@ describe("AddRecord Component", () => {
       expect(getByTestId("calendar-icon")).toBeTruthy();
     });
   });
+
+
 });
