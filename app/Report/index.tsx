@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert, ScrollView, StyleSheet, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { fullDate } from "../../utils/parser";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import globalStyle from "../../globalStyle";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams } from "expo-router";
 import Button from "../../components/Button";
+import { useToast } from "../../components/Toast/ToastContext";
 
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
@@ -250,6 +251,7 @@ type TimingsResult = {
  */
 const Report = () => {
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const { project } = useLocalSearchParams();
   const [startDate, setStartDate] = useState(() => {
     const currentDate = new Date();
@@ -302,7 +304,7 @@ const Report = () => {
       );
 
       if (!projectData) {
-        Alert.alert("Erro", "Projeto não encontrado. Verifique se o projeto ainda existe.");
+        showToast("Projeto não encontrado. Verifique se o projeto ainda existe.", "error");
         return;
       }
 
@@ -341,9 +343,9 @@ const Report = () => {
       });
     } catch (e) {
       console.warn("Error generating report:", e);
-      Alert.alert(
-        "Erro ao gerar relatório", 
-        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
+      showToast(
+        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.",
+        "error"
       );
     }
   };

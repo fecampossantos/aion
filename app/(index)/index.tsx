@@ -20,7 +20,6 @@ import {
   BackupModal,
   RestoreModal,
   RestoreConfirmationModal,
-  SuccessModal,
   ConfirmationModal,
 } from "../../components/Modal";
 
@@ -58,10 +57,6 @@ const Home = () => {
     setShowRestoreModal,
     showRestoreConfirmationModal,
     setShowRestoreConfirmationModal,
-    showSuccessModal,
-    setShowSuccessModal,
-    successModalData,
-    setSuccessModalData,
     restoreBackupInfo,
     setRestoreBackupInfo,
     // Confirmation modal states
@@ -384,14 +379,7 @@ const Home = () => {
         isLoading={isRestoring}
       />
 
-      {/* Success Modal */}
-      <SuccessModal
-        visible={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title={successModalData.title}
-        message={successModalData.message}
-        details={successModalData.details}
-      />
+
     </View>
   );
 };

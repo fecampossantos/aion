@@ -10,6 +10,15 @@ jest.mock('expo-print');
 jest.mock('expo-file-system');
 jest.mock('expo-sharing');
 
+// Mock the toast context
+const mockShowToast = jest.fn();
+jest.mock('../../../components/Toast/ToastContext', () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock Alert
 jest.mock('react-native', () => ({
   Alert: {
@@ -47,6 +56,7 @@ describe('useReportGeneration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockShowToast.mockClear();
     
     // Mock Print
     (Print.printToFileAsync as jest.Mock).mockResolvedValue({ uri: '/mock/uri/file.pdf' });
@@ -135,7 +145,7 @@ describe('useReportGeneration', () => {
       });
       expect(FileSystem.moveAsync).toHaveBeenCalled();
       expect(shareAsync).toHaveBeenCalled();
-      expect(Alert.alert).toHaveBeenCalledWith('Sucesso', 'Relatório PDF gerado com sucesso!');
+      expect(mockShowToast).toHaveBeenCalledWith('Relatório PDF gerado com sucesso!', 'success');
     });
 
     it('should not generate report if already generating', async () => {
@@ -213,9 +223,9 @@ describe('useReportGeneration', () => {
         });
       });
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Nenhum dado encontrado',
-        'Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho.'
+      expect(mockShowToast).toHaveBeenCalledWith(
+        'Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho.',
+        'warning'
       );
       expect(Print.printToFileAsync).not.toHaveBeenCalled();
     });
@@ -238,9 +248,9 @@ describe('useReportGeneration', () => {
         });
       });
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Erro ao gerar relatório',
-        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.'
+      expect(mockShowToast).toHaveBeenCalledWith(
+        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.',
+        'error'
       );
     });
 
@@ -262,9 +272,9 @@ describe('useReportGeneration', () => {
         });
       });
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Erro ao gerar relatório',
-        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.'
+      expect(mockShowToast).toHaveBeenCalledWith(
+        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.',
+        'error'
       );
     });
 
@@ -286,9 +296,9 @@ describe('useReportGeneration', () => {
         });
       });
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Erro ao gerar relatório',
-        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.'
+      expect(mockShowToast).toHaveBeenCalledWith(
+        'Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.',
+        'error'
       );
     });
 

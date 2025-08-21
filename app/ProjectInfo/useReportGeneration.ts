@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
-import { Alert } from "react-native";
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
 import { shareAsync } from "expo-sharing";
+import { useToast } from "../../components/Toast/ToastContext";
 import { generateReportHTML } from "../../utils/pdfReportService";
 import { fullDate } from "../../utils/parser";
 
@@ -13,6 +13,7 @@ import { fullDate } from "../../utils/parser";
 export const useReportGeneration = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const isGeneratingRef = useRef(false);
+  const { showToast } = useToast();
 
   /**
    * Gets the start of day as ISO string for database queries
@@ -69,9 +70,9 @@ export const useReportGeneration = () => {
       const timings = await getTimings();
 
       if (timings.length === 0) {
-        Alert.alert(
-          "Nenhum dado encontrado",
-          "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho."
+        showToast(
+          "Não foram encontradas sessões de trabalho no período selecionado. Verifique as datas ou adicione algumas sessões de trabalho.",
+          "warning"
         );
         isGeneratingRef.current = false;
         setIsGeneratingReport(false);
@@ -119,12 +120,12 @@ export const useReportGeneration = () => {
 
       await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
 
-      Alert.alert("Sucesso", "Relatório PDF gerado com sucesso!");
+      showToast("Relatório PDF gerado com sucesso!", "success");
     } catch (e) {
       console.warn("Error generating report:", e);
-      Alert.alert(
-        "Erro ao gerar relatório",
-        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo."
+      showToast(
+        "Ocorreu um erro ao gerar o relatório PDF. Tente novamente ou verifique se há espaço suficiente no dispositivo.",
+        "error"
       );
     } finally {
       isGeneratingRef.current = false;

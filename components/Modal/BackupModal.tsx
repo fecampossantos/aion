@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   featuresTitle: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.md,
     marginBottom: theme.spacing.xs,
   },

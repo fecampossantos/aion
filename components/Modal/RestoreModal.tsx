@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   stepsTitle: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.md,
     marginBottom: theme.spacing.xs,
   },
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   recommendationTitle: {
     color: theme.colors.primary[100],
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.sm,
     marginBottom: theme.spacing.xs,
   },

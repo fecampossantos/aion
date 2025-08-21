@@ -103,12 +103,12 @@ const styles = StyleSheet.create({
   },
   primaryText: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.md,
   },
   secondaryText: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.md,
   },
 });

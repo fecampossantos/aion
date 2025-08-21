@@ -17,8 +17,8 @@ import {
   BackupModal,
   RestoreModal,
   RestoreConfirmationModal,
-  SuccessModal,
 } from "../../components/Modal";
+import { useToast } from "../../components/Toast/ToastContext";
 
 // Interface for the last worked task with project info
 interface LastWorkedTask {
@@ -38,6 +38,7 @@ interface LastWorkedTask {
  */
 export const useDatabaseManagement = () => {
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const [projects, setProjects] = useState<Array<Project>>([]);
   const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(null);
   const [filteredProjects, setFilteredProjects] = useState<Array<Project>>([]);
@@ -52,12 +53,7 @@ export const useDatabaseManagement = () => {
   const [showBackupModal, setShowBackupModal] = useState<boolean>(false);
   const [showRestoreModal, setShowRestoreModal] = useState<boolean>(false);
   const [showRestoreConfirmationModal, setShowRestoreConfirmationModal] = useState<boolean>(false);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-  const [successModalData, setSuccessModalData] = useState<{
-    title: string;
-    message: string;
-    details: string[];
-  }>({ title: '', message: '', details: [] });
+
   const [restoreBackupInfo, setRestoreBackupInfo] = useState<{
     date: string;
     projectCount: number;
@@ -195,25 +191,11 @@ export const useDatabaseManagement = () => {
       await populateDatabase(database);
       await refreshProjects();
       const stats = await getDatabaseStats(database);
-      // Show success modal
-      setSuccessModalData({
-        title: 'Success!',
-        message: 'Database populated successfully!',
-        details: [
-          `Added ${stats.projects} projects`,
-          `Added ${stats.tasks} tasks`,
-          `Added ${stats.timings} time entries`
-        ]
-      });
-      setShowSuccessModal(true);
+      // Show success toast
+      showToast(`Database populated successfully! Added ${stats.projects} projects, ${stats.tasks} tasks, and ${stats.timings} time entries.`, 'success');
     } catch (error) {
-      // Show error modal
-      setSuccessModalData({
-        title: 'Error',
-        message: 'Failed to populate database. Please try again.',
-        details: []
-      });
-      setShowSuccessModal(true);
+      // Show error toast
+      showToast('Failed to populate database. Please try again.', 'error');
       console.error("Population error:", error);
     } finally {
       setIsPopulating(false);
@@ -236,21 +218,11 @@ export const useDatabaseManagement = () => {
     try {
       await clearDatabase(database);
       await refreshProjects();
-      // Show success modal
-      setSuccessModalData({
-        title: 'Success!',
-        message: 'Database cleared successfully!',
-        details: []
-      });
-      setShowSuccessModal(true);
+      // Show success toast
+      showToast('Database cleared successfully!', 'success');
     } catch (error) {
-      // Show error modal
-      setSuccessModalData({
-        title: 'Error',
-        message: 'Failed to clear database. Please try again.',
-        details: []
-      });
-      setShowSuccessModal(true);
+      // Show error toast
+      showToast('Failed to clear database. Please try again.', 'error');
       console.error("Clear error:", error);
     } finally {
       setIsClearing(false);
@@ -272,17 +244,8 @@ export const useDatabaseManagement = () => {
     setIsBackingUp(true);
     try {
       await downloadBackup(database);
-      // Show success modal
-      setSuccessModalData({
-        title: 'Backup Created',
-        message: 'Your backup has been created successfully and is ready to share.',
-        details: [
-          'The backup file has been saved to your device',
-          'You can now share it to your preferred location',
-          'All your projects, tasks, and time data are included'
-        ]
-      });
-      setShowSuccessModal(true);
+      // Show success toast
+      showToast('Backup created successfully and ready to share!', 'success');
       // Refresh projects after successful backup
       await fetchAllProjects();
     } catch (error) {
@@ -328,17 +291,8 @@ export const useDatabaseManagement = () => {
     try {
       // The actual restore was already done, just refresh the data
       await fetchAllProjects();
-      // Show success modal
-      setSuccessModalData({
-        title: 'Restore Complete',
-        message: 'Your data has been successfully restored from the backup.',
-        details: [
-          `${restoreBackupInfo.projectCount} projects restored`,
-          `${restoreBackupInfo.taskCount} tasks restored`,
-          `${restoreBackupInfo.timingCount} time records restored`
-        ]
-      });
-      setShowSuccessModal(true);
+      // Show success toast
+      showToast(`Restore complete! ${restoreBackupInfo.projectCount} projects, ${restoreBackupInfo.taskCount} tasks, and ${restoreBackupInfo.timingCount} time records restored.`, 'success');
     } catch (error) {
       console.error("Restore error:", error);
     } finally {
@@ -376,10 +330,6 @@ export const useDatabaseManagement = () => {
     setShowRestoreModal,
     showRestoreConfirmationModal,
     setShowRestoreConfirmationModal,
-    showSuccessModal,
-    setShowSuccessModal,
-    successModalData,
-    setSuccessModalData,
     restoreBackupInfo,
     setRestoreBackupInfo,
     // Confirmation modal states

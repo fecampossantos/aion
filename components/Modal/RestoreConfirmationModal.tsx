@@ -12,7 +12,7 @@ interface RestoreConfirmationModalProps {
     projectCount: number;
     taskCount: number;
     timingCount: number;
-  };
+  } | null;
   isLoading?: boolean;
 }
 
@@ -45,25 +45,27 @@ const RestoreConfirmationModal: React.FC<RestoreConfirmationModalProps> = ({
           </Text>
         </View>
 
-        <View style={styles.backupInfo}>
-          <Text style={styles.backupInfoTitle}>Backup Information:</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Date:</Text>
-            <Text style={styles.infoValue}>{backupInfo.date}</Text>
+        {backupInfo && (
+          <View style={styles.backupInfo}>
+            <Text style={styles.backupInfoTitle}>Backup Information:</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Date:</Text>
+              <Text style={styles.infoValue}>{backupInfo.date}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Projects:</Text>
+              <Text style={styles.infoValue}>{backupInfo.projectCount}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Tasks:</Text>
+              <Text style={styles.infoValue}>{backupInfo.taskCount}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Time Records:</Text>
+              <Text style={styles.infoValue}>{backupInfo.timingCount}</Text>
+            </View>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Projects:</Text>
-            <Text style={styles.infoValue}>{backupInfo.projectCount}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Tasks:</Text>
-            <Text style={styles.infoValue}>{backupInfo.taskCount}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Time Records:</Text>
-            <Text style={styles.infoValue}>{backupInfo.timingCount}</Text>
-          </View>
-        </View>
+        )}
 
         <View style={styles.buttonContainer}>
           <ModalButton
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
   },
   backupInfoTitle: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.md,
     marginBottom: theme.spacing.xs,
   },
@@ -142,7 +144,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.semibold,
+    fontFamily: theme.typography.fontFamily.semiBold,
     fontSize: theme.typography.fontSize.sm,
   },
   buttonContainer: {

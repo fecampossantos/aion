@@ -9,6 +9,7 @@ jest.mock('react-native', () => {
   // Mock Animated values
   RN.Animated.Value = jest.fn(() => ({
     interpolate: jest.fn(() => 'mocked-interpolated-value'),
+    resetAnimation: jest.fn(), // Add this to prevent the error
   }));
   
   RN.Animated.spring = jest.fn(() => ({
@@ -26,7 +27,7 @@ jest.mock('react-native', () => {
   // Mock TouchableOpacity to avoid animation issues
   const MockTouchableOpacity = ({ children, onPress, testID, ...props }) => {
     return (
-      <RN.View testID={testID} onTouchEnd={onPress} {...props}>
+      <RN.View testID={testID} onPress={onPress} {...props}>
         {children}
       </RN.View>
     );
@@ -77,7 +78,7 @@ describe('ToggleSwitch', () => {
     );
 
     const toggle = getByTestId('toggle-switch');
-    fireEvent(toggle, 'touchEnd');
+    fireEvent.press(toggle);
 
     expect(mockOnValueChange).toHaveBeenCalledWith(true);
   });
@@ -91,7 +92,7 @@ describe('ToggleSwitch', () => {
     );
 
     const toggle = getByTestId('toggle-switch');
-    fireEvent(toggle, 'touchEnd');
+    fireEvent.press(toggle);
 
     expect(mockOnValueChange).toHaveBeenCalledWith(false);
   });
@@ -106,7 +107,7 @@ describe('ToggleSwitch', () => {
     );
 
     const toggle = getByTestId('toggle-switch');
-    fireEvent(toggle, 'touchEnd');
+    fireEvent.press(toggle);
 
     expect(mockOnValueChange).not.toHaveBeenCalled();
   });

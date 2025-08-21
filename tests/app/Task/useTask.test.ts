@@ -230,11 +230,17 @@ describe('useTask', () => {
     );
   });
 
-  it('handles database errors gracefully', async () => {
-    // Clear the previous mock setup and set up error scenario
-    jest.clearAllMocks();
-    mockDatabase.getAllAsync.mockRejectedValue(new Error('Database error'));
+});
 
+describe('useTask - Error Handling', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Set up error scenario from the start
+    mockDatabase.getAllAsync.mockRejectedValue(new Error('Database error'));
+    mockDatabase.runAsync.mockResolvedValue({ changes: 1, lastInsertRowId: 3 });
+  });
+
+  it('handles database errors gracefully from initialization', async () => {
     const { result } = renderHook(() => useTask('1'));
 
     await act(async () => {

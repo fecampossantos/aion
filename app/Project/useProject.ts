@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { ConfirmationModal } from "../../components/Modal";
 import { Project as IProject } from "../../interfaces/Project";
 
 interface TaskWithTimed {
@@ -39,6 +39,9 @@ export const useProject = (projectID: string) => {
   const [showCompleted, setShowCompleted] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(10);
+
+  // Modal state for timer warning
+  const [showTimerWarningModal, setShowTimerWarningModal] = useState<boolean>(false);
 
   const isTimerRunning = timerIdRunning !== null;
 
@@ -138,22 +141,26 @@ export const useProject = (projectID: string) => {
     const unsubscribe = navigation.addListener("beforeRemove", () => {
       if (!isTimerRunning) return;
 
-      Alert.alert(
-        "Parar timer?",
-        "Seu timer ainda esta rodando. Se voce sair, perdera o tempo!",
-        [
-          { text: "Continuar aqui", style: "cancel", onPress: () => {} },
-          {
-            text: "Sair",
-            style: "destructive",
-            onPress: () => router.replace("/"),
-          },
-        ]
-      );
+      setShowTimerWarningModal(true);
     });
 
     return unsubscribe;
-  }, [navigation, isTimerRunning, router]);
+  }, [navigation, isTimerRunning]);
+
+  /**
+   * Handles confirming navigation away while timer is running
+   */
+  const handleConfirmNavigation = () => {
+    setShowTimerWarningModal(false);
+    router.replace("/");
+  };
+
+  /**
+   * Handles canceling navigation away while timer is running
+   */
+  const handleCancelNavigation = () => {
+    setShowTimerWarningModal(false);
+  };
 
   /**
    * Fetches all tasks for the project
@@ -323,6 +330,7 @@ ORDER BY
     showCompleted,
     currentPage,
     itemsPerPage,
+    showTimerWarningModal,
     getTasks,
     getPaginatedTasks,
     getTotalPages,
@@ -335,5 +343,7 @@ ORDER BY
     handleDoneTask,
     handleInitTimer,
     handleStopTimer,
+    handleConfirmNavigation,
+    handleCancelNavigation,
   };
 };

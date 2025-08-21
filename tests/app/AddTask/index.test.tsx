@@ -15,6 +15,14 @@ jest.mock("expo-sqlite", () => ({
   useSQLiteContext: () => mockDatabase,
 }));
 
+// Mock the toast context
+jest.mock("../../../components/Toast/ToastContext", () => ({
+  useToast: () => ({
+    showToast: jest.fn(),
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock("expo-router", () => ({
   router: {
     push: jest.fn(),

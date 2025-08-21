@@ -6,6 +6,7 @@ import ProjectInfo from "../../../app/ProjectInfo";
 const mockUseReport = {
   getTimings: jest.fn(),
   getProject: jest.fn(),
+  getBurndownData: jest.fn(),
   endDate: new Date("2023-12-31"),
   handleShowDatePicker: jest.fn(),
   startDate: new Date("2023-12-01"),
@@ -35,6 +36,14 @@ const mockUseReport = {
 
 // Mock the custom hook
 jest.mock("../../../app/ProjectInfo/useReport", () => jest.fn(() => mockUseReport));
+
+// Mock the toast context
+jest.mock("../../../components/Toast/ToastContext", () => ({
+  useToast: () => ({
+    showToast: jest.fn(),
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 // Mock expo-router
 jest.mock("expo-router", () => ({
