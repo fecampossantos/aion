@@ -16,6 +16,13 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
+import {
+  BackupModal,
+  RestoreModal,
+  RestoreConfirmationModal,
+  SuccessModal,
+  ConfirmationModal,
+} from "../../components/Modal";
 
 /**
  * Home component that displays the main dashboard with projects and database management options
@@ -34,11 +41,34 @@ const Home = () => {
     isRestoring,
     refreshProjects,
     handlePopulateDatabase,
+    handlePopulateConfirm,
     handleClearDatabase,
+    handleClearConfirm,
     handleBackupData,
+    handleBackupConfirm,
     handleRestoreData,
+    handleRestoreConfirm,
+    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
+    // Modal states
+    showBackupModal,
+    setShowBackupModal,
+    showRestoreModal,
+    setShowRestoreModal,
+    showRestoreConfirmationModal,
+    setShowRestoreConfirmationModal,
+    showSuccessModal,
+    setShowSuccessModal,
+    successModalData,
+    setSuccessModalData,
+    restoreBackupInfo,
+    setRestoreBackupInfo,
+    // Confirmation modal states
+    showPopulateConfirmation,
+    setShowPopulateConfirmation,
+    showClearConfirmation,
+    setShowClearConfirmation,
   } = useDatabaseManagement();
 
   /**
@@ -304,6 +334,64 @@ const Home = () => {
           />
         </View>
       )}
+
+      {/* Populate Database Confirmation Modal */}
+      <ConfirmationModal
+        visible={showPopulateConfirmation}
+        onClose={() => setShowPopulateConfirmation(false)}
+        onConfirm={handlePopulateConfirm}
+        title="Populate Database"
+        message="This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds."
+        confirmText="Populate"
+        variant="info"
+        isLoading={isPopulating}
+      />
+
+      {/* Clear Database Confirmation Modal */}
+      <ConfirmationModal
+        visible={showClearConfirmation}
+        onClose={() => setShowClearConfirmation(false)}
+        onConfirm={handleClearConfirm}
+        title="Clear Database"
+        message="This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!"
+        confirmText="Clear All"
+        variant="danger"
+        isLoading={isClearing}
+      />
+
+      {/* Backup Modal */}
+      <BackupModal
+        visible={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
+        onConfirm={handleBackupConfirm}
+        isLoading={isBackingUp}
+      />
+
+      {/* Restore Modal */}
+      <RestoreModal
+        visible={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onConfirm={handleRestoreConfirm}
+        isLoading={isRestoring}
+      />
+
+      {/* Restore Confirmation Modal */}
+      <RestoreConfirmationModal
+        visible={showRestoreConfirmationModal}
+        onClose={() => setShowRestoreConfirmationModal(false)}
+        onConfirm={handleFinalRestoreConfirm}
+        backupInfo={restoreBackupInfo}
+        isLoading={isRestoring}
+      />
+
+      {/* Success Modal */}
+      <SuccessModal
+        visible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title={successModalData.title}
+        message={successModalData.message}
+        details={successModalData.details}
+      />
     </View>
   );
 };

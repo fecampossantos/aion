@@ -1,6 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import { Alert } from 'react-native';
 
 /**
@@ -115,7 +116,7 @@ export async function exportBackupToFile(
 }
 
 /**
- * Downloads backup file to device storage and opens share dialog
+ * Creates a backup file and opens the share screen
  * @param db - SQLite database instance
  * @param filename - Optional filename for the backup file
  */
@@ -130,10 +131,24 @@ export async function downloadBackup(
       throw new Error('Sharing is not available on this device');
     }
 
-    // Export backup to file
-    const filePath = await exportBackupToFile(db, filename);
+    // Create backup data
+    const backupData = await createBackup(db);
 
-    // Get file info for confirmation
+    // Generate filename if not provided
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupFilename = filename || `aion-backup-${timestamp}.json`;
+
+    // Create file path in Documents directory
+    const filePath = `${FileSystem.documentDirectory}${backupFilename}`;
+
+    // Write backup data to Documents directory
+    await FileSystem.writeAsStringAsync(
+      filePath,
+      JSON.stringify(backupData, null, 2),
+      { encoding: FileSystem.EncodingType.UTF8 }
+    );
+
+    // Verify file was created successfully
     const fileInfo = await FileSystem.getInfoAsync(filePath);
     if (!fileInfo.exists) {
       throw new Error('Backup file was not created successfully');
@@ -149,11 +164,27 @@ export async function downloadBackup(
     // Show success message
     Alert.alert(
       'Backup Created',
-      `Backup file has been created and saved to your device.\n\nFile: ${filename || 'aion-backup.json'}\nSize: ${Math.round((fileInfo.size || 0) / 1024)} KB`
+      `Backup file has been created and is ready to share.\n\nFile: ${backupFilename}\nSize: ${Math.round((fileInfo.size || 0) / 1024)} KB`,
+      [
+        {
+          text: 'OK',
+          style: 'default'
+        }
+      ]
     );
 
   } catch (error) {
-    console.error('Error downloading backup:', error);
+    console.error('Error creating backup:', error);
+    Alert.alert(
+      'Backup Failed',
+      `Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      [
+        {
+          text: 'OK',
+          style: 'default'
+        }
+      ]
+    );
     throw error;
   }
 }
@@ -246,7 +277,89 @@ export async function restoreFromBackup(
 
   } catch (error) {
     console.error('Error restoring from backup:', error);
+    // Preserve the original error message
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Failed to restore from backup');
+  }
+}
+
+/**
+ * Allows user to select a backup file and restores the database from it
+ * @param db - SQLite database instance
+ * @returns Promise<object> - Backup information after successful restore
+ */
+export async function restoreFromSelectedFile(
+  db: SQLiteDatabase
+): Promise<{
+  date: string;
+  projectCount: number;
+  taskCount: number;
+  timingCount: number;
+}> {
+  try {
+    // Let user select a backup file
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'application/json',
+      copyToCacheDirectory: true,
+      multiple: false
+    });
+
+    if (result.canceled) {
+      // User cancelled the selection
+      return;
+    }
+
+    // Get the selected file
+    const selectedFile = result.assets?.[0];
+    if (!selectedFile) {
+      throw new Error('No file selected');
+    }
+
+    // Validate file extension
+    if (!selectedFile.name.toLowerCase().endsWith('.json')) {
+      throw new Error('Please select a valid backup file (.json)');
+    }
+
+    // Read and parse backup file
+    const fileContent = await FileSystem.readAsStringAsync(selectedFile.uri);
+    let backupData: BackupData;
+    
+    try {
+      backupData = JSON.parse(fileContent);
+    } catch (parseError) {
+      throw new Error('Invalid backup file format. Please select a valid Aion backup file.');
+    }
+
+    // Validate backup data structure
+    if (!backupData.data || !backupData.version || !backupData.timestamp) {
+      throw new Error('Invalid backup file. This does not appear to be a valid Aion backup.');
+    }
+
+    // For now, we'll proceed with the restore since the confirmation is handled by the modal
+    // In a future implementation, this could be made more flexible
+    const projectCount = backupData.data.projects?.length || 0;
+    const taskCount = backupData.data.tasks?.length || 0;
+    const timingCount = backupData.data.timings?.length || 0;
+    const backupDate = backupData.timestamp ? new Date(backupData.timestamp).toLocaleDateString() : 'Unknown';
+
+    // Restore from backup data
+    await restoreFromBackup(db, backupData);
+
+    // Success message will be handled by the calling component
+    // Return the backup info for display
+    return {
+      date: backupDate,
+      projectCount,
+      taskCount,
+      timingCount
+    };
+
+  } catch (error) {
+    console.error('Error restoring from selected file:', error);
+    // Error message will be handled by the calling component
+    throw error;
   }
 }
 
