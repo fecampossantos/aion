@@ -566,6 +566,7 @@ const ProjectInfo = () => {
               withHorizontalLines={true}
               withVerticalLines={false}
               fromZero={true}
+              withVerticalLabels={false}
             />
           </View>
           <View style={styles.burndownLegend}>
@@ -652,7 +653,6 @@ const ProjectInfo = () => {
         />
       )}
 
-      {/* Delete Project Confirmation Modal */}
       <Modal
         visible={showDeleteModal}
         transparent={true}
