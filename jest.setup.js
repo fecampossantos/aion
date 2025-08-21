@@ -44,7 +44,14 @@ jest.mock('expo-sharing', () => ({
 jest.mock('expo-sqlite', () => ({
   useSQLiteContext: jest.fn(() => ({
     runAsync: jest.fn(() => Promise.resolve({ changes: 1, lastInsertRowId: 1 })),
-    getFirstAsync: jest.fn(() => Promise.resolve({ project_id: 1, name: 'Test Project' })),
+    getFirstAsync: jest.fn((query) => {
+      // Handle count queries
+      if (query && query.includes('COUNT(*)')) {
+        return Promise.resolve({ count: 0 });
+      }
+      // Handle other queries
+      return Promise.resolve({ project_id: 1, name: 'Test Project' });
+    }),
     getAllAsync: jest.fn(() => Promise.resolve([
       { name: 'Test Task' },
       { timing_id: 1, task_id: 1, time: 3600, created_at: '2023-01-01T10:00:00Z' }

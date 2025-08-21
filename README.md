@@ -237,11 +237,10 @@ This project is private and proprietary.
 - None (let me know if you find any 😅)
 
 ### Planned Features
-- Data backup and restore
+- Data backup and restore - _in progress on background agents_
 - Multi-language support
-- Search bar on projects screen
-- Last worked on tasks display on projects screen
-- Search bar and pagination on tasks screen
+- Last worked on tasks display on projects screen - _in progress on background agents_
+- Tasks analysis (burndown chart) - _in progress on background agents_
 
 ## 📞 Support
 

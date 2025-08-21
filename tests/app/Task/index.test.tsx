@@ -61,6 +61,28 @@ jest.mock("../../../components/LoadingView", () => {
   );
 });
 
+
+
+jest.mock("../../../components/Pagination", () => {
+  const { View, Text, TouchableOpacity } = require("react-native");
+  return ({ currentPage, totalPages, onPageChange, onNextPage, onPreviousPage }: any) => {
+    if (totalPages <= 1) return null;
+    
+    return (
+      <View testID="pagination">
+        <TouchableOpacity testID="prev-page" onPress={onPreviousPage}>
+          <Text>Previous</Text>
+        </TouchableOpacity>
+        <Text testID="current-page">{currentPage}</Text>
+        <Text testID="total-pages">{totalPages}</Text>
+        <TouchableOpacity testID="next-page" onPress={onNextPage}>
+          <Text>Next</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+});
+
 // Mock data
 const mockTimings = [
   {
@@ -360,4 +382,97 @@ describe("Task Component", () => {
       );
     });
   });
+
+
+
+  // Pagination Tests
+  it("shows pagination when there are multiple pages", async () => {
+    // Mock more timings to trigger pagination
+    const manyTimings = Array.from({ length: 15 }, (_, i) => ({
+      timing_id: i + 1,
+      task_id: 1,
+      time: 3600,
+      created_at: new Date(`2023-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`),
+    }));
+    
+    mockDatabase.getAllAsync.mockResolvedValue(manyTimings);
+    
+    const { getByTestId } = render(<Task />);
+    
+    await waitFor(() => {
+      expect(getByTestId("pagination")).toBeDefined();
+    });
+  });
+
+  it("does not show pagination when there is only one page", async () => {
+    const { queryByTestId } = render(<Task />);
+    
+    await waitFor(() => {
+      expect(queryByTestId("pagination")).toBeNull();
+    });
+  });
+
+  it("displays correct page information", async () => {
+    // Mock more timings to trigger pagination
+    const manyTimings = Array.from({ length: 15 }, (_, i) => ({
+      timing_id: i + 1,
+      task_id: 1,
+      time: 3600,
+      created_at: new Date(`2023-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`),
+    }));
+    
+    mockDatabase.getAllAsync.mockResolvedValue(manyTimings);
+    
+    const { getByTestId } = render(<Task />);
+    
+    await waitFor(() => {
+      expect(getByTestId("current-page")).toBeDefined();
+      expect(getByTestId("total-pages")).toBeDefined();
+    });
+  });
+
+  it("handles pagination navigation correctly", async () => {
+    // Mock more timings to trigger pagination
+    const manyTimings = Array.from({ length: 15 }, (_, i) => ({
+      timing_id: i + 1,
+      task_id: 1,
+      time: 3600,
+      created_at: new Date(`2023-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`),
+    }));
+    
+    mockDatabase.getAllAsync.mockResolvedValue(manyTimings);
+    
+    const { getByTestId } = render(<Task />);
+    
+    await waitFor(() => {
+      const nextButton = getByTestId("next-page");
+      const prevButton = getByTestId("prev-page");
+      
+      expect(nextButton).toBeDefined();
+      expect(prevButton).toBeDefined();
+    });
+  });
+
+  // Integration Tests for Pagination
+  it("shows pagination results info when timings exist", async () => {
+    const { getByText } = render(<Task />);
+    
+    await waitFor(() => {
+      expect(getByText("Showing 2 of 2 sessions")).toBeDefined();
+    });
+  });
+
+  it("shows appropriate messages for different states", async () => {
+    // Mock empty timings to test the "no sessions" message
+    mockDatabase.getAllAsync.mockResolvedValue([]);
+    
+    const { getByText } = render(<Task />);
+    
+    await waitFor(() => {
+      // Should show "No time sessions yet" when no timings exist
+      expect(getByText("No time sessions yet")).toBeDefined();
+    });
+  });
+
+
 });

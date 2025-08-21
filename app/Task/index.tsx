@@ -5,6 +5,7 @@ import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import Timer from "../../components/Timer";
 import Timing from "../../components/Timing";
 import LoadingView from "../../components/LoadingView";
+import Pagination from "../../components/Pagination";
 import { theme } from "../../globalStyle/theme";
 import { useTask } from "./useTask";
 
@@ -91,7 +92,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-
+  resultsInfo: {
+    color: theme.colors.neutral[400],
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.fontSize.sm,
+    textAlign: "center",
+    marginBottom: theme.spacing.md,
+  },
   noTimingsWarningContainer: {
     display: "flex",
     alignItems: "center",
@@ -121,31 +128,40 @@ const styles = StyleSheet.create({
  */
 const Task = () => {
   const router = useRouter();
-  const { taskID, taskName } = useLocalSearchParams();
+  const { taskID, taskName, projectID } = useLocalSearchParams();
   
   const {
     timings,
     isLoading,
     isTimerRunning,
     taskTitle,
+    currentPage,
     onInitTimer,
     onStopTimer,
     calculateTotalTime,
     formatTotalTime,
     handleDeleteTiming,
+    getPaginatedTimings,
+    getTotalPages,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
   } = useTask(taskID as string);
   
   const handleAddRecordPress = () => {
-    // Get the project ID from the task
+    // Navigate to AddRecord with task and project information for prepopulation
     router.push({
       pathname: "AddRecord",
       params: {
-        projectID: taskID, // This will be used to get the project context
+        projectID: projectID,
         taskID: taskID,
         taskName: taskTitle,
       },
     });
   };
+
+  const paginatedTimings = getPaginatedTimings();
+  const totalPages = getTotalPages();
 
   return (
     <View style={styles.container}>
@@ -155,7 +171,6 @@ const Task = () => {
         contentContainerStyle={styles.scrollViewContent}
       >
         <View style={styles.timerSection}>
-          <Text style={styles.sectionTitle}>Timer</Text>
           <Timer
             onInit={onInitTimer}
             onStop={onStopTimer}
@@ -189,19 +204,36 @@ const Task = () => {
               />
             </TouchableOpacity>
           </View>
+
           {isLoading ? (
             <LoadingView />
           ) : (
             <View>
               {timings.length > 0 ? (
-                timings.map((t) => (
-                  <Timing
-                    timing={t}
-                    key={t.timing_id}
-                    deleteTiming={() => handleDeleteTiming(t.timing_id)}
-                    isTimerRunning={isTimerRunning}
-                  />
-                ))
+                <>
+                  <Text style={styles.resultsInfo}>
+                    Showing {paginatedTimings.length} of {timings.length} sessions
+                  </Text>
+                  
+                  {paginatedTimings.map((t) => (
+                    <Timing
+                      timing={t}
+                      key={t.timing_id}
+                      deleteTiming={() => handleDeleteTiming(t.timing_id)}
+                      isTimerRunning={isTimerRunning}
+                    />
+                  ))}
+
+                  {totalPages > 1 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={goToPage}
+                      onNextPage={goToNextPage}
+                      onPreviousPage={goToPreviousPage}
+                    />
+                  )}
+                </>
               ) : (
                 <View style={styles.noTimingsWarningContainer}>
                   <Feather

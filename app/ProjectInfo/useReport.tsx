@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
-import { Alert } from "react-native";
 import { Project as IProject } from "../../interfaces/Project";
 import { getEndOfDay, getInitOfDay, prepareResultSet } from "./utils";
 
@@ -25,11 +24,19 @@ const useReport = (projectID: string) => {
   const [showChart, setShowChart] = useState(false);
   const [burndownData, setBurndownData] = useState<{
     labels: Array<string>;
-    datasets: Array<{ data: Array<number>; color?: (opacity: number) => string; strokeWidth?: number }>;
+    datasets: Array<{
+      data: Array<number>;
+      color?: (opacity: number) => string;
+      strokeWidth?: number;
+    }>;
   } | null>();
   const [showBurndownChart, setShowBurndownChart] = useState(false);
 
   const [project, setProject] = useState<IProject>();
+
+  // Modal state for delete confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteProjectInput, setDeleteProjectInput] = useState("");
 
   async function getProject() {
     const project = await database.getFirstAsync<IProject>(
@@ -106,10 +113,12 @@ const useReport = (projectID: string) => {
       }
 
       // Create date range from project start to end date
-      const projectStartDate = new Date(Math.min(...tasks.map(t => new Date(t.created_date).getTime())));
+      const projectStartDate = new Date(
+        Math.min(...tasks.map((t) => new Date(t.created_date).getTime()))
+      );
       const dateRange: Date[] = [];
       const currentDate = new Date(projectStartDate);
-      
+
       while (currentDate <= endDate) {
         dateRange.push(new Date(currentDate));
         currentDate.setDate(currentDate.getDate() + 1);
@@ -117,9 +126,9 @@ const useReport = (projectID: string) => {
 
       // Calculate ideal and actual burndown
       const totalTasks = tasks.length;
-      const labels = dateRange.map(date => {
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
+      const labels = dateRange.map((date) => {
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
         return `${day}/${month}`;
       });
 
@@ -127,21 +136,25 @@ const useReport = (projectID: string) => {
       const actualBurndown: number[] = [];
 
       dateRange.forEach((date, index) => {
-        const dateStr = date.toISOString().split('T')[0];
-        
+        const dateStr = date.toISOString().split("T")[0];
+
         // Ideal burndown (linear decrease)
         const daysFromStart = index;
         const totalDays = dateRange.length - 1;
-        const idealRemaining = totalDays > 0 ? Math.max(0, totalTasks - (totalTasks * daysFromStart / totalDays)) : totalTasks;
+        const idealRemaining =
+          totalDays > 0
+            ? Math.max(0, totalTasks - (totalTasks * daysFromStart) / totalDays)
+            : totalTasks;
         idealBurndown.push(Math.round(idealRemaining));
 
         // Actual burndown (tasks remaining based on completion dates)
-        const completedByDate = tasks.filter(task => 
-          task.completed === 1 && 
-          task.completed_date && 
-          task.completed_date <= dateStr
+        const completedByDate = tasks.filter(
+          (task) =>
+            task.completed === 1 &&
+            task.completed_date &&
+            task.completed_date <= dateStr
         ).length;
-        
+
         actualBurndown.push(totalTasks - completedByDate);
       });
 
@@ -157,30 +170,47 @@ const useReport = (projectID: string) => {
             data: actualBurndown,
             color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // blue for actual
             strokeWidth: 3,
-          }
-        ]
+          },
+        ],
       });
       setShowBurndownChart(true);
     } catch (e) {
-      console.warn('Error generating burndown data:', e);
+      console.warn("Error generating burndown data:", e);
       setShowBurndownChart(false);
     }
   }
 
+  /**
+   * Handles the actual deletion of the project
+   */
   const handleDeleteProject = () => {
     database.runAsync("DELETE FROM projects WHERE project_id = ?;", projectID);
     router.replace("/");
   };
 
+  /**
+   * Shows the delete confirmation modal
+   */
   const handleClickedOnDeleteProject = () => {
-    Alert.alert("Apagar projeto?", "Você perderá todas as informações dele!", [
-      { text: "Cancelar", style: "cancel", onPress: () => {} },
-      {
-        text: "Apagar",
-        style: "destructive",
-        onPress: () => handleDeleteProject(),
-      },
-    ]);
+    setShowDeleteModal(true);
+    setDeleteProjectInput("");
+  };
+
+  /**
+   * Handles the delete confirmation with project name validation
+   */
+  const handleConfirmDelete = () => {
+    if (project && deleteProjectInput === project.name) {
+      handleDeleteProject();
+    }
+  };
+
+  /**
+   * Closes the delete modal and resets input
+   */
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteProjectInput("");
   };
 
   const handleUpdateDate = (event, selectedDate) => {
@@ -216,6 +246,12 @@ const useReport = (projectID: string) => {
     project,
     showChart,
     showBurndownChart,
+    // Modal state and handlers
+    showDeleteModal,
+    deleteProjectInput,
+    setDeleteProjectInput,
+    handleConfirmDelete,
+    handleCancelDelete,
   };
 };
 

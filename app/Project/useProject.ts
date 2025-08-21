@@ -14,7 +14,7 @@ interface TaskWithTimed {
 }
 
 /**
- * Custom hook for managing project functionality
+ * Custom hook for managing project functionality with task name search and pagination
  * @param {string} projectID - The project ID
  * @returns {Object} Project state and functions
  */
@@ -29,9 +29,16 @@ export const useProject = (projectID: string) => {
   }
 
   const [tasks, setTasks] = useState<Array<TaskWithTimed>>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Array<TaskWithTimed>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timerIdRunning, setTimerIdRunning] = useState<number | null>(null);
   const [project, setProject] = useState<IProject>();
+  
+  // Search, filter, and pagination state
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
 
   const isTimerRunning = timerIdRunning !== null;
 
@@ -85,9 +92,47 @@ export const useProject = (projectID: string) => {
   // Reset state when projectID changes
   useEffect(() => {
     setTasks([]);
+    setFilteredTasks([]);
     setIsLoading(true);
     setTimerIdRunning(null);
+    setCurrentPage(1);
+    setSearchQuery("");
+    setShowCompleted(false);
   }, [projectID]);
+
+  /**
+   * Filters tasks based on search query and show completed preference
+   * @param {string} query - The search query string to match against task names
+   */
+  const filterTasks = useCallback((query: string) => {
+    let filtered = tasks;
+
+    // Filter by completion status
+    // When showCompleted is false (default), show only incomplete tasks (completed === 0)
+    // When showCompleted is true (toggled), show all tasks (both completed and incomplete)
+    if (!showCompleted) {
+      filtered = filtered.filter((task) => task.completed === 0);
+    }
+    // If showCompleted is true, we don't filter - show all tasks
+
+    // Filter by search query
+    if (query.trim()) {
+      const searchLower = query.toLowerCase();
+      filtered = filtered.filter((task) =>
+        task.name.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    setFilteredTasks(filtered);
+    setCurrentPage(1);
+  }, [tasks, showCompleted]);
+
+  // Re-filter tasks when showCompleted or tasks change
+  useEffect(() => {
+    if (tasks && tasks.length > 0) {
+      filterTasks(searchQuery);
+    }
+  }, [filterTasks, searchQuery, showCompleted]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", () => {
@@ -136,9 +181,11 @@ ORDER BY
       );
 
       setTasks(allTasks);
+      setFilteredTasks(allTasks);
     } catch (error) {
       // Set tasks to undefined on error
       setTasks(undefined);
+      setFilteredTasks(undefined);
     }
   };
 
@@ -201,13 +248,89 @@ ORDER BY
     setTimerIdRunning(null);
   };
 
+  /**
+   * Handles search query changes
+   * @param {string} query - The new search query
+   */
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    filterTasks(query);
+  };
+
+  /**
+   * Handles show completed toggle
+   * @param {boolean} value - Whether to show completed tasks
+   */
+  const handleShowCompletedToggle = (value: boolean) => {
+    setShowCompleted(value);
+    filterTasks(searchQuery);
+  };
+
+  /**
+   * Gets paginated tasks for the current page
+   * @returns {Array<TaskWithTimed>} Array of tasks for the current page
+   */
+  const getPaginatedTasks = (): Array<TaskWithTimed> => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredTasks.slice(startIndex, endIndex);
+  };
+
+  /**
+   * Gets the total number of pages
+   * @returns {number} Total number of pages
+   */
+  const getTotalPages = (): number => {
+    return Math.ceil(filteredTasks.length / itemsPerPage);
+  };
+
+  /**
+   * Goes to the next page
+   */
+  const goToNextPage = () => {
+    if (currentPage < getTotalPages()) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  /**
+   * Goes to the previous page
+   */
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  /**
+   * Goes to a specific page
+   * @param {number} page - The page number to go to
+   */
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= getTotalPages()) {
+      setCurrentPage(page);
+    }
+  };
+
   return {
     tasks,
+    filteredTasks,
     isLoading,
     timerIdRunning,
     project,
     isTimerRunning,
+    searchQuery,
+    showCompleted,
+    currentPage,
+    itemsPerPage,
     getTasks,
+    getPaginatedTasks,
+    getTotalPages,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+    handleSearchChange,
+    handleShowCompletedToggle,
     handleNavigateToTask,
     handleDoneTask,
     handleInitTimer,
