@@ -103,7 +103,7 @@ export function generateReportHTML(
       ? ((summary.completedTasks / summary.totalTasks) * 100).toFixed(1)
       : "0";
 
-  // Group timings by task
+  // Group timings by task and only include tasks recorded during the period
   const taskGroups = timings.reduce((acc, timing) => {
     if (!acc[timing.task_name]) {
       acc[timing.task_name] = {
@@ -117,33 +117,11 @@ export function generateReportHTML(
     return acc;
   }, {} as Record<string, { sessions: TimingsResult[]; totalTime: number; completed: number }>);
 
-  const data_rows = timings.map((t: TimingsResult) => {
-    const { d: date, time } = fullDateWithHour(t.timing_created_at);
-    return `
-      <tr class="${t.task_completed === 1 ? "completed-task" : "pending-task"}">
-        <td>
-          <span class="status-icon">${
-            t.task_completed === 0 ? "⏳" : "✅"
-          }</span>
-          <span class="status-text">${
-            t.task_completed === 0 ? "Em progresso" : "Concluída"
-          }</span>
-        </td>
-        <td class="task-name">${t.task_name}</td>
-        <td class="session-date">${date}</td>
-        <td class="session-time">${time}</td>
-        <td class="session-duration">${secondsToTimeHHMMSS(t.timing_timed)}</td>
-      </tr>`;
-  });
-
   const task_summary_rows = Object.entries(taskGroups).map(
     ([taskName, data]) => `
     <tr class="${data.completed === 1 ? "completed-task" : "pending-task"}">
-      <td>
-        <span class="status-icon">${data.completed === 0 ? "⏳" : "✅"}</span>
-        <span class="task-name">${taskName}</span>
-      </td>
-      <td class="sessions-count">${data.sessions.length} sessões</td>
+      <td class="task-name">${taskName}</td>
+      <td class="sessions-count">${data.sessions.length}</td>
       <td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>
       <td class="task-cost">R$ ${(
         (data.totalTime / 3600) *
@@ -159,7 +137,6 @@ export function generateReportHTML(
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>${documentName}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -171,83 +148,24 @@ export function generateReportHTML(
 
     <style>
       :root {
-        /* Theme Colors */
-        --primary-50: #eff6ff;
-        --primary-100: #dbeafe;
-        --primary-200: #bfdbfe;
-        --primary-300: #93c5fd;
-        --primary-400: #60a5fa;
-        --primary-500: #3b82f6;
-        --primary-600: #2563eb;
-        --primary-700: #1d4ed8;
-        --primary-800: #1e40af;
-        --primary-900: #1e3a8a;
-        
-        --neutral-50: #f8fafc;
-        --neutral-100: #f1f5f9;
-        --neutral-200: #e2e8f0;
-        --neutral-300: #cbd5e1;
-        --neutral-400: #94a3b8;
-        --neutral-500: #64748b;
-        --neutral-600: #475569;
-        --neutral-700: #334155;
-        --neutral-800: #1e293b;
-        --neutral-900: #0f172a;
-        
-        --success-50: #ecfdf5;
-        --success-100: #d1fae5;
-        --success-200: #a7f3d0;
-        --success-300: #6ee7b7;
-        --success-400: #34d399;
-        --success-500: #10b981;
-        --success-600: #059669;
-        --success-700: #047857;
-        --success-800: #065f46;
-        --success-900: #064e3b;
-        
-        --warning-50: #fffbeb;
-        --warning-100: #fef3c7;
-        --warning-200: #fde68a;
-        --warning-300: #fcd34d;
-        --warning-400: #fbbf24;
-        --warning-500: #f59e0b;
-        --warning-600: #d97706;
-        --warning-700: #b45309;
-        --warning-800: #92400e;
-        --warning-900: #78350f;
-        
-        --error-50: #fef2f2;
-        --error-100: #fee2e2;
-        --error-200: #fecaca;
-        --error-300: #fca5a5;
-        --error-400: #f87171;
-        --error-500: #ef4444;
-        --error-600: #dc2626;
-        --error-700: #b91c1c;
-        --error-800: #991b1b;
-        --error-900: #7f1d1d;
-        
-        /* Spacing Scale */
-        --spacing-xs: 4px;
-        --spacing-sm: 8px;
-        --spacing-md: 12px;
-        --spacing-lg: 16px;
-        --spacing-xl: 20px;
-        --spacing-2xl: 24px;
-        --spacing-3xl: 32px;
-        --spacing-4xl: 40px;
-        --spacing-5xl: 48px;
-        --spacing-6xl: 64px;
-        
-        /* Border Radius */
-        --radius-none: 0px;
-        --radius-sm: 4px;
-        --radius-md: 8px;
-        --radius-lg: 12px;
-        --radius-xl: 16px;
-        --radius-2xl: 20px;
-        --radius-3xl: 24px;
-        --radius-full: 9999px;
+        --primary: #3b82f6;
+        --primary-light: #1e40af;
+        --success: #10b981;
+        --success-light: #065f46;
+        --warning: #f59e0b;
+        --warning-light: #92400e;
+        --neutral-50: #0f172a;
+        --neutral-100: #1e293b;
+        --neutral-200: #334155;
+        --neutral-300: #475569;
+        --neutral-400: #64748b;
+        --neutral-500: #94a3b8;
+        --neutral-600: #cbd5e1;
+        --neutral-700: #e2e8f0;
+        --neutral-800: #f1f5f9;
+        --neutral-900: #f8fafc;
+        --white: #ffffff;
+        --black: #000000;
       }
 
       * {
@@ -260,208 +178,139 @@ export function generateReportHTML(
         font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
         background-color: var(--neutral-50);
         color: var(--neutral-900);
-        line-height: 1.6;
+        line-height: 1.5;
         font-size: 14px;
+        -webkit-font-smoothing: antialiased;
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 1000px;
         margin: 0 auto;
-        padding: var(--spacing-lg);
+        padding: 40px 20px;
       }
 
       .header {
         text-align: center;
-        margin-bottom: var(--spacing-4xl);
-        padding-bottom: var(--spacing-xl);
-        border-bottom: 3px solid var(--primary-500);
-        position: relative;
-      }
-
-      .header::after {
-        content: '';
-        position: absolute;
-        bottom: -3px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
-        border-radius: var(--radius-full);
+        margin-bottom: 48px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid var(--neutral-200);
       }
 
       .header h1 {
-        color: var(--primary-600);
-        font-size: 36px;
+        color: var(--white);
+        font-size: 32px;
         font-weight: 700;
-        margin-bottom: var(--spacing-sm);
-        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+        letter-spacing: -0.025em;
       }
 
       .header .subtitle {
         color: var(--neutral-600);
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 400;
-        opacity: 0.8;
       }
 
       .project-info {
-        background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-        color: white;
-        border-radius: var(--radius-xl);
-        padding: var(--spacing-3xl);
-        margin-bottom: var(--spacing-3xl);
-        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .project-info::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 200px;
-        height: 200px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        transform: translate(50%, -50%);
+        background: var(--neutral-100);
+        border: 1px solid var(--neutral-200);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
       }
 
       .project-info h2 {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 600;
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: 20px;
+        color: var(--white);
         text-align: center;
-        position: relative;
-        z-index: 1;
       }
 
       .project-details {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
         text-align: center;
-        position: relative;
-        z-index: 1;
       }
 
       .project-detail {
-        background: rgba(255, 255, 255, 0.15);
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-lg);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: transform 0.2s ease;
-      }
-
-      .project-detail:hover {
-        transform: translateY(-2px);
+        padding: 16px;
+        background: var(--neutral-200);
+        border-radius: 8px;
+        border: 1px solid var(--neutral-300);
       }
 
       .project-detail .label {
         font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        opacity: 0.9;
-        margin-bottom: var(--spacing-sm);
+        letter-spacing: 0.05em;
+        color: var(--neutral-500);
+        margin-bottom: 4px;
         font-weight: 500;
       }
 
       .project-detail .value {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
+        color: var(--white);
       }
 
       .summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-3xl);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
       }
 
       .summary-card {
-        background: white;
+        background: var(--neutral-100);
         border: 1px solid var(--neutral-200);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
+        border-radius: 12px;
+        padding: 20px;
         text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transition: all 0.2s ease;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .summary-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-500), var(--success-500));
-      }
-
-      .summary-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
       }
 
       .summary-card h3 {
-        color: var(--neutral-700);
-        font-size: 14px;
-        font-weight: 600;
+        color: var(--neutral-500);
+        font-size: 13px;
+        font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: var(--spacing-md);
-        color: var(--neutral-600);
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
       }
 
       .summary-card .metric {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 700;
-        color: var(--primary-600);
-        margin-bottom: var(--spacing-sm);
+        color: var(--primary);
+        margin-bottom: 4px;
         line-height: 1.2;
       }
 
       .summary-card .sub-metric {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--neutral-500);
         line-height: 1.4;
       }
 
       .section {
-        margin-bottom: var(--spacing-4xl);
+        margin-bottom: 40px;
       }
 
       .section-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 600;
-        color: var(--neutral-800);
-        margin-bottom: var(--spacing-xl);
-        padding-bottom: var(--spacing-md);
-        border-bottom: 2px solid var(--neutral-200);
-        position: relative;
-      }
-
-      .section-title::before {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 40px;
-        height: 2px;
-        background: var(--primary-500);
-        border-radius: var(--radius-full);
+        color: var(--white);
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--neutral-200);
       }
 
       .table-container {
-        background: white;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        background: var(--neutral-100);
         border: 1px solid var(--neutral-200);
+        border-radius: 12px;
+        overflow: hidden;
       }
 
       table {
@@ -470,171 +319,95 @@ export function generateReportHTML(
       }
 
       th {
-        background: var(--neutral-50);
+        background: var(--neutral-200);
         color: var(--neutral-700);
         font-weight: 600;
         font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: var(--spacing-lg) var(--spacing-md);
+        letter-spacing: 0.05em;
+        padding: 16px 12px;
         text-align: left;
-        border-bottom: 1px solid var(--neutral-200);
-        position: sticky;
-        top: 0;
-        z-index: 10;
+        border-bottom: 1px solid var(--neutral-300);
       }
 
       td {
-        padding: var(--spacing-md);
-        border-bottom: 1px solid var(--neutral-100);
+        padding: 12px;
+        border-bottom: 1px solid var(--neutral-200);
         font-size: 13px;
-        transition: background-color 0.2s ease;
       }
 
-      tr:hover {
-        background: var(--neutral-50);
+      tr:last-child td {
+        border-bottom: none;
       }
 
-      .completed-task td {
-        background: rgba(16, 185, 129, 0.05);
-        border-left: 4px solid var(--success-500);
+      .completed-task {
+        background: var(--success-light);
       }
 
-      .pending-task td {
-        background: rgba(245, 158, 11, 0.05);
-        border-left: 4px solid var(--warning-500);
-      }
-
-      .status-icon {
-        margin-right: var(--spacing-sm);
-        font-size: 16px;
-        display: inline-block;
-        width: 20px;
-        text-align: center;
-      }
-
-      .status-text {
-        font-weight: 500;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+      .pending-task {
+        background: var(--warning-light);
       }
 
       .task-name {
-        font-weight: 600;
-        color: var(--neutral-800);
-      }
-
-      .session-date, .session-time {
-        color: var(--neutral-600);
-        font-family: 'Monaco', 'Menlo', monospace;
-        font-size: 12px;
-        background: var(--neutral-100);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: var(--radius-sm);
-        display: inline-block;
-      }
-
-      .session-duration, .task-total-time {
-        font-weight: 600;
-        color: var(--primary-600);
-        font-family: 'Monaco', 'Menlo', monospace;
-        background: var(--primary-50);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: var(--radius-sm);
-        display: inline-block;
+        font-weight: 500;
+        color: var(--white);
       }
 
       .sessions-count {
         color: var(--neutral-600);
         font-size: 12px;
-        background: var(--neutral-100);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: var(--radius-sm);
-        display: inline-block;
+        text-align: center;
+      }
+
+      .task-total-time {
+        font-weight: 600;
+        color: var(--primary);
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 12px;
       }
 
       .task-cost {
         font-weight: 600;
-        color: var(--success-600);
-        background: var(--success-50);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: var(--radius-sm);
-        display: inline-block;
-      }
-
-      .total-row {
-        background: var(--primary-600) !important;
-        color: white !important;
-        font-weight: 600;
-      }
-
-      .total-row td {
-        background: var(--primary-600) !important;
-        color: white;
-        font-weight: 600;
-        border-left: none;
+        color: var(--success);
+        text-align: right;
       }
 
       .cost-summary {
-        background: linear-gradient(135deg, var(--success-600), var(--success-700));
-        color: white;
-        border-radius: var(--radius-xl);
-        padding: var(--spacing-3xl);
+        background: var(--success-light);
+        border: 1px solid var(--success);
+        border-radius: 12px;
+        padding: 24px;
         text-align: center;
-        margin-top: var(--spacing-3xl);
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .cost-summary::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 200px;
-        height: 200px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        transform: translate(50%, -50%);
+        margin-top: 32px;
       }
 
       .cost-summary h3 {
-        font-size: 20px;
-        margin-bottom: var(--spacing-md);
-        opacity: 0.9;
-        position: relative;
-        z-index: 1;
+        font-size: 18px;
+        margin-bottom: 12px;
+        color: var(--success);
+        font-weight: 600;
       }
 
       .cost-summary .total-cost {
-        font-size: 42px;
+        font-size: 36px;
         font-weight: 700;
-        margin-bottom: var(--spacing-md);
-        position: relative;
-        z-index: 1;
+        margin-bottom: 8px;
+        color: var(--success);
       }
 
       .cost-summary .cost-breakdown {
-        font-size: 15px;
-        opacity: 0.8;
-        position: relative;
-        z-index: 1;
-      }
-
-      .page-break {
-        page-break-before: always;
+        font-size: 14px;
+        color: var(--neutral-600);
       }
 
       @media print {
         body {
           font-size: 12px;
-          background-color: white;
+          background-color: var(--black);
         }
         
         .container {
-          padding: var(--spacing-md);
+          padding: 20px;
         }
         
         .summary-grid {
@@ -643,8 +416,7 @@ export function generateReportHTML(
         
         .project-info,
         .cost-summary {
-          box-shadow: none;
-          border: 2px solid var(--neutral-300);
+          border: 1px solid var(--neutral-300);
         }
       }
     </style>
@@ -654,7 +426,7 @@ export function generateReportHTML(
     <div class="container">
       <div class="header">
         <h1>Relatório de Produtividade</h1>
-        <p class="subtitle">Análise detalhada de tempo e desempenho</p>
+        <p class="subtitle">Análise de tempo e desempenho</p>
       </div>
       
       <div class="project-info">
@@ -679,38 +451,18 @@ export function generateReportHTML(
         <div class="summary-card">
           <h3>Tempo Total</h3>
           <div class="metric">${totalTime}</div>
-          <div class="sub-metric">${summary.totalSessions} sessões em ${
-    summary.totalDays
-  } dias</div>
+          <div class="sub-metric">${summary.totalSessions} sessões</div>
         </div>
         
         <div class="summary-card">
           <h3>Taxa de Conclusão</h3>
           <div class="metric">${completionRate}%</div>
-          <div class="sub-metric">${summary.completedTasks} de ${
-    summary.totalTasks
-  } tarefas</div>
-        </div>
-        
-        <div class="summary-card">
-          <h3>Sessão Média</h3>
-          <div class="metric">${secondsToTimeHHMMSS(
-            Math.round(summary.averageSessionTime)
-          )}</div>
-          <div class="sub-metric">Variação: ${secondsToTimeHHMMSS(
-            summary.shortestSession
-          )} - ${secondsToTimeHHMMSS(summary.longestSession)}</div>
-        </div>
-        
-        <div class="summary-card">
-          <h3>Dia Mais Produtivo</h3>
-          <div class="metric">${summary.mostProductiveDay}</div>
-          <div class="sub-metric">Análise do período selecionado</div>
+          <div class="sub-metric">${summary.completedTasks}/${summary.totalTasks} tarefas</div>
         </div>
       </div>
 
       <div class="section">
-        <h2 class="section-title">📋 Resumo por Tarefa</h2>
+        <h2 class="section-title">Resumo por Tarefa</h2>
         <div class="table-container">
           <table>
             <thead>
@@ -728,39 +480,13 @@ export function generateReportHTML(
         </div>
       </div>
 
-      <div class="section page-break">
-        <h2 class="section-title">⏱️ Detalhamento de Sessões</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Tarefa</th>
-                <th>Data</th>
-                <th>Horário</th>
-                <th>Duração</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data_rows.join("")}
-              <tr class="total-row">
-                <td colspan="4"><strong>TEMPO TOTAL</strong></td>
-                <td><strong>${totalTime}</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <div class="cost-summary">
-        <h3>💰 Resumo Financeiro</h3>
+        <h3>Resumo Financeiro</h3>
         <div class="total-cost">R$ ${total_cost
           .toString()
           .replace(".", ",")}</div>
         <div class="cost-breakdown">
-          Baseado em ${hours}h ${minutes}m ${seconds}s a R$ ${
-    project.hourly_cost
-  }/hora
+          ${hours}h ${minutes}m ${seconds}s × R$ ${project.hourly_cost}/hora
         </div>
       </div>
     </div>

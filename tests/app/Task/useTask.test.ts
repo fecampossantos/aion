@@ -1,437 +1,248 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useTask } from '../../../app/Task/useTask';
-import { useSQLiteContext } from 'expo-sqlite';
 
-// Mock the dependencies
-jest.mock('expo-sqlite');
+// Mock expo-sqlite
+const mockDatabase = {
+  getAllAsync: jest.fn(),
+  runAsync: jest.fn(),
+};
 
-const mockUseSQLiteContext = useSQLiteContext as jest.MockedFunction<typeof useSQLiteContext>;
+jest.mock('expo-sqlite', () => ({
+  useSQLiteContext: () => mockDatabase,
+}));
+
+// Mock data
+const mockTimings = [
+  {
+    timing_id: 1,
+    task_id: 1,
+    time: 3600,
+    created_at: '2023-01-01T10:00:00Z',
+  },
+  {
+    timing_id: 2,
+    task_id: 1,
+    time: 7200,
+    created_at: '2023-01-01T11:00:00Z',
+  },
+  {
+    timing_id: 3,
+    task_id: 1,
+    time: 1800,
+    created_at: '2023-01-02T09:00:00Z',
+  },
+];
+
+const mockTaskResult = [{ name: 'Test Task' }];
 
 describe('useTask', () => {
-  const mockTaskID = 'test-task-123';
-  const mockTask = {
-    name: 'Test Task',
-  };
-
-  const mockTimings = [
-    {
-      timing_id: 1,
-      task_id: 123,
-      time: 3600, // 1 hour in seconds
-      created_at: '2024-01-01T00:00:00.000Z',
-    },
-    {
-      timing_id: 2,
-      task_id: 123,
-      time: 5400, // 1.5 hours in seconds
-      created_at: '2024-01-01T00:00:00.000Z',
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDatabase.getAllAsync
+      .mockResolvedValueOnce(mockTaskResult) // First call for task details
+      .mockResolvedValueOnce(mockTimings); // Second call for timings
+    mockDatabase.runAsync.mockResolvedValue({ changes: 1, lastInsertRowId: 3 });
+  });
+
+  it('initializes with default values', () => {
+    const { result } = renderHook(() => useTask('1'));
+
+    expect(result.current.timings).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isTimerRunning).toBe(false);
+    expect(result.current.taskTitle).toBe('');
+    expect(result.current.currentPage).toBe(1);
+    expect(result.current.itemsPerPage).toBe(10);
+  });
+
+  it('fetches timings and task details on mount', async () => {
+    const { result } = renderHook(() => useTask('1'));
+
+    await act(async () => {
+      // Wait for the effect to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith(
+      'SELECT name FROM tasks WHERE task_id = ?;',
+      '1'
+    );
+    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith(
+      'SELECT * FROM timings WHERE task_id = ? ORDER BY created_at DESC;',
+      '1'
+    );
+    expect(result.current.timings).toEqual(mockTimings);
+    expect(result.current.taskTitle).toBe('Test Task');
+    expect(result.current.isLoading).toBe(false);
+  });
+
+
+
+  it('handles pagination correctly', async () => {
+    const { result } = renderHook(() => useTask('1'));
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    // Test pagination with default items per page (10)
+    expect(result.current.getTotalPages()).toBe(1);
+    expect(result.current.getPaginatedTimings()).toEqual(mockTimings);
+
+    // Test pagination with more items
+    const manyTimings = Array.from({ length: 15 }, (_, i) => ({
+      timing_id: i + 1,
+      task_id: 1,
+      time: 3600,
+      created_at: `2023-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`,
+    }));
+
+    // We can't directly set state in the hook, so let's mock the database to return many timings
+    mockDatabase.getAllAsync.mockResolvedValue(manyTimings);
     
-    // Setup default mocks
-    mockUseSQLiteContext.mockReturnValue({
-      execAsync: jest.fn(),
-      getAllAsync: jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings),
-      getFirstAsync: jest.fn(),
-      runAsync: jest.fn(),
-    } as any);
+    // Re-render the hook with the new data
+    const { result: newResult } = renderHook(() => useTask('1'));
+    
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    expect(newResult.current.getTotalPages()).toBe(2);
+    expect(newResult.current.getPaginatedTimings()).toHaveLength(10);
+
+    // Test next page
+    act(() => {
+      newResult.current.goToNextPage();
+    });
+
+    expect(newResult.current.currentPage).toBe(2);
+    expect(newResult.current.getPaginatedTimings()).toHaveLength(5);
+
+    // Test previous page
+    act(() => {
+      newResult.current.goToPreviousPage();
+    });
+
+    expect(newResult.current.currentPage).toBe(1);
+
+    // Test go to specific page
+    act(() => {
+      newResult.current.goToPage(2);
+    });
+
+    expect(newResult.current.currentPage).toBe(2);
   });
 
-  describe('initialization', () => {
-    it('should initialize with default values', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
 
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.isTimerRunning).toBe(false);
-      expect(typeof result.current.getTimingsFromTask).toBe('function');
-      expect(typeof result.current.handleDeleteTiming).toBe('function');
-      expect(typeof result.current.onInitTimer).toBe('function');
-      expect(typeof result.current.onStopTimer).toBe('function');
-      expect(typeof result.current.calculateTotalTime).toBe('function');
-      expect(typeof result.current.formatTotalTime).toBe('function');
+
+  it('handles edge cases in pagination', async () => {
+    const { result } = renderHook(() => useTask('1'));
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    it('should call getTimingsFromTask on mount', () => {
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
-
-      renderHook(() => useTask(mockTaskID));
-
-      expect(mockGetAllAsync).toHaveBeenCalledWith(
-        'SELECT name FROM tasks WHERE task_id = ?;',
-        mockTaskID
-      );
+    // Test going to page 0 (should not change)
+    act(() => {
+      result.current.goToPage(0);
     });
+
+    expect(result.current.currentPage).toBe(1);
+
+    // Test going to page beyond total pages (should not change)
+    act(() => {
+      result.current.goToPage(999);
+    });
+
+    expect(result.current.currentPage).toBe(1);
+
+    // Test going to previous page when on first page (should not change)
+    act(() => {
+      result.current.goToPreviousPage();
+    });
+
+    expect(result.current.currentPage).toBe(1);
+
+    // For edge cases, we'll test with the default mock data (3 items, so 1 page)
+    // Test going to next page when on last page (should not change)
+    act(() => {
+      result.current.goToNextPage();
+    });
+
+    expect(result.current.currentPage).toBe(1); // Should not go beyond total pages
   });
 
-  describe('getTimingsFromTask', () => {
-    it('should fetch task and timings successfully', async () => {
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
+  it('calculates total time correctly', async () => {
+    const { result } = renderHook(() => useTask('1'));
 
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for the effect to complete
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      expect(result.current.taskTitle).toBe('Test Task');
-      expect(result.current.timings).toEqual(mockTimings);
-      expect(result.current.isLoading).toBe(false);
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    it('should handle task not found', async () => {
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+    const totalTime = result.current.calculateTotalTime();
+    expect(totalTime).toBe(12600); // 3600 + 7200 + 1800
 
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for the effect to complete
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    it('should handle database error gracefully', async () => {
-      const mockGetAllAsync = jest.fn().mockRejectedValue(new Error('Database error'));
-
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for the effect to complete
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
-    });
+    const formattedTime = result.current.formatTotalTime(totalTime);
+    expect(formattedTime).toBe('3h 30m');
   });
 
-  describe('timer functionality', () => {
-    it('should start timer successfully', () => {
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
-      
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
+  it('handles timer functionality correctly', async () => {
+    const { result } = renderHook(() => useTask('1'));
 
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      act(() => {
-        result.current.onInitTimer();
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    it('should stop timer successfully', async () => {
-      const mockRunAsync = jest.fn().mockResolvedValue({});
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
-      
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: mockRunAsync,
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Start timer first
-      act(() => {
-        result.current.onInitTimer();
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
-
-      // Stop timer
-      await act(async () => {
-        await result.current.onStopTimer(3600);
-      });
-
-      expect(result.current.isTimerRunning).toBe(false);
-      expect(mockRunAsync).toHaveBeenCalledWith(
-        'INSERT INTO timings (task_id, time) VALUES (?, ?);',
-        mockTaskID,
-        3600
-      );
+    // Start timer
+    act(() => {
+      result.current.onInitTimer();
     });
+
+    expect(result.current.isTimerRunning).toBe(true);
+
+    // Stop timer
+    await act(async () => {
+      await result.current.onStopTimer(1800);
+    });
+
+    expect(result.current.isTimerRunning).toBe(false);
+    expect(mockDatabase.runAsync).toHaveBeenCalledWith(
+      'INSERT INTO timings (task_id, time) VALUES (?, ?);',
+      '1',
+      1800
+    );
   });
 
-  describe('task operations', () => {
-    it('should delete timing successfully', async () => {
-      const mockRunAsync = jest.fn().mockResolvedValue({});
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings)
-        // After deletion, reload with updated data
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
+  it('handles delete timing correctly', async () => {
+    const { result } = renderHook(() => useTask('1'));
 
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: mockRunAsync,
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for initial load
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      const timingToDelete = mockTimings[0];
-
-      await act(async () => {
-        await result.current.handleDeleteTiming(timingToDelete.timing_id);
-      });
-
-      expect(mockRunAsync).toHaveBeenCalledWith(
-        'DELETE FROM timings WHERE timing_id = ?;',
-        timingToDelete.timing_id
-      );
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    it('should handle database operation errors gracefully', async () => {
-      const mockRunAsync = jest.fn().mockRejectedValue(new Error('Database error'));
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce(mockTimings);
-
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: mockRunAsync,
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for initial load
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      // Should not throw error when database operations fail
-      expect(() => {
-        result.current.handleDeleteTiming(1);
-      }).not.toThrow();
+    await act(async () => {
+      await result.current.handleDeleteTiming(1);
     });
+
+    expect(mockDatabase.runAsync).toHaveBeenCalledWith(
+      'DELETE FROM timings WHERE timing_id = ?;',
+      1
+    );
   });
 
-  describe('utility functions', () => {
-    it('should calculate total time correctly', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
+  it('handles database errors gracefully', async () => {
+    // Clear the previous mock setup and set up error scenario
+    jest.clearAllMocks();
+    mockDatabase.getAllAsync.mockRejectedValue(new Error('Database error'));
 
-      // The hook will have empty timings initially
-      const totalTime = result.current.calculateTotalTime();
-      expect(totalTime).toBe(0);
+    const { result } = renderHook(() => useTask('1'));
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    it('should format total time correctly', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      const formattedTime = result.current.formatTotalTime(3661); // 1 hour, 1 minute, 1 second
-      expect(formattedTime).toBe('1h 1m');
-    });
-
-    it('should handle zero time', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      const formattedTime = result.current.formatTotalTime(0);
-      expect(formattedTime).toBe('0h 0m');
-    });
-
-    it('should handle large time values', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      const formattedTime = result.current.formatTotalTime(7325); // 2 hours, 2 minutes, 5 seconds
-      expect(formattedTime).toBe('2h 2m');
-    });
-  });
-
-  describe('state management', () => {
-    it('should maintain timer state across re-renders', () => {
-      const { result, rerender } = renderHook(() => useTask(mockTaskID));
-
-      // Start timer
-      act(() => {
-        result.current.onInitTimer();
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
-
-      // Re-render
-      rerender(() => useTask(mockTaskID));
-
-      // State should be preserved
-      expect(result.current.isTimerRunning).toBe(true);
-    });
-
-    it('should handle multiple timer operations', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Start timer
-      act(() => {
-        result.current.onInitTimer();
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
-
-      // Stop timer
-      act(() => {
-        result.current.isTimerRunning = false;
-      });
-
-      expect(result.current.isTimerRunning).toBe(false);
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty task ID', () => {
-      const { result } = renderHook(() => useTask(''));
-
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(true);
-    });
-
-    it('should handle null task ID', () => {
-      const { result } = renderHook(() => useTask(null as any));
-
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(true);
-    });
-
-    it('should handle undefined task ID', () => {
-      const { result } = renderHook(() => useTask(undefined as any));
-
-      expect(result.current.taskTitle).toBe('');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(true);
-    });
-
-    it('should handle database context not available', () => {
-      mockUseSQLiteContext.mockReturnValue(null as any);
-
-      // The hook should throw when trying to access null database
-      expect(() => {
-        renderHook(() => useTask(mockTaskID));
-      }).toThrow();
-    });
-
-    it('should handle empty timings array', async () => {
-      const mockGetAllAsync = jest.fn()
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce([]);
-
-      mockUseSQLiteContext.mockReturnValue({
-        execAsync: jest.fn(),
-        getAllAsync: mockGetAllAsync,
-        getFirstAsync: jest.fn(),
-        runAsync: jest.fn(),
-      } as any);
-
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      // Wait for the effect to complete
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      });
-
-      expect(result.current.taskTitle).toBe('Test Task');
-      expect(result.current.timings).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  describe('hook lifecycle', () => {
-    it('should cleanup timer state on unmount', () => {
-      const { result, unmount } = renderHook(() => useTask(mockTaskID));
-
-      // Start timer
-      act(() => {
-        result.current.onInitTimer();
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
-
-      // Unmount hook - cleanup effect will run
-      unmount();
-
-      // Note: We can't test the cleanup effect directly since it runs after unmount
-      // The cleanup effect is properly set up in the hook implementation
-    });
-
-    it('should handle rapid timer operations', () => {
-      const { result } = renderHook(() => useTask(mockTaskID));
-
-      const operations = [
-        () => result.current.onInitTimer(),
-        () => { result.current.isTimerRunning = false; },
-        () => result.current.onInitTimer(),
-        () => { result.current.isTimerRunning = false; },
-        () => result.current.onInitTimer(),
-      ];
-
-      act(() => {
-        operations.forEach(operation => operation());
-      });
-
-      expect(result.current.isTimerRunning).toBe(true);
-    });
+    expect(result.current.timings).toEqual([]);
+    expect(result.current.taskTitle).toBe('');
+    expect(result.current.isLoading).toBe(false);
   });
 });

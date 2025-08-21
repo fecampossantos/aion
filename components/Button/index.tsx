@@ -25,6 +25,7 @@ interface ButtonProps {
   text: string;
   buttonStyle?: object;
   textStyle?: object;
+  disabled?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ interface ButtonProps {
  * @param {string} props.text - Text to display on the button
  * @param {object} [props.buttonStyle] - Additional styles for the button container
  * @param {object} [props.textStyle] - Additional styles for the button text
+ * @param {boolean} [props.disabled] - Whether the button is disabled
  * @returns {JSX.Element} A customizable button component
  */
 const Button = ({
@@ -41,11 +43,16 @@ const Button = ({
   text,
   buttonStyle = {},
   textStyle = {},
+  disabled = false,
 }: ButtonProps) => {
   return (
     <Pressable
-      onPress={() => onPress()}
-      style={{ ...styles.button, ...buttonStyle }}
+      onPress={() => !disabled && onPress()}
+      style={[
+        styles.button,
+        buttonStyle,
+        disabled && { opacity: 0.5, backgroundColor: theme.colors.neutral[600] }
+      ]}
     >
       <Text style={{ ...styles.text, ...textStyle }}>{text}</Text>
     </Pressable>
