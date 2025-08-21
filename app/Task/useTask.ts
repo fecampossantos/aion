@@ -3,7 +3,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { Timing as ITiming } from "../../interfaces/Timing";
 
 /**
- * Custom hook for managing task functionality
+ * Custom hook for managing task functionality with pagination
  * @param {string} taskID - The task ID
  * @returns {Object} Task state and functions
  */
@@ -19,6 +19,10 @@ export const useTask = (taskID: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [taskTitle, setTaskTitle] = useState<string>("");
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
 
   /**
    * Fetches timings and task details for the current task
@@ -48,6 +52,53 @@ export const useTask = (taskID: string) => {
       setTaskTitle("");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Gets paginated timings for the current page
+   * @returns {Array<ITiming>} Array of timings for the current page
+   */
+  const getPaginatedTimings = (): Array<ITiming> => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return timings.slice(startIndex, endIndex);
+  };
+
+  /**
+   * Gets the total number of pages
+   * @returns {number} Total number of pages
+   */
+  const getTotalPages = (): number => {
+    return Math.ceil(timings.length / itemsPerPage);
+  };
+
+  /**
+   * Goes to the next page
+   */
+  const goToNextPage = () => {
+    if (currentPage < getTotalPages()) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  /**
+   * Goes to the previous page
+   */
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  /**
+   * Goes to a specific page
+   * @param {number} page - The page number to go to
+   */
+  const goToPage = (page: number) => {
+    const totalPages = getTotalPages();
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -124,11 +175,18 @@ export const useTask = (taskID: string) => {
     isLoading,
     isTimerRunning,
     taskTitle,
+    currentPage,
+    itemsPerPage,
     getTimingsFromTask,
     handleDeleteTiming,
     onInitTimer,
     onStopTimer,
     calculateTotalTime,
     formatTotalTime,
+    getPaginatedTimings,
+    getTotalPages,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
   };
 };

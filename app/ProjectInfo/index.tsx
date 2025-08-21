@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  Modal,
 } from "react-native";
 
 import Button from "../../components/Button";
@@ -16,7 +17,7 @@ import { useEffect } from "react";
 import { fullDate } from "../../utils/parser";
 import globalStyle from "../../globalStyle";
 
-import { BarChart } from "react-native-chart-kit";
+import { BarChart, LineChart } from "react-native-chart-kit";
 import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
@@ -24,6 +25,7 @@ import { useReportGeneration } from "./useReportGeneration";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { theme } from "../../globalStyle/theme";
+import TextInput from "../../components/TextInput";
 
 const styles = StyleSheet.create({
   container: {
@@ -229,6 +231,76 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
   },
+  burndownLegend: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 24,
+    marginTop: 16,
+    paddingHorizontal: 20,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  legendText: {
+    color: globalStyle.white,
+    fontSize: 14,
+    fontFamily: globalStyle.font.regular,
+    opacity: 0.9,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.colors.neutral[800],
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 24,
+    width: "90%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    color: globalStyle.white,
+    fontSize: 20,
+    fontFamily: globalStyle.font.bold,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  modalDescription: {
+    color: globalStyle.white,
+    fontSize: 14,
+    fontFamily: globalStyle.font.regular,
+    textAlign: "center",
+    marginBottom: 20,
+    opacity: 0.8,
+    lineHeight: 20,
+  },
+  modalInput: {
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+  },
+  cancelButton: {
+    backgroundColor: theme.colors.neutral[600],
+  },
+  modalDeleteButton: {
+    backgroundColor: theme.colors.error[500],
+  },
 });
 
 export const chartConfig = {
@@ -331,18 +403,27 @@ const ProjectInfo = () => {
 
   const {
     getTimings,
+    getBurndownData,
     getProject,
     endDate,
     handleShowDatePicker,
     startDate,
     handleClickedOnDeleteProject,
     resultSet,
+    burndownData,
     showDatePicker,
     datePickerValue,
     handleUpdateDate,
     dateShown,
     project,
     showChart,
+    showBurndownChart,
+    // Modal state and handlers
+    showDeleteModal,
+    deleteProjectInput,
+    setDeleteProjectInput,
+    handleConfirmDelete,
+    handleCancelDelete,
   } = useReport(projectID);
 
   const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
@@ -354,6 +435,7 @@ const ProjectInfo = () => {
   useEffect(() => {
     async function render() {
       await getTimings();
+      await getBurndownData();
     }
     if (!project) return;
     render();
@@ -458,6 +540,58 @@ const ProjectInfo = () => {
         </View>
       )}
 
+      {showBurndownChart && burndownData && (
+        <View style={styles.chartSection}>
+          <View style={styles.chartHeader}>
+            <Feather name="trending-down" color={globalStyle.white} size={24} />
+            <Text style={styles.chartTitle}>Burndown Chart</Text>
+          </View>
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={burndownData}
+              width={Dimensions.get("screen").width - 48}
+              height={Dimensions.get("screen").height * 0.35}
+              yAxisLabel=""
+              yAxisSuffix=" tasks"
+              chartConfig={{
+                ...chartConfig,
+                decimalPlaces: 0,
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                },
+              }}
+              bezier={false}
+              style={styles.chart}
+              withHorizontalLines={true}
+              withVerticalLines={false}
+              fromZero={true}
+              withVerticalLabels={false}
+            />
+          </View>
+          <View style={styles.burndownLegend}>
+            <View style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  { backgroundColor: "rgba(156, 163, 175, 1)" },
+                ]}
+              />
+              <Text style={styles.legendText}>Ideal</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  { backgroundColor: "rgba(59, 130, 246, 1)" },
+                ]}
+              />
+              <Text style={styles.legendText}>Atual</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       <View style={styles.actionSection}>
         <Button
           buttonStyle={styles.generateReportButton}
@@ -495,12 +629,12 @@ const ProjectInfo = () => {
                 params: { projectID: project.project_id },
               })
             }
-            text="✏️ Editar Projeto"
+            text="Editar Projeto"
           />
           <Button
             buttonStyle={styles.deleteButton}
             onPress={() => handleClickedOnDeleteProject()}
-            text="🗑️ Apagar Projeto"
+            text="Apagar Projeto"
           />
         </View>
       </View>
@@ -518,6 +652,57 @@ const ProjectInfo = () => {
           maximumDate={new Date()}
         />
       )}
+
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelDelete}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Apagar Projeto</Text>
+            <Text style={styles.modalDescription}>
+              Esta ação não pode ser desfeita. Para confirmar, digite o nome do
+              projeto:{" "}
+              <Text style={{ fontFamily: globalStyle.font.bold }}>
+                {project?.name}
+              </Text>
+            </Text>
+
+            <View style={styles.modalInput}>
+              <TextInput
+                value={deleteProjectInput}
+                onChangeText={setDeleteProjectInput}
+                placeholder="Digite o nome do projeto"
+                testID="delete-project-input"
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Button
+                buttonStyle={[styles.modalButton, styles.cancelButton]}
+                onPress={handleCancelDelete}
+                text="Cancelar"
+                textStyle={{
+                  color: globalStyle.white,
+                  fontFamily: globalStyle.font.medium,
+                }}
+              />
+              <Button
+                buttonStyle={[styles.modalButton, styles.modalDeleteButton]}
+                onPress={handleConfirmDelete}
+                text="Apagar Projeto"
+                textStyle={{
+                  color: globalStyle.white,
+                  fontFamily: globalStyle.font.medium,
+                }}
+                disabled={project ? deleteProjectInput !== project.name : true}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };

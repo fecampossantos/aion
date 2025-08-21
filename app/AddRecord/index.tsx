@@ -230,7 +230,7 @@ const TimeInput = ({
  */
 const AddRecord = () => {
   const database = useSQLiteContext();
-  const { projectID } = useLocalSearchParams();
+  const { projectID, taskID, taskName } = useLocalSearchParams();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<any>();
@@ -245,15 +245,30 @@ const AddRecord = () => {
 
   useEffect(() => {
     async function getProject() {
-      const project = await database.getFirstAsync<IProject>(
-        `SELECT * FROM projects WHERE project_id = ?;`,
-        projectID as string
-      );
-      setProject(project);
+      let currentProjectID = projectID;
+      
+      // If we have a taskID but no projectID, get the project from the task
+      if (taskID && !projectID) {
+        const task = await database.getFirstAsync<Task>(
+          `SELECT * FROM tasks WHERE task_id = ?;`,
+          taskID as string
+        );
+        if (task) {
+          currentProjectID = task.project_id.toString();
+        }
+      }
+
+      if (currentProjectID) {
+        const project = await database.getFirstAsync<IProject>(
+          `SELECT * FROM projects WHERE project_id = ?;`,
+          currentProjectID as string
+        );
+        setProject(project);
+      }
     }
 
     getProject();
-  }, [projectID]);
+  }, [projectID, taskID]);
 
   useEffect(() => {
     async function getTasks() {
@@ -263,10 +278,15 @@ const AddRecord = () => {
       );
 
       setTasks(tasks);
+      
+      // If we have a taskID from navigation, prepopulate the selected task
+      if (taskID) {
+        setSelectedTask(parseInt(taskID as string));
+      }
     }
     if (!project) return;
     getTasks();
-  }, [project]);
+  }, [project, taskID]);
 
   const validTime = (value: string) => {
     const hours = parseInt(value.slice(0, 2));
@@ -338,6 +358,7 @@ const AddRecord = () => {
         <Text style={styles.headerTitle}>Adicionar Registro</Text>
         <Text style={styles.headerSubtitle}>
           {project?.name ? `Projeto: ${project.name}` : 'Carregando projeto...'}
+          {taskName && ` • Tarefa: ${taskName}`}
         </Text>
       </View>
 

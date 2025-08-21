@@ -1,11 +1,17 @@
-import { View, Text, Pressable, RefreshControl, ScrollView } from "react-native";
-import { useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 
-
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
+import Task from "../../components/Task";
+import SearchBar from "../../components/SearchBar";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
@@ -18,6 +24,9 @@ import { useDatabaseManagement } from "./useDatabaseManagement";
 const Home = () => {
   const {
     projects,
+    lastWorkedTask,
+    filteredProjects,
+    searchQuery,
     isLoading,
     isPopulating,
     isClearing,
@@ -28,6 +37,8 @@ const Home = () => {
     handleClearDatabase,
     handleBackupData,
     handleRestoreData,
+    handleSearch,
+    clearSearch,
   } = useDatabaseManagement();
 
   /**
@@ -37,7 +48,27 @@ const Home = () => {
     await refreshProjects();
   };
 
+  /**
+   * Handles navigation to the specific task
+   */
+  const handleNavigateToLastWorkedTask = () => {
+    if (lastWorkedTask) {
+      router.push(`/Task?taskID=${lastWorkedTask.task_id}`);
+    }
+  };
 
+  /**
+   * Dummy handlers for task operations (not needed for read-only display)
+   */
+  const handleDoneTask = (isChecked: boolean, task: any) => {
+    // Do nothing - this is a read-only display
+  };
+  const handleInitTimer = () => {
+    // Do nothing - timer is disabled
+  };
+  const handleStopTimer = () => {
+    // Do nothing - timer is disabled
+  };
 
   return (
     <View style={styles.container}>
@@ -192,6 +223,15 @@ const Home = () => {
         </View>
       </View>
 
+      <View style={styles.searchBarContainer}>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={handleSearch}
+          placeholder="Buscar projetos..."
+          onClear={clearSearch}
+        />
+      </View>
+
       {isLoading ? (
         <LoadingView />
       ) : (
@@ -207,12 +247,22 @@ const Home = () => {
           }
           showsVerticalScrollIndicator={false}
         >
-          {projects.length > 0 ? (
+          {filteredProjects.length > 0 ? (
             <View>
               <Text style={styles.title}>Projetos</Text>
-              {projects.map((project) => (
+              {filteredProjects.map((project) => (
                 <ProjectCard project={project} key={project.project_id} />
               ))}
+            </View>
+          ) : searchQuery ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>🔍</Text>
+              <Text style={styles.emptyStateTitle}>
+                Nenhum projeto encontrado
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                Tente ajustar sua busca ou criar um novo projeto
+              </Text>
             </View>
           ) : (
             <View style={styles.emptyState}>
@@ -226,6 +276,33 @@ const Home = () => {
             </View>
           )}
         </ScrollView>
+      )}
+
+      {/* Last Worked Task Section */}
+      {lastWorkedTask && !isLoading && (
+        <View style={styles.lastWorkedTaskContainer}>
+          <Text style={styles.lastWorkedTaskTitle}>
+            Última Tarefa Trabalhada
+          </Text>
+          <Text style={styles.lastWorkedTaskProjectName}>
+            {lastWorkedTask.project_name}
+          </Text>
+          <Task
+            task={{
+              task_id: lastWorkedTask.task_id,
+              name: lastWorkedTask.name,
+              completed: lastWorkedTask.completed,
+              task_created_at: lastWorkedTask.task_created_at,
+              timed_until_now: lastWorkedTask.timed_until_now,
+            }}
+            onPress={handleNavigateToLastWorkedTask}
+            disableTimer={true}
+            onInitTimer={handleInitTimer}
+            onStopTimer={handleStopTimer}
+            showTimedUntilNowOnTimer={lastWorkedTask.timed_until_now}
+            handleDoneTask={handleDoneTask}
+          />
+        </View>
       )}
     </View>
   );
@@ -382,6 +459,32 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginBottom: theme.spacing.xs,
     letterSpacing: 0.5,
+  },
+  lastWorkedTaskContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginBottom: theme.spacing.lg,
+  },
+  lastWorkedTaskTitle: {
+    color: theme.colors.white,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: theme.typography.fontSize.lg,
+    marginBottom: theme.spacing.md,
+    letterSpacing: 0.5,
+  },
+  lastWorkedTaskProjectName: {
+    color: theme.colors.neutral[400],
+    fontFamily: theme.typography.fontFamily.medium,
+    fontSize: theme.typography.fontSize.sm,
+    marginBottom: theme.spacing.sm,
+    letterSpacing: 0.3,
+  },
+  searchBarContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+    height: 50,
   },
 });
 
