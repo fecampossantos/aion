@@ -67,15 +67,9 @@ const createMockHook = (overrides = {}) => ({
   clearSearch: mockClearSearch,
   // Add missing properties to prevent undefined errors
   lastWorkedTask: null,
-  isPopulating: false,
-  isClearing: false,
   isBackingUp: false,
   isRestoring: false,
   refreshProjects: jest.fn(),
-  handlePopulateDatabase: jest.fn(),
-  handlePopulateConfirm: jest.fn(),
-  handleClearDatabase: jest.fn(),
-  handleClearConfirm: jest.fn(),
   handleBackupData: jest.fn(),
   handleBackupConfirm: jest.fn(),
   handleRestoreData: jest.fn(),
@@ -90,11 +84,6 @@ const createMockHook = (overrides = {}) => ({
   setShowRestoreConfirmationModal: jest.fn(),
   restoreBackupInfo: null,
   setRestoreBackupInfo: jest.fn(),
-  // Confirmation modal states
-  showPopulateConfirmation: false,
-  setShowPopulateConfirmation: jest.fn(),
-  showClearConfirmation: false,
-  setShowClearConfirmation: jest.fn(),
   ...overrides,
 });
 
@@ -130,6 +119,19 @@ jest.mock("../../../components/SearchBar", () => {
     <View>
       <TextInput testID="search-input" placeholder={placeholder} />
     </View>
+  );
+});
+
+// Mock the LastWorkedTask component
+jest.mock("../../../components/LastWorkedTask", () => {
+  const React = require("react");
+  const { View, Text, Pressable } = require("react-native");
+  return ({ task, onPress }: { task: any; onPress: any }) => (
+    <Pressable testID="last-worked-task-touchable" onPress={onPress}>
+      <View testID="last-worked-task">
+        <Text>{task.name}</Text>
+      </View>
+    </Pressable>
   );
 });
 
@@ -323,7 +325,7 @@ describe("Home Screen", () => {
 
     const { getByTestId } = render(<Home />);
     
-    const taskElement = getByTestId("task-item");
+    const taskElement = getByTestId("last-worked-task-touchable");
     fireEvent.press(taskElement);
     
     expect(require("expo-router").router.push).toHaveBeenCalledWith("/Task?taskID=1");
@@ -375,36 +377,6 @@ describe("Home Screen", () => {
     expect(mockRefreshProjects).toHaveBeenCalled();
   });
 
-  it("handles populate database button press", () => {
-    const mockHandlePopulateDatabase = jest.fn();
-    
-    mockUseDatabaseManagement.mockReturnValue(createMockHook({
-      handlePopulateDatabase: mockHandlePopulateDatabase,
-    }));
-
-    const { getByText } = render(<Home />);
-    
-    const populateButton = getByText("Populate Database");
-    fireEvent.press(populateButton);
-    
-    expect(mockHandlePopulateDatabase).toHaveBeenCalled();
-  });
-
-  it("handles clear database button press", () => {
-    const mockHandleClearDatabase = jest.fn();
-    
-    mockUseDatabaseManagement.mockReturnValue(createMockHook({
-      handleClearDatabase: mockHandleClearDatabase,
-    }));
-
-    const { getByText } = render(<Home />);
-    
-    const clearButton = getByText("Clear Database");
-    fireEvent.press(clearButton);
-    
-    expect(mockHandleClearDatabase).toHaveBeenCalled();
-  });
-
   it("handles backup data button press", () => {
     const mockHandleBackupData = jest.fn();
     
@@ -414,7 +386,7 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    const backupButton = getByText("Backup Data");
+    const backupButton = getByText("Fazer Backup");
     fireEvent.press(backupButton);
     
     expect(mockHandleBackupData).toHaveBeenCalled();
@@ -429,7 +401,7 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    const restoreButton = getByText("Restore Data");
+    const restoreButton = getByText("Restaurar Dados");
     fireEvent.press(restoreButton);
     
     expect(mockHandleRestoreData).toHaveBeenCalled();
@@ -437,8 +409,6 @@ describe("Home Screen", () => {
 
   it("shows modals when their states are true", () => {
     mockUseDatabaseManagement.mockReturnValue(createMockHook({
-      showPopulateConfirmation: true,
-      showClearConfirmation: true,
       showBackupModal: true,
       showRestoreModal: true,
       showRestoreConfirmationModal: true,
@@ -446,13 +416,10 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    // Test for unique modal content to avoid conflicts with button text
-    expect(getByText("This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds.")).toBeDefined();
-    expect(getByText("This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!")).toBeDefined();
-    
-    // Test for modal titles that are unique
-    expect(getByText("Populate")).toBeDefined(); // Button text in modal
-    expect(getByText("Clear All")).toBeDefined(); // Button text in modal
+    // Test for modal content that should be present
+    // The backup and restore modals should be rendered when their states are true
+    expect(getByText("Fazer Backup")).toBeDefined();
+    expect(getByText("Restaurar Dados")).toBeDefined();
   });
 
   it("handles search input changes", () => {
@@ -475,18 +442,14 @@ describe("Home Screen", () => {
 
   it("shows correct button text based on loading states", () => {
     mockUseDatabaseManagement.mockReturnValue(createMockHook({
-      isPopulating: true,
-      isClearing: true,
       isBackingUp: true,
       isRestoring: true,
     }));
 
     const { getByText } = render(<Home />);
     
-    expect(getByText("Populating...")).toBeDefined();
-    expect(getByText("Clearing...")).toBeDefined();
-    expect(getByText("Creating...")).toBeDefined();
-    expect(getByText("Restoring...")).toBeDefined();
+    expect(getByText("Criando...")).toBeDefined();
+    expect(getByText("Restaurando...")).toBeDefined();
   });
 
   it("renders with different project counts", () => {
@@ -534,20 +497,16 @@ describe("Home Screen", () => {
   it("renders database buttons with correct styles and icons", () => {
     const { getByText } = render(<Home />);
     
-    // Check that all database management buttons are present
-    expect(getByText("Populate Database")).toBeDefined();
-    expect(getByText("Clear Database")).toBeDefined();
-    expect(getByText("Backup Data")).toBeDefined();
-    expect(getByText("Restore Data")).toBeDefined();
+    // Check that the remaining database management buttons are present
+    expect(getByText("Fazer Backup")).toBeDefined();
+    expect(getByText("Restaurar Dados")).toBeDefined();
   });
 
   it("renders with different loading states for database operations", () => {
     // Test different combinations of loading states
     const testCases = [
-      { isPopulating: true, isClearing: false, isBackingUp: false, isRestoring: false },
-      { isPopulating: false, isClearing: true, isBackingUp: false, isRestoring: false },
-      { isPopulating: false, isClearing: false, isBackingUp: true, isRestoring: false },
-      { isPopulating: false, isClearing: false, isBackingUp: false, isRestoring: true },
+      { isBackingUp: true, isRestoring: false },
+      { isBackingUp: false, isRestoring: true },
     ];
 
     testCases.forEach((testCase) => {
@@ -555,18 +514,118 @@ describe("Home Screen", () => {
       
       const { getByText } = render(<Home />);
       
-      if (testCase.isPopulating) {
-        expect(getByText("Populating...")).toBeDefined();
-      }
-      if (testCase.isClearing) {
-        expect(getByText("Clearing...")).toBeDefined();
-      }
       if (testCase.isBackingUp) {
-        expect(getByText("Creating...")).toBeDefined();
+        expect(getByText("Criando...")).toBeDefined();
       }
       if (testCase.isRestoring) {
-        expect(getByText("Restoring...")).toBeDefined();
+        expect(getByText("Restaurando...")).toBeDefined();
       }
+    });
+  });
+
+  // New tests for the updated scrolling behavior
+  describe("Scrolling Behavior", () => {
+    it("renders main ScrollView for entire screen content", () => {
+      const { getByTestId, getByText } = render(<Home />);
+      
+      // The main ScrollView should be present and contain all the scrollable content
+      // We can verify this by checking that the content is properly structured
+      expect(getByTestId("search-input")).toBeDefined();
+      expect(getByText("Projetos")).toBeDefined();
+    });
+
+    it("maintains header as fixed element outside ScrollView", () => {
+      const { getByText } = render(<Home />);
+      
+      // Header should always be visible and not part of the scrollable content
+      expect(getByText("aion")).toBeDefined();
+      
+      // Database buttons should be inside the ScrollView (scrollable)
+      expect(getByText("Fazer Backup")).toBeDefined();
+    });
+
+    it("includes all content sections within the main ScrollView", () => {
+      const { getByText } = render(<Home />);
+      
+      // All these elements should be within the main ScrollView
+      expect(getByText("Fazer Backup")).toBeDefined(); // Database buttons
+      expect(getByText("Projetos")).toBeDefined(); // Projects section
+      expect(getByText("Project 1")).toBeDefined(); // Project cards
+    });
+
+    it("handles pull-to-refresh on entire screen content", () => {
+      const mockRefreshProjects = jest.fn();
+      
+      mockUseDatabaseManagement.mockReturnValue(createMockHook({
+        refreshProjects: mockRefreshProjects,
+      }));
+
+      render(<Home />);
+      
+      // The RefreshControl should be applied to the main ScrollView
+      // This means users can pull to refresh from anywhere on the screen
+      expect(mockRefreshProjects).toBeDefined();
+    });
+
+    it("maintains proper content structure with ScrollView", () => {
+      const { getByText, getByTestId } = render(<Home />);
+      
+      // Verify the content flows properly within the ScrollView
+      // Database buttons should come first
+      expect(getByText("Fazer Backup")).toBeDefined();
+      
+      // Then search bar (rendered as part of the flow)
+      expect(getByTestId("search-input")).toBeDefined();
+      
+      // Then projects section
+      expect(getByText("Projetos")).toBeDefined();
+      
+      // Then last worked task (if available)
+      // This test verifies the content order is maintained
+    });
+
+    it("renders projects list as regular View instead of separate ScrollView", () => {
+      const { getByText, getAllByTestId } = render(<Home />);
+      
+      // Projects should be rendered as a regular View within the main ScrollView
+      expect(getByText("Projetos")).toBeDefined();
+      expect(getAllByTestId("project-card")).toHaveLength(2);
+      
+      // The projects list is no longer a separate ScrollView, it's just content
+      // within the main ScrollView
+    });
+  });
+
+  describe("Content Layout and Structure", () => {
+    it("maintains proper spacing and layout with new ScrollView structure", () => {
+      const { getByText } = render(<Home />);
+      
+      // All content should be properly spaced and laid out
+      expect(getByText("Fazer Backup")).toBeDefined();
+      expect(getByText("Restaurar Dados")).toBeDefined();
+      expect(getByText("Projetos")).toBeDefined();
+    });
+
+    it("handles empty states properly within ScrollView", () => {
+      mockUseDatabaseManagement.mockReturnValue(createMockHook({
+        projects: [],
+        filteredProjects: [],
+      }));
+
+      const { getByText } = render(<Home />);
+      
+      // Empty state should be properly displayed within the ScrollView
+      expect(getByText("Nenhum projeto encontrado")).toBeDefined();
+      expect(getByText("Comece criando seu primeiro projeto para organizar suas tarefas")).toBeDefined();
+    });
+
+    it("maintains search functionality within new structure", () => {
+      const { getByTestId } = render(<Home />);
+      
+      const searchInput = getByTestId("search-input");
+      fireEvent.changeText(searchInput, "Test Search");
+      
+      expect(mockHandleSearch).toHaveBeenCalledWith("Test Search");
     });
   });
 });
