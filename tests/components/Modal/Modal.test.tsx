@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { View, Text } from 'react-native';
 import Modal from '../../../components/Modal/Modal';
 
 // All mocks removed to prevent React Native mock issues
 
-describe.skip('Modal', () => {
+describe('Modal', () => {
   const mockOnClose = jest.fn();
 
   beforeEach(() => {
@@ -19,7 +20,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={true}
       >
-        <div>Modal content</div>
+        <Text>Modal content</Text>
       </Modal>
     );
 
@@ -37,7 +38,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={true}
       >
-        <div>Modal content</div>
+        <Text>Modal content</Text>
       </Modal>
     );
 
@@ -52,7 +53,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={true}
       >
-        <div>Modal content</div>
+        <Text>Modal content</Text>
       </Modal>
     );
 
@@ -67,7 +68,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={false}
       >
-        <div>Modal content</div>
+        <Text>Modal content</Text>
       </Modal>
     );
 
@@ -82,7 +83,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={true}
       >
-        <div>Modal content</div>
+        <Text>Modal content</Text>
       </Modal>
     );
 
@@ -98,7 +99,7 @@ describe.skip('Modal', () => {
         title="Test Modal"
         showCloseButton={true}
       >
-        <div>Custom modal content</div>
+        <Text>Custom modal content</Text>
       </Modal>
     );
 

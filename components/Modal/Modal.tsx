@@ -39,8 +39,8 @@ const Modal: React.FC<ModalProps> = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
+      <View style={styles.overlay} testID="modal-overlay">
+        <View style={styles.modalContainer} testID="modal-container">
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             {showCloseButton && (
