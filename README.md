@@ -320,9 +320,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - None (let me know if you find any 😅)
 
 ### Planned Features
-- Multi-language support
-- PDF templates options
-- improve header on mains screen with animation and blur
+- Multi-language support - _in progress on agent_
+- PDF templates options - _in progress on agent_
+- improve header on mains screen with animation and blur  - _in progress on agent_
    - "aion" text should become smaller and more to the left upper side - add button should disappear - background should be blurred
 
 ## 📞 Support
