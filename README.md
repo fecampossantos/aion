@@ -1,6 +1,38 @@
 # Aion - Time Tracking App
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
+
 **Aion** is a React Native mobile application built with Expo that helps users track time spent on projects and tasks. The app features project management, task creation, real-time timer functionality, and PDF report generation.
+
+## 🌟 Why Open Source?
+
+Aion is now open source! We believe in the power of community collaboration to create better software. By making Aion open source, we hope to:
+
+- **Improve Quality**: Get feedback and contributions from developers worldwide
+- **Foster Innovation**: Allow the community to suggest and implement new features
+- **Share Knowledge**: Help other developers learn from our codebase
+- **Build Community**: Create a space for developers to collaborate and grow
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, adding features, improving documentation, or suggesting ideas, your help is appreciated.
+
+**Getting Started:**
+- Read our [Contributing Guide](CONTRIBUTING.md)
+- Check out our [Code of Conduct](CODE_OF_CONDUCT.md)
+- Look for issues labeled `good first issue` or `help wanted`
+- Join our community discussions
+
+**Quick Start:**
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📱 Features
 
@@ -222,15 +254,65 @@ The app uses a consistent dark theme with the following color palette:
 
 ## 🤝 Contributing
 
+We welcome contributions from the community! Whether you're fixing bugs, adding features, improving documentation, or suggesting ideas, your help is appreciated.
+
+**Getting Started:**
+- Read our [Contributing Guide](CONTRIBUTING.md)
+- Check out our [Code of Conduct](CODE_OF_CONDUCT.md)
+- Look for issues labeled `good first issue` or `help wanted`
+- Join our community discussions
+
+**Quick Start:**
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Make your changes
+4. Add tests
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## 🌟 Open Source Community
+
+### **Why We're Open Source**
+Aion is now open source because we believe in the power of community collaboration. By making our code public, we hope to:
+
+- **Improve Quality**: Get feedback and contributions from developers worldwide
+- **Foster Innovation**: Allow the community to suggest and implement new features
+- **Share Knowledge**: Help other developers learn from our codebase
+- **Build Community**: Create a space for developers to collaborate and grow
+
+### **Community Guidelines**
+- **Be Respectful**: Treat all community members with respect and kindness
+- **Help Others**: Share knowledge and help newcomers get started
+- **Follow Standards**: Adhere to our coding standards and contribution guidelines
+- **Report Issues**: Help us improve by reporting bugs and suggesting features
+
+### **Ways to Contribute**
+- 🐛 **Bug Reports**: Help us identify and fix issues
+- ✨ **Feature Requests**: Suggest new functionality
+- 🔧 **Code Contributions**: Submit pull requests with improvements
+- 📚 **Documentation**: Help improve our docs and guides
+- 🧪 **Testing**: Help ensure code quality and reliability
+- 🌐 **Localization**: Help translate the app to other languages
+
+### **Getting Help**
+- **GitHub Issues**: For bug reports and feature requests
+- **GitHub Discussions**: For questions and community chat
+- **Pull Requests**: For code contributions
+- **Security Issues**: Report privately via [SECURITY.md](SECURITY.md)
 
 ## 📝 License
 
-This project is private and proprietary.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**What this means:**
+- ✅ **Use**: You can use this software for any purpose
+- ✅ **Modify**: You can modify the source code
+- ✅ **Distribute**: You can distribute copies
+- ✅ **Commercial Use**: You can use it commercially
+- ✅ **Attribution**: You must include the original license and copyright notice
 
 ## 🐛 Known Issues & Roadmap
 
@@ -239,13 +321,40 @@ This project is private and proprietary.
 
 ### Planned Features
 - Multi-language support
+- PDF templates options
+- improve header on mains screen with animation and blur
+   - "aion" text should become smaller and more to the left upper side - add button should disappear - background should be blurred
 
 ## 📞 Support
 
 For support and questions, please create an issue in the repository.
 
+## 🚀 Project Status
+
+**Current Version**: 1.1.2  
+**Package**: com.fecampossantos.aion  
+**Status**: Active Development  
+**Open Source**: ✅ Yes  
+
+## 🌍 Community & Resources
+
+- **📖 Documentation**: [docs/](docs/) - Comprehensive guides and API docs
+- **🐛 Issues**: [GitHub Issues](https://github.com/fecampossantos/aion/issues) - Report bugs and request features
+- **💬 Discussions**: [GitHub Discussions](https://github.com/fecampossantos/aion/discussions) - Community chat and Q&A
+- **📋 Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute
+- **📜 License**: [LICENSE](LICENSE) - MIT License details
+- **🔒 Security**: [SECURITY.md](SECURITY.md) - Security policy and reporting
+
+## 🙏 Acknowledgments
+
+Aion wouldn't be possible without the amazing open source community:
+
+- **React Native** - The foundation of our mobile app
+- **Expo** - The tools and services that make development easier
+- **Contributors** - Everyone who helps improve Aion
+- **Users** - The people who use and provide feedback on our app
+
 ---
 
-**Version**: 1.1.2  
-**Package**: com.fecampossantos.aion  
-**Built with**: ❤️ using React Native and Expo
+**Built with**: ❤️ using React Native and Expo  
+**Made Open Source**: 🌟 for the community

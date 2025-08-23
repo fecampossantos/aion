@@ -10,21 +10,15 @@ import { StatusBar } from "expo-status-bar";
 
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
-import Task from "../../components/Task";
+import LastWorkedTask from "../../components/LastWorkedTask";
 import SearchBar from "../../components/SearchBar";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
-import {
-  BackupModal,
-  RestoreModal,
-  RestoreConfirmationModal,
-  ConfirmationModal,
-} from "../../components/Modal";
 
 /**
- * Home component that displays the main dashboard with projects and database management options
+ * Home component that displays the main dashboard with projects
  * @returns The main home screen component
  */
 const Home = () => {
@@ -34,36 +28,9 @@ const Home = () => {
     filteredProjects,
     searchQuery,
     isLoading,
-    isPopulating,
-    isClearing,
-    isBackingUp,
-    isRestoring,
     refreshProjects,
-    handlePopulateDatabase,
-    handlePopulateConfirm,
-    handleClearDatabase,
-    handleClearConfirm,
-    handleBackupData,
-    handleBackupConfirm,
-    handleRestoreData,
-    handleRestoreConfirm,
-    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
-    // Modal states
-    showBackupModal,
-    setShowBackupModal,
-    showRestoreModal,
-    setShowRestoreModal,
-    showRestoreConfirmationModal,
-    setShowRestoreConfirmationModal,
-    restoreBackupInfo,
-    setRestoreBackupInfo,
-    // Confirmation modal states
-    showPopulateConfirmation,
-    setShowPopulateConfirmation,
-    showClearConfirmation,
-    setShowClearConfirmation,
   } = useDatabaseManagement();
 
   /**
@@ -83,35 +50,18 @@ const Home = () => {
   };
 
   /**
-   * Dummy handlers for task operations (not needed for read-only display)
+   * Handles navigation to settings page
    */
-  const handleDoneTask = (isChecked: boolean, task: any) => {
-    // Do nothing - this is a read-only display
-  };
-  const handleInitTimer = () => {
-    // Do nothing - timer is disabled
-  };
-  const handleStopTimer = () => {
-    // Do nothing - timer is disabled
+  const handleNavigateToSettings = () => {
+    router.push("/Settings");
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="home-container">
       <StatusBar style="light" />
       <View style={styles.header}>
         <Text style={styles.headerText}>aion</Text>
         <View style={styles.headerButtons}>
-          <Pressable
-            style={styles.refreshButton}
-            onPress={handleRefresh}
-            disabled={isLoading}
-          >
-            <Entypo
-              name="cycle"
-              size={theme.components.icon.medium}
-              color={theme.colors.neutral[800]}
-            />
-          </Pressable>
           <Pressable
             style={styles.addButton}
             onPress={() => router.push("AddProject")}
@@ -126,260 +76,94 @@ const Home = () => {
         </View>
       </View>
 
-      <View style={styles.databaseButtonsContainer}>
-        <View style={styles.buttonRow}>
-          <Pressable
-            style={[styles.databaseButton, styles.populateButton]}
-            onPress={handlePopulateDatabase}
-            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
-          >
-            <View style={styles.buttonContent}>
-              <View style={styles.buttonIconContainer}>
-                {isPopulating ? (
-                  <Entypo
-                    name="cycle"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                ) : (
-                  <Entypo
-                    name="database"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                )}
-              </View>
-              <View style={styles.buttonTextContainer}>
-                <Text style={styles.databaseButtonText}>
-                  {isPopulating ? "Populating..." : "Populate Database"}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[styles.databaseButton, styles.clearButton]}
-            onPress={handleClearDatabase}
-            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
-          >
-            <View style={styles.buttonContent}>
-              <View style={styles.buttonIconContainer}>
-                {isClearing ? (
-                  <Entypo
-                    name="cycle"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                ) : (
-                  <Entypo
-                    name="trash"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                )}
-              </View>
-              <View style={styles.buttonTextContainer}>
-                <Text style={styles.databaseButtonText}>
-                  {isClearing ? "Clearing..." : "Clear Database"}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        </View>
-
-        <View style={styles.buttonRow}>
-          <Pressable
-            style={[styles.databaseButton, styles.backupButton]}
-            onPress={handleBackupData}
-            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
-          >
-            <View style={styles.buttonContent}>
-              <View style={styles.buttonIconContainer}>
-                {isBackingUp ? (
-                  <Entypo
-                    name="cycle"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                ) : (
-                  <Entypo
-                    name="download"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                )}
-              </View>
-              <View style={styles.buttonTextContainer}>
-                <Text style={styles.databaseButtonText}>
-                  {isBackingUp ? "Creating..." : "Backup Data"}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[styles.databaseButton, styles.restoreButton]}
-            onPress={handleRestoreData}
-            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
-          >
-            <View style={styles.buttonContent}>
-              <View style={styles.buttonIconContainer}>
-                {isRestoring ? (
-                  <Entypo
-                    name="cycle"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                ) : (
-                  <Entypo
-                    name="upload"
-                    size={theme.components.icon.small}
-                    color={theme.colors.white}
-                  />
-                )}
-              </View>
-              <View style={styles.buttonTextContainer}>
-                <Text style={styles.databaseButtonText}>
-                  {isRestoring ? "Restoring..." : "Restore Data"}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.searchBarContainer}>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={handleSearch}
-          placeholder="Buscar projetos..."
-          onClear={clearSearch}
-        />
-      </View>
-
-      {isLoading ? (
-        <LoadingView />
-      ) : (
-        <ScrollView
-          style={styles.projectsList}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={handleRefresh}
-              tintColor={theme.colors.white}
-              colors={[theme.colors.white]}
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        >
-          {filteredProjects.length > 0 ? (
-            <View>
-              <Text style={styles.title}>Projetos</Text>
-              {filteredProjects.map((project) => (
-                <ProjectCard project={project} key={project.project_id} />
-              ))}
-            </View>
-          ) : searchQuery ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateIcon}>🔍</Text>
-              <Text style={styles.emptyStateTitle}>
-                Nenhum projeto encontrado
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Tente ajustar sua busca ou criar um novo projeto
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateIcon}>📁</Text>
-              <Text style={styles.emptyStateTitle}>
-                Nenhum projeto encontrado
-              </Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Comece criando seu primeiro projeto para organizar suas tarefas
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-      )}
-
-      {/* Last Worked Task Section */}
-      {lastWorkedTask && !isLoading && (
-        <View style={styles.lastWorkedTaskContainer}>
-          <Text style={styles.lastWorkedTaskTitle}>
-            Última Tarefa Trabalhada
-          </Text>
-          <Text style={styles.lastWorkedTaskProjectName}>
-            {lastWorkedTask.project_name}
-          </Text>
-          <Task
-            task={{
-              task_id: lastWorkedTask.task_id,
-              name: lastWorkedTask.name,
-              completed: lastWorkedTask.completed,
-              task_created_at: lastWorkedTask.task_created_at,
-              timed_until_now: lastWorkedTask.timed_until_now,
-            }}
-            onPress={handleNavigateToLastWorkedTask}
-            disableTimer={true}
-            onInitTimer={handleInitTimer}
-            onStopTimer={handleStopTimer}
-            showTimedUntilNowOnTimer={lastWorkedTask.timed_until_now}
-            handleDoneTask={handleDoneTask}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={handleRefresh}
+            tintColor={theme.colors.white}
+            colors={[theme.colors.white]}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.searchBarContainer}>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={handleSearch}
+            placeholder="Buscar projetos..."
+            onClear={clearSearch}
           />
         </View>
-      )}
 
-      {/* Populate Database Confirmation Modal */}
-      <ConfirmationModal
-        visible={showPopulateConfirmation}
-        onClose={() => setShowPopulateConfirmation(false)}
-        onConfirm={handlePopulateConfirm}
-        title="Populate Database"
-        message="This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds."
-        confirmText="Populate"
-        variant="info"
-        isLoading={isPopulating}
-      />
+        {isLoading ? (
+          <LoadingView />
+        ) : (
+          <View style={styles.projectsList}>
+            {filteredProjects.length > 0 ? (
+              <View>
+                <Text style={styles.title}>Projetos</Text>
+                {filteredProjects.map((project) => (
+                  <ProjectCard project={project} key={project.project_id} />
+                ))}
+              </View>
+            ) : searchQuery ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateIcon}>🔍</Text>
+                <Text style={styles.emptyStateTitle}>
+                  Nenhum projeto encontrado
+                </Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Tente ajustar sua busca ou criar um novo projeto.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateIcon}>📁</Text>
+                <Text style={styles.emptyStateTitle}>
+                  Nenhum projeto ainda
+                </Text>
+                <Text style={styles.emptyStateSubtitle}>
+                  Crie seu primeiro projeto para começar a organizar suas tarefas.
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
-      {/* Clear Database Confirmation Modal */}
-      <ConfirmationModal
-        visible={showClearConfirmation}
-        onClose={() => setShowClearConfirmation(false)}
-        onConfirm={handleClearConfirm}
-        title="Clear Database"
-        message="This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!"
-        confirmText="Clear All"
-        variant="danger"
-        isLoading={isClearing}
-      />
+        {/* Last Worked Task Section */}
+        {lastWorkedTask && !isLoading && (
+          <View style={styles.lastWorkedTaskContainer}>
+            <Text style={styles.lastWorkedTaskTitle}>
+              Última Tarefa Trabalhada
+            </Text>
+            <Text style={styles.lastWorkedTaskProjectName}>
+              {lastWorkedTask.project_name}
+            </Text>
+            <LastWorkedTask
+              task={lastWorkedTask}
+              onPress={handleNavigateToLastWorkedTask}
+            />
+          </View>
+        )}
 
-      {/* Backup Modal */}
-      <BackupModal
-        visible={showBackupModal}
-        onClose={() => setShowBackupModal(false)}
-        onConfirm={handleBackupConfirm}
-        isLoading={isBackingUp}
-      />
-
-      {/* Restore Modal */}
-      <RestoreModal
-        visible={showRestoreModal}
-        onClose={() => setShowRestoreModal(false)}
-        onConfirm={handleRestoreConfirm}
-        isLoading={isRestoring}
-      />
-
-      {/* Restore Confirmation Modal */}
-      <RestoreConfirmationModal
-        visible={showRestoreConfirmationModal}
-        onClose={() => setShowRestoreConfirmationModal(false)}
-        onConfirm={handleFinalRestoreConfirm}
-        backupInfo={restoreBackupInfo}
-        isLoading={isRestoring}
-      />
-
-
+        {/* Settings Section - End of Page */}
+        <View style={styles.settingsContainer}>
+          <Pressable
+            style={styles.settingsButton}
+            onPress={handleNavigateToSettings}
+            disabled={isLoading}
+          >
+            <Entypo
+              name="cog"
+              size={theme.components.icon.medium}
+              color={theme.colors.white}
+            />
+          </Pressable>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -433,6 +217,13 @@ const styles = StyleSheet.create({
     height: theme.spacing["4xl"],
     ...theme.shadows.md,
   },
+  scrollView: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollViewContent: {
+    paddingBottom: theme.spacing["4xl"],
+  },
   projectsList: {
     width: "100%",
     display: "flex",
@@ -470,76 +261,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.md,
     textAlign: "center",
   },
-  databaseButtonsContainer: {
-    width: "100%",
-    paddingHorizontal: theme.spacing["2xl"],
-    marginTop: theme.spacing.sm,
-    gap: theme.spacing.md,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: theme.spacing.md,
-    justifyContent: "space-between",
-  },
-  databaseButton: {
-    flex: 1,
-    paddingVertical: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 80,
-    ...theme.shadows.md,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  populateButton: {
-    backgroundColor: theme.colors.success[600],
-    borderColor: theme.colors.success[500],
-  },
-  clearButton: {
-    backgroundColor: theme.colors.error[600],
-    borderColor: theme.colors.error[500],
-  },
-  backupButton: {
-    backgroundColor: theme.colors.primary[600],
-    borderColor: theme.colors.primary[500],
-  },
-  restoreButton: {
-    backgroundColor: theme.colors.warning[600],
-    borderColor: theme.colors.warning[500],
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
-  },
-  buttonIconContainer: {
-    width: theme.spacing["4xl"],
-    height: theme.spacing["4xl"],
-    borderRadius: theme.spacing["4xl"] / 2,
-    backgroundColor: theme.colors.transparent.white[20],
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: theme.spacing.md,
-  },
-  buttonTextContainer: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  databaseButtonText: {
-    color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.bold,
-    fontSize: theme.typography.fontSize.sm,
-    textAlign: "left",
-    marginBottom: theme.spacing.xs,
-    letterSpacing: 0.5,
-  },
   lastWorkedTaskContainer: {
     width: "100%",
     paddingHorizontal: theme.spacing["2xl"],
     marginBottom: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
   },
   lastWorkedTaskTitle: {
     color: theme.colors.white,
@@ -561,6 +287,21 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
     height: 50,
+  },
+  settingsContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing["2xl"],
+    alignItems: "flex-end",
+    position: "relative",
+  },
+  settingsButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: theme.spacing["4xl"] / 2,
+    width: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
   },
 });
 
