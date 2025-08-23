@@ -1,0 +1,154 @@
+{
+  "app": {
+    "name": "aion",
+    "version": "Version {{version}}"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "total": "Total",
+    "time": "Time",
+    "cost": "Cost",
+    "name": "Name",
+    "from": "From",
+    "to": "To",
+    "start": "Start",
+    "end": "End"
+  },
+  "navigation": {
+    "home": "Home",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "reports": "Reports"
+  },
+  "home": {
+    "noProjects": "You don't have any projects yet",
+    "noProjectsSubtitle": "Create your first project to get started",
+    "noProjectsFound": "No projects found",
+    "noProjectsFoundSubtitle": "Try adjusting your search or create a new project",
+    "addProject": "Add Project",
+    "searchProjects": "Search projects...",
+    "lastWorkedTask": "Last worked task",
+    "totalTime": "Total time",
+    "lastWorked": "Last worked: {{date}}",
+    "neverWorked": "Never worked"
+  },
+  "project": {
+    "addProject": "Add Project",
+    "editProject": "Edit Project",
+    "projectInfo": "Project Information",
+    "projectName": "Project Name",
+    "projectNamePlaceholder": "Enter project name...",
+    "hourlyRate": "Hourly Rate",
+    "hourlyRatePlaceholder": "0.00",
+    "saveChanges": "💾 Save Changes",
+    "deleteProject": "Delete Project",
+    "noTasks": "This project has no tasks",
+    "addTask": "Add Task",
+    "viewReport": "View Report",
+    "tasks": "Tasks",
+    "completedTasks": "{{completed}}/{{total}} tasks",
+    "errors": {
+      "nameRequired": "Project name cannot be empty",
+      "nameExists": "A project with this name already exists",
+      "deleteError": "Error deleting project",
+      "saveError": "Error saving project"
+    }
+  },
+  "task": {
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "taskName": "Task Name",
+    "taskNamePlaceholder": "Enter task name...",
+    "completed": "Completed",
+    "pending": "Pending",
+    "markCompleted": "Mark as Completed",
+    "markPending": "Mark as Pending",
+    "addTimeRecord": "Add Time Record",
+    "deleteTask": "Delete Task",
+    "noTasksFound": "No tasks found",
+    "totalTime": "Total time",
+    "sessions": "sessions",
+    "errors": {
+      "nameRequired": "Task name cannot be empty",
+      "saveError": "Error saving task",
+      "deleteError": "Error deleting task"
+    }
+  },
+  "timeRecord": {
+    "addRecord": "Add Time Record",
+    "editRecord": "Edit Time Record",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "duration": "Duration",
+    "saveRecord": "Save Record",
+    "deleteRecord": "Delete Record",
+    "errors": {
+      "invalidTime": "Invalid time",
+      "endBeforeStart": "End time must be after start time",
+      "saveError": "Error saving time record"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "language": "Language",
+    "currentLanguage": "English",
+    "dataManagement": "Data Management",
+    "backup": "Backup Data",
+    "backupSubtitle": "Save and share your data",
+    "restore": "Restore Data",
+    "restoreSubtitle": "Restore from a backup file",
+    "support": "Support",
+    "github": "GitHub",
+    "githubSubtitle": "View source code",
+    "creating": "Creating...",
+    "restoring": "Restoring..."
+  },
+  "languageSelection": {
+    "title": "Select Language",
+    "subtitle": "Choose your preferred language",
+    "english": "English",
+    "portuguese": "Portuguese (Brazil)",
+    "currentLanguage": "Current: {{language}}"
+  },
+  "backup": {
+    "title": "Backup Data",
+    "message": "This will create a backup file with all your projects, tasks, and time records.",
+    "confirm": "Create Backup",
+    "success": "Backup created successfully and ready to share!",
+    "error": "Error creating backup"
+  },
+  "restore": {
+    "title": "Restore Data",
+    "message": "Select a backup file to restore your data. This will replace all current data.",
+    "confirm": "Select File",
+    "confirmRestore": "Confirm Restore",
+    "restoreMessage": "Restore complete! {{projects}} projects, {{tasks}} tasks, and {{timings}} time records restored.",
+    "error": "Error restoring data"
+  },
+  "reports": {
+    "title": "Reports",
+    "dateRange": "Date Range",
+    "generateReport": "Generate Report",
+    "totalTime": "Total Time",
+    "totalCost": "Total Cost",
+    "completionRate": "Completion Rate",
+    "sessionsDetail": "Sessions Detail",
+    "task": "Task",
+    "sessions": "Sessions",
+    "noData": "No data available for the selected period"
+  }
+}

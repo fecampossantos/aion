@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../../globalStyle/theme';
 import { Modal, ModalButton } from './index';
+import { useTranslation } from 'react-i18next';
 
 interface BackupModalProps {
   visible: boolean;
@@ -23,11 +24,13 @@ const BackupModal: React.FC<BackupModalProps> = ({
   onConfirm,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
+  
   return (
-    <Modal visible={visible} onClose={onClose} title="Create Backup">
+    <Modal visible={visible} onClose={onClose} title={t("backup.title")}>
       <View style={styles.content}>
         <Text style={styles.description}>
-          This will create a backup file with all your projects, tasks, and time tracking data.
+          {t("backup.message")}
         </Text>
         
         <Text style={styles.info}>
@@ -44,14 +47,14 @@ const BackupModal: React.FC<BackupModalProps> = ({
 
         <View style={styles.buttonContainer}>
           <ModalButton
-            title="Cancel"
+            title={t("common.cancel")}
             onPress={onClose}
             variant="secondary"
             disabled={isLoading}
             fullWidth
           />
           <ModalButton
-            title={isLoading ? "Creating Backup..." : "Create Backup"}
+            title={isLoading ? t("settings.creating") : t("backup.confirm")}
             onPress={onConfirm}
             loading={isLoading}
             disabled={isLoading}
