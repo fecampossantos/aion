@@ -6,18 +6,6 @@ import {
   clearDatabase,
   getDatabaseStats,
 } from "../../utils/databaseUtils";
-import {
-  downloadBackup,
-  restoreFromSelectedFile,
-  restoreFromFile,
-  getBackupStats,
-  BackupData,
-} from "../../utils/backupUtils";
-import {
-  BackupModal,
-  RestoreModal,
-  RestoreConfirmationModal,
-} from "../../components/Modal";
 import { useToast } from "../../components/Toast/ToastContext";
 
 // Interface for the last worked task with project info
@@ -46,20 +34,6 @@ export const useDatabaseManagement = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
-  const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
-  const [isRestoring, setIsRestoring] = useState<boolean>(false);
-  
-  // Modal states
-  const [showBackupModal, setShowBackupModal] = useState<boolean>(false);
-  const [showRestoreModal, setShowRestoreModal] = useState<boolean>(false);
-  const [showRestoreConfirmationModal, setShowRestoreConfirmationModal] = useState<boolean>(false);
-
-  const [restoreBackupInfo, setRestoreBackupInfo] = useState<{
-    date: string;
-    projectCount: number;
-    taskCount: number;
-    timingCount: number;
-  }>({ date: '', projectCount: 0, taskCount: 0, timingCount: 0 });
   
   // Confirmation modal states
   const [showPopulateConfirmation, setShowPopulateConfirmation] = useState<boolean>(false);
@@ -101,78 +75,63 @@ export const useDatabaseManagement = () => {
   /**
    * Fetches all projects from the database
    */
-  const fetchAllProjects = async () => {
+  const fetchAllProjects = useCallback(async () => {
     try {
-      setIsLoading(true);
-      const p = await database.getAllAsync<Project>("SELECT * FROM projects;");
-      setProjects(p);
-      setFilteredProjects(p);
+      const allProjects = await database.getAllAsync<Project>(
+        "SELECT * FROM projects ORDER BY name ASC;"
+      );
+      setProjects(allProjects || []);
+      setFilteredProjects(allProjects || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
-    } finally {
-      setIsLoading(false);
+      setProjects([]);
+      setFilteredProjects([]);
     }
-  };
+  }, [database]);
 
   /**
-   * Fetches the last worked task based on the most recent timing entry
+   * Fetches the last worked task with project information
    */
-  const fetchLastWorkedTask = async () => {
+  const fetchLastWorkedTask = useCallback(async () => {
     try {
-      // First check if there are any timings at all
-      const hasTimings = await database.getFirstAsync<{ count: number }>(
-        "SELECT COUNT(*) as count FROM timings;"
-      );
-      
-      if (!hasTimings || hasTimings.count === 0) {
-        setLastWorkedTask(null);
-        return;
-      }
-
-      const query = `
-        SELECT 
+      const lastTask = await database.getFirstAsync<LastWorkedTask>(
+        `SELECT 
           t.task_id,
           t.name,
           t.completed,
-          t.created_at as task_created_at,
-          COALESCE(SUM(tim.time), 0) as timed_until_now,
+          t.created_at AS task_created_at,
+          COALESCE(SUM(tim.time), 0) AS timed_until_now,
           t.project_id,
           p.name as project_name,
           MAX(tim.created_at) as last_timing_date
         FROM tasks t
         JOIN projects p ON t.project_id = p.project_id
-        JOIN timings tim ON t.task_id = tim.task_id
+        LEFT JOIN timings tim ON t.task_id = tim.task_id
         GROUP BY t.task_id, t.name, t.completed, t.created_at, t.project_id, p.name
+        HAVING timed_until_now > 0
         ORDER BY last_timing_date DESC
-        LIMIT 1;
-      `;
-      
-      const result = await database.getFirstAsync<LastWorkedTask>(query);
-      setLastWorkedTask(result || null);
+        LIMIT 1;`
+      );
+      setLastWorkedTask(lastTask || null);
     } catch (error) {
       console.error("Error fetching last worked task:", error);
       setLastWorkedTask(null);
     }
-  };
-
-  /**
-   * Refreshes the projects data from the database
-   */
-  const refreshProjects = useCallback(async () => {
-    await fetchAllProjects();
-    await fetchLastWorkedTask();
   }, [database]);
 
-  // Fetch projects and last worked task on mount
-  useEffect(() => {
-    fetchAllProjects();
-    fetchLastWorkedTask();
-  }, []);
-
-  // Update filtered projects when projects change
-  useEffect(() => {
-    filterProjects(searchQuery);
-  }, [projects, filterProjects, searchQuery]);
+  /**
+   * Refreshes projects data
+   */
+  const refreshProjects = useCallback(async () => {
+    try {
+      await fetchAllProjects();
+      await fetchLastWorkedTask();
+    } catch (error) {
+      console.error("Error refreshing projects:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchAllProjects, fetchLastWorkedTask]);
 
   /**
    * Handles populating the database with sample data
@@ -190,13 +149,12 @@ export const useDatabaseManagement = () => {
     try {
       await populateDatabase(database);
       await refreshProjects();
-      const stats = await getDatabaseStats(database);
       // Show success toast
-      showToast(`Database populated successfully! Added ${stats.projects} projects, ${stats.tasks} tasks, and ${stats.timings} time entries.`, 'success');
+      showToast('Database populated successfully!', 'success');
     } catch (error) {
       // Show error toast
       showToast('Failed to populate database. Please try again.', 'error');
-      console.error("Population error:", error);
+      console.error("Populate error:", error);
     } finally {
       setIsPopulating(false);
     }
@@ -229,76 +187,10 @@ export const useDatabaseManagement = () => {
     }
   };
 
-  /**
-   * Handles creating and sharing a backup of all data
-   */
-  const handleBackupData = () => {
-    setShowBackupModal(true);
-  };
-
-  /**
-   * Handles backup confirmation
-   */
-  const handleBackupConfirm = async () => {
-    setShowBackupModal(false);
-    setIsBackingUp(true);
-    try {
-      await downloadBackup(database);
-      // Show success toast
-      showToast('Backup created successfully and ready to share!', 'success');
-      // Refresh projects after successful backup
-      await fetchAllProjects();
-    } catch (error) {
-      // Error handling is done in downloadBackup function
-      console.error("Backup error:", error);
-    } finally {
-      setIsBackingUp(false);
-    }
-  };
-
-  /**
-   * Handles restoring data from a backup file
-   */
-  const handleRestoreData = () => {
-    setShowRestoreModal(true);
-  };
-
-  /**
-   * Handles restore confirmation
-   */
-  const handleRestoreConfirm = async () => {
-    setShowRestoreModal(false);
-    setIsRestoring(true);
-    try {
-      const backupInfo = await restoreFromSelectedFile(database);
-      // Set backup info for confirmation modal
-      setRestoreBackupInfo(backupInfo);
-      setShowRestoreConfirmationModal(true);
-      setIsRestoring(false);
-    } catch (error) {
-      // Error handling is done in restoreFromSelectedFile function
-      console.error("Restore error:", error);
-      setIsRestoring(false);
-    }
-  };
-
-  /**
-   * Handles final restore confirmation
-   */
-  const handleFinalRestoreConfirm = async () => {
-    setShowRestoreConfirmationModal(false);
-    setIsRestoring(true);
-    try {
-      // The actual restore was already done, just refresh the data
-      await fetchAllProjects();
-      // Show success toast
-      showToast(`Restore complete! ${restoreBackupInfo.projectCount} projects, ${restoreBackupInfo.taskCount} tasks, and ${restoreBackupInfo.timingCount} time records restored.`, 'success');
-    } catch (error) {
-      console.error("Restore error:", error);
-    } finally {
-      setIsRestoring(false);
-    }
-  };
+  // Load initial data
+  useEffect(() => {
+    refreshProjects();
+  }, [refreshProjects]);
 
   return {
     projects,
@@ -308,30 +200,14 @@ export const useDatabaseManagement = () => {
     isLoading,
     isPopulating,
     isClearing,
-    isBackingUp,
-    isRestoring,
     fetchAllProjects,
     refreshProjects,
     handlePopulateDatabase,
     handlePopulateConfirm,
     handleClearDatabase,
     handleClearConfirm,
-    handleBackupData,
-    handleBackupConfirm,
-    handleRestoreData,
-    handleRestoreConfirm,
-    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
-    // Modal states
-    showBackupModal,
-    setShowBackupModal,
-    showRestoreModal,
-    setShowRestoreModal,
-    showRestoreConfirmationModal,
-    setShowRestoreConfirmationModal,
-    restoreBackupInfo,
-    setRestoreBackupInfo,
     // Confirmation modal states
     showPopulateConfirmation,
     setShowPopulateConfirmation,

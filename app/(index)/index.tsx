@@ -16,15 +16,9 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
-import {
-  BackupModal,
-  RestoreModal,
-  RestoreConfirmationModal,
-  ConfirmationModal,
-} from "../../components/Modal";
 
 /**
- * Home component that displays the main dashboard with projects and database management options
+ * Home component that displays the main dashboard with projects
  * @returns The main home screen component
  */
 const Home = () => {
@@ -34,25 +28,9 @@ const Home = () => {
     filteredProjects,
     searchQuery,
     isLoading,
-    isBackingUp,
-    isRestoring,
     refreshProjects,
-    handleBackupData,
-    handleBackupConfirm,
-    handleRestoreData,
-    handleRestoreConfirm,
-    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
-    // Modal states
-    showBackupModal,
-    setShowBackupModal,
-    showRestoreModal,
-    setShowRestoreModal,
-    showRestoreConfirmationModal,
-    setShowRestoreConfirmationModal,
-    restoreBackupInfo,
-    setRestoreBackupInfo,
   } = useDatabaseManagement();
 
   /**
@@ -71,8 +49,15 @@ const Home = () => {
     }
   };
 
+  /**
+   * Handles navigation to settings page
+   */
+  const handleNavigateToSettings = () => {
+    router.push("/Settings");
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="home-container">
       <StatusBar style="light" />
       <View style={styles.header}>
         <Text style={styles.headerText}>aion</Text>
@@ -104,68 +89,6 @@ const Home = () => {
         }
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.databaseButtonsContainer}>
-          <View style={styles.buttonRow}>
-            <Pressable
-              style={[styles.databaseButton, styles.backupButton]}
-              onPress={handleBackupData}
-              disabled={isLoading || isBackingUp || isRestoring}
-            >
-              <View style={styles.buttonContent}>
-                <View style={styles.buttonIconContainer}>
-                  {isBackingUp ? (
-                    <Entypo
-                      name="cycle"
-                      size={theme.components.icon.small}
-                      color={theme.colors.white}
-                    />
-                  ) : (
-                    <Entypo
-                      name="download"
-                      size={theme.components.icon.small}
-                      color={theme.colors.white}
-                    />
-                  )}
-                </View>
-                <View style={styles.buttonTextContainer}>
-                  <Text style={styles.databaseButtonText}>
-                    {isBackingUp ? "Criando..." : "Fazer Backup"}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-
-            <Pressable
-              style={[styles.databaseButton, styles.restoreButton]}
-              onPress={handleRestoreData}
-              disabled={isLoading || isBackingUp || isRestoring}
-            >
-              <View style={styles.buttonContent}>
-                <View style={styles.buttonIconContainer}>
-                  {isRestoring ? (
-                    <Entypo
-                      name="cycle"
-                      size={theme.components.icon.small}
-                      color={theme.colors.white}
-                    />
-                  ) : (
-                    <Entypo
-                      name="upload"
-                      size={theme.components.icon.small}
-                      color={theme.colors.white}
-                    />
-                  )}
-                </View>
-                <View style={styles.buttonTextContainer}>
-                  <Text style={styles.databaseButtonText}>
-                    {isRestoring ? "Restaurando..." : "Restaurar Dados"}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
-          </View>
-        </View>
-
         <View style={styles.searchBarContainer}>
           <SearchBar
             value={searchQuery}
@@ -193,17 +116,17 @@ const Home = () => {
                   Nenhum projeto encontrado
                 </Text>
                 <Text style={styles.emptyStateSubtitle}>
-                  Tente ajustar sua busca ou criar um novo projeto
+                  Tente ajustar sua busca ou criar um novo projeto.
                 </Text>
               </View>
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateIcon}>📁</Text>
                 <Text style={styles.emptyStateTitle}>
-                  Nenhum projeto encontrado
+                  Nenhum projeto ainda
                 </Text>
                 <Text style={styles.emptyStateSubtitle}>
-                  Comece criando seu primeiro projeto para organizar suas tarefas
+                  Crie seu primeiro projeto para começar a organizar suas tarefas.
                 </Text>
               </View>
             )}
@@ -225,32 +148,22 @@ const Home = () => {
             />
           </View>
         )}
+
+        {/* Settings Section - End of Page */}
+        <View style={styles.settingsContainer}>
+          <Pressable
+            style={styles.settingsButton}
+            onPress={handleNavigateToSettings}
+            disabled={isLoading}
+          >
+            <Entypo
+              name="cog"
+              size={theme.components.icon.medium}
+              color={theme.colors.white}
+            />
+          </Pressable>
+        </View>
       </ScrollView>
-
-      {/* Backup Modal */}
-      <BackupModal
-        visible={showBackupModal}
-        onClose={() => setShowBackupModal(false)}
-        onConfirm={handleBackupConfirm}
-        isLoading={isBackingUp}
-      />
-
-      {/* Restore Modal */}
-      <RestoreModal
-        visible={showRestoreModal}
-        onClose={() => setShowRestoreModal(false)}
-        onConfirm={handleRestoreConfirm}
-        isLoading={isRestoring}
-      />
-
-      {/* Restore Confirmation Modal */}
-      <RestoreConfirmationModal
-        visible={showRestoreConfirmationModal}
-        onClose={() => setShowRestoreConfirmationModal(false)}
-        onConfirm={handleFinalRestoreConfirm}
-        backupInfo={restoreBackupInfo}
-        isLoading={isRestoring}
-      />
     </View>
   );
 };
@@ -348,68 +261,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.md,
     textAlign: "center",
   },
-  databaseButtonsContainer: {
-    width: "100%",
-    paddingHorizontal: theme.spacing["2xl"],
-    marginTop: theme.spacing.sm,
-    gap: theme.spacing.md,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: theme.spacing.md,
-    justifyContent: "space-between",
-  },
-  databaseButton: {
-    flex: 1,
-    paddingVertical: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 80,
-    ...theme.shadows.md,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  backupButton: {
-    backgroundColor: theme.colors.primary[600],
-    borderColor: theme.colors.primary[500],
-  },
-  restoreButton: {
-    backgroundColor: theme.colors.warning[600],
-    borderColor: theme.colors.warning[500],
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
-  },
-  buttonIconContainer: {
-    width: theme.spacing["4xl"],
-    height: theme.spacing["4xl"],
-    borderRadius: theme.spacing["4xl"] / 2,
-    backgroundColor: theme.colors.transparent.white[20],
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: theme.spacing.md,
-  },
-  buttonTextContainer: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  databaseButtonText: {
-    color: theme.colors.white,
-    fontFamily: theme.typography.fontFamily.bold,
-    fontSize: theme.typography.fontSize.sm,
-    textAlign: "left",
-    marginBottom: theme.spacing.xs,
-    letterSpacing: 0.5,
-  },
   lastWorkedTaskContainer: {
     width: "100%",
     paddingHorizontal: theme.spacing["2xl"],
     marginBottom: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
   },
   lastWorkedTaskTitle: {
     color: theme.colors.white,
@@ -431,6 +287,21 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
     height: 50,
+  },
+  settingsContainer: {
+    width: "100%",
+    paddingHorizontal: theme.spacing["2xl"],
+    marginTop: theme.spacing["2xl"],
+    alignItems: "flex-end",
+    position: "relative",
+  },
+  settingsButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: theme.spacing["4xl"] / 2,
+    width: theme.spacing["4xl"],
+    height: theme.spacing["4xl"],
   },
 });
 

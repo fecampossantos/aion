@@ -239,6 +239,9 @@ This project is private and proprietary.
 
 ### Planned Features
 - Multi-language support
+- PDF templates options
+- improve header on mains screen with animation and blur
+   - "aion" text should become smaller and more to the left upper side - add button should disappear - background should be blurred
 
 ## 📞 Support
 

@@ -1,7 +1,9 @@
-import { renderHook, act } from '@testing-library/react-native';
+import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useDatabaseManagement } from '../../../app/(index)/useDatabaseManagement';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
+import { ToastProvider } from '../../../components/Toast/ToastContext';
+import { SQLiteProvider } from 'expo-sqlite';
 
 // Mock the expo modules
 jest.mock('expo-sqlite');
@@ -61,7 +63,9 @@ describe('useDatabaseManagement', () => {
     expect(typeof result.current.handleClearDatabase).toBe('function');
   });
 
-  it('should fetch projects on mount', async () => {
+  it("should fetch projects on mount", async () => {
+    mockDatabase.getAllAsync.mockResolvedValue(mockProjects);
+
     const { result } = renderHook(() => useDatabaseManagement());
 
     // Wait for the effect to complete
@@ -69,19 +73,21 @@ describe('useDatabaseManagement', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith('SELECT * FROM projects;');
+    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith('SELECT * FROM projects ORDER BY name ASC;');
     expect(result.current.projects).toEqual(mockProjects);
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('should handle fetchAllProjects correctly', async () => {
+  it("should handle fetchAllProjects correctly", async () => {
+    mockDatabase.getAllAsync.mockResolvedValue(mockProjects);
+
     const { result } = renderHook(() => useDatabaseManagement());
 
     await act(async () => {
       await result.current.fetchAllProjects();
     });
 
-    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith('SELECT * FROM projects;');
+    expect(mockDatabase.getAllAsync).toHaveBeenCalledWith('SELECT * FROM projects ORDER BY name ASC;');
     expect(result.current.projects).toEqual(mockProjects);
   });
 
@@ -97,9 +103,11 @@ describe('useDatabaseManagement', () => {
       expect(result.current.showPopulateConfirmation).toBe(true);
     });
 
-    it('should populate database when confirmed', async () => {
+    it("handlePopulateDatabase should populate database when confirmed", async () => {
+      mockDatabase.runAsync.mockResolvedValue({});
+      const { populateDatabase } = require('../../../utils/databaseUtils');
+
       const { result } = renderHook(() => useDatabaseManagement());
-      const { populateDatabase, getDatabaseStats } = require('../../../utils/databaseUtils');
 
       // Call the confirmation handler directly (simulating modal confirmation)
       await act(async () => {
@@ -107,13 +115,14 @@ describe('useDatabaseManagement', () => {
       });
 
       expect(populateDatabase).toHaveBeenCalledWith(mockDatabase);
-      expect(getDatabaseStats).toHaveBeenCalledWith(mockDatabase);
       expect(result.current.isPopulating).toBe(false);
     });
 
-    it('should show success message after population', async () => {
+    it("handlePopulateDatabase should show success message after population", async () => {
+      mockDatabase.runAsync.mockResolvedValue({});
+      const { populateDatabase } = require('../../../utils/databaseUtils');
+
       const { result } = renderHook(() => useDatabaseManagement());
-      const { populateDatabase, getDatabaseStats } = require('../../../utils/databaseUtils');
 
       // Call the confirmation handler directly (simulating modal confirmation)
       await act(async () => {
@@ -122,7 +131,7 @@ describe('useDatabaseManagement', () => {
 
       // Should show success toast
       expect(mockShowToast).toHaveBeenCalledWith(
-        'Database populated successfully! Added 2 projects, 10 tasks, and 100 time entries.',
+        'Database populated successfully!',
         'success'
       );
     });
