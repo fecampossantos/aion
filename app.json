@@ -45,7 +45,8 @@
       "expo-font",
       "expo-asset",
       "expo-sqlite",
-      "expo-router"
+      "expo-router",
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {
