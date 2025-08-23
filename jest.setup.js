@@ -33,12 +33,36 @@ jest.mock('expo-print', () => ({
 jest.mock('expo-file-system', () => ({
   documentDirectory: 'file://mock-documents/',
   moveAsync: jest.fn(() => Promise.resolve()),
+  writeAsStringAsync: jest.fn(() => Promise.resolve()),
+  readAsStringAsync: jest.fn(() => Promise.resolve(JSON.stringify({
+    version: '1.0.0',
+    timestamp: '2024-01-01T00:00:00.000Z',
+    data: {
+      projects: [{ project_id: 1, name: 'Test Project', hourly_cost: 50, created_at: '2024-01-01' }],
+      tasks: [{ task_id: 1, project_id: 1, name: 'Test Task', completed: 0, created_at: '2024-01-01' }],
+      timings: [{ timing_id: 1, task_id: 1, time: 3600, created_at: '2024-01-01' }]
+    }
+  }))),
+  getInfoAsync: jest.fn(() => Promise.resolve({ exists: true, size: 1024 })),
+  EncodingType: {
+    UTF8: 'utf8'
+  }
 }));
 
 // Mock expo-sharing
 jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(() => Promise.resolve()),
   isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+}));
+
+
+
+// Mock expo-document-picker
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn(() => Promise.resolve({
+    canceled: false,
+    assets: [{ uri: 'file://mock-backup.json', name: 'backup.json' }]
+  })),
 }));
 
 jest.mock('expo-sqlite', () => ({
@@ -55,6 +79,13 @@ jest.mock('expo-sqlite', () => ({
     getAllAsync: jest.fn(() => Promise.resolve([
       { name: 'Test Task' },
       { timing_id: 1, task_id: 1, time: 3600, created_at: '2023-01-01T10:00:00Z' }
+    ])),
+    execAsync: jest.fn(() => Promise.resolve()),
+  })),
+  SQLiteDatabase: jest.fn().mockImplementation(() => ({
+    runAsync: jest.fn(() => Promise.resolve({ changes: 1, lastInsertRowId: 1 })),
+    getAllAsync: jest.fn(() => Promise.resolve([
+      { project_id: 1, name: 'Test Project', hourly_cost: 50, created_at: '2024-01-01' }
     ])),
     execAsync: jest.fn(() => Promise.resolve()),
   })),

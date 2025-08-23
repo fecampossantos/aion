@@ -8,6 +8,7 @@ import ToggleSwitch from "../../components/ToggleSwitch";
 import { useLocalSearchParams } from "expo-router";
 import { useProject } from "./useProject";
 import SearchBar from "../../components/SearchBar";
+import { ConfirmationModal } from "../../components/Modal";
 
 const styles = StyleSheet.create({
   container: {
@@ -142,6 +143,9 @@ const Project = () => {
     goToPage,
     handleSearchChange,
     handleShowCompletedToggle,
+    showTimerWarningModal,
+    handleCancelNavigation,
+    handleConfirmNavigation,
   } = useProject(projectID as string);
 
   if (!project) return <LoadingView />;
@@ -245,6 +249,18 @@ const Project = () => {
           )}
         </View>
       </View>
+
+      {/* Timer Warning Modal */}
+      <ConfirmationModal
+        visible={showTimerWarningModal}
+        onClose={handleCancelNavigation}
+        onConfirm={handleConfirmNavigation}
+        title="Parar timer?"
+        message="Seu timer ainda está rodando. Se você sair, perderá o tempo!"
+        confirmText="Sair"
+        cancelText="Continuar aqui"
+        variant="warning"
+      />
     </ScrollView>
   );
 };

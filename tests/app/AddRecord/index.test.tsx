@@ -26,27 +26,37 @@ jest.mock("expo-router", () => ({
 // Mock @react-native-picker/picker
 jest.mock("@react-native-picker/picker", () => {
   const { View, Text } = require("react-native");
-  return {
-    Picker: ({ selectedValue, onValueChange, children, style, testID }: any) => (
-      <View testID={testID} style={style}>
-        <Text testID="picker-label">Task Picker</Text>
-        {children && Array.isArray(children) && children.map((child: any, index: number) => {
-          if (child && child.props) {
-            return (
-              <Text
-                key={index}
-                onPress={() => onValueChange(child.props.value, index)}
-                testID={`picker-item-${child.props.value || index}`}
-              >
-                {child.props.label || `Item ${index}`}
-              </Text>
-            );
-          }
-          return null;
-        })}
-      </View>
-    ),
-  };
+  
+  const PickerItem = ({ label, value, style, color }: any) => (
+    <Text style={style} testID={`picker-item-${value}`}>
+      {label}
+    </Text>
+  );
+  
+  const Picker = ({ selectedValue, onValueChange, children, style, testID }: any) => (
+    <View testID={testID} style={style}>
+      <Text testID="picker-label">Task Picker</Text>
+      {children && Array.isArray(children) && children.map((child: any, index: number) => {
+        if (child && child.props) {
+          return (
+            <Text
+              key={index}
+              onPress={() => onValueChange(child.props.value, index)}
+              testID={`picker-item-${child.props.value || index}`}
+            >
+              {child.props.label || `Item ${index}`}
+            </Text>
+          );
+        }
+        return null;
+      })}
+    </View>
+  );
+  
+  // Attach PickerItem as a property of Picker
+  Picker.Item = PickerItem;
+  
+  return { Picker };
 });
 
 // Mock @react-native-community/datetimepicker
@@ -90,9 +100,15 @@ describe("AddRecord Component", () => {
   it("renders without crashing", async () => {
     const { getByText, getByTestId } = render(<AddRecord />);
     
+    // Wait for the component to load project and tasks
+    await waitFor(() => {
+      expect(mockDatabase.getFirstAsync).toHaveBeenCalled();
+    }, { timeout: 10000 });
+    
+    // Now check for the text that should appear after loading
     await waitFor(() => {
       expect(getByText("Selecione a task")).toBeDefined();
-    });
+    }, { timeout: 10000 });
   });
 
   it("loads project and tasks on mount", async () => {

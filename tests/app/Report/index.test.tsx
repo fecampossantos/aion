@@ -52,6 +52,14 @@ jest.mock("expo-sharing", () => ({
   shareAsync: jest.fn(),
 }));
 
+// Mock the toast context
+jest.mock("../../../components/Toast/ToastContext", () => ({
+  useToast: () => ({
+    showToast: jest.fn(),
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe("Report Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();

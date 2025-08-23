@@ -16,6 +16,12 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
+import {
+  BackupModal,
+  RestoreModal,
+  RestoreConfirmationModal,
+  ConfirmationModal,
+} from "../../components/Modal";
 
 /**
  * Home component that displays the main dashboard with projects and database management options
@@ -30,11 +36,34 @@ const Home = () => {
     isLoading,
     isPopulating,
     isClearing,
+    isBackingUp,
+    isRestoring,
     refreshProjects,
     handlePopulateDatabase,
+    handlePopulateConfirm,
     handleClearDatabase,
+    handleClearConfirm,
+    handleBackupData,
+    handleBackupConfirm,
+    handleRestoreData,
+    handleRestoreConfirm,
+    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
+    // Modal states
+    showBackupModal,
+    setShowBackupModal,
+    showRestoreModal,
+    setShowRestoreModal,
+    showRestoreConfirmationModal,
+    setShowRestoreConfirmationModal,
+    restoreBackupInfo,
+    setRestoreBackupInfo,
+    // Confirmation modal states
+    showPopulateConfirmation,
+    setShowPopulateConfirmation,
+    showClearConfirmation,
+    setShowClearConfirmation,
   } = useDatabaseManagement();
 
   /**
@@ -98,63 +127,125 @@ const Home = () => {
       </View>
 
       <View style={styles.databaseButtonsContainer}>
-        <Pressable
-          style={[styles.databaseButton, styles.populateButton]}
-          onPress={handlePopulateDatabase}
-          disabled={isLoading || isPopulating || isClearing}
-        >
-          <View style={styles.buttonContent}>
-            <View style={styles.buttonIconContainer}>
-              {isPopulating ? (
-                <Entypo
-                  name="cycle"
-                  size={theme.components.icon.small}
-                  color={theme.colors.white}
-                />
-              ) : (
-                <Entypo
-                  name="database"
-                  size={theme.components.icon.small}
-                  color={theme.colors.white}
-                />
-              )}
+        <View style={styles.buttonRow}>
+          <Pressable
+            style={[styles.databaseButton, styles.populateButton]}
+            onPress={handlePopulateDatabase}
+            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
+          >
+            <View style={styles.buttonContent}>
+              <View style={styles.buttonIconContainer}>
+                {isPopulating ? (
+                  <Entypo
+                    name="cycle"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                ) : (
+                  <Entypo
+                    name="database"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                )}
+              </View>
+              <View style={styles.buttonTextContainer}>
+                <Text style={styles.databaseButtonText}>
+                  {isPopulating ? "Populating..." : "Populate Database"}
+                </Text>
+              </View>
             </View>
-            <View style={styles.buttonTextContainer}>
-              <Text style={styles.databaseButtonText}>
-                {isPopulating ? "Populating..." : "Populate Database"}
-              </Text>
-            </View>
-          </View>
-        </Pressable>
+          </Pressable>
 
-        <Pressable
-          style={[styles.databaseButton, styles.clearButton]}
-          onPress={handleClearDatabase}
-          disabled={isLoading || isPopulating || isClearing}
-        >
-          <View style={styles.buttonContent}>
-            <View style={styles.buttonIconContainer}>
-              {isClearing ? (
-                <Entypo
-                  name="cycle"
-                  size={theme.components.icon.small}
-                  color={theme.colors.white}
-                />
-              ) : (
-                <Entypo
-                  name="trash"
-                  size={theme.components.icon.small}
-                  color={theme.colors.white}
-                />
-              )}
+          <Pressable
+            style={[styles.databaseButton, styles.clearButton]}
+            onPress={handleClearDatabase}
+            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
+          >
+            <View style={styles.buttonContent}>
+              <View style={styles.buttonIconContainer}>
+                {isClearing ? (
+                  <Entypo
+                    name="cycle"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                ) : (
+                  <Entypo
+                    name="trash"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                )}
+              </View>
+              <View style={styles.buttonTextContainer}>
+                <Text style={styles.databaseButtonText}>
+                  {isClearing ? "Clearing..." : "Clear Database"}
+                </Text>
+              </View>
             </View>
-            <View style={styles.buttonTextContainer}>
-              <Text style={styles.databaseButtonText}>
-                {isClearing ? "Clearing..." : "Clear Database"}
-              </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.buttonRow}>
+          <Pressable
+            style={[styles.databaseButton, styles.backupButton]}
+            onPress={handleBackupData}
+            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
+          >
+            <View style={styles.buttonContent}>
+              <View style={styles.buttonIconContainer}>
+                {isBackingUp ? (
+                  <Entypo
+                    name="cycle"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                ) : (
+                  <Entypo
+                    name="download"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                )}
+              </View>
+              <View style={styles.buttonTextContainer}>
+                <Text style={styles.databaseButtonText}>
+                  {isBackingUp ? "Creating..." : "Backup Data"}
+                </Text>
+              </View>
             </View>
-          </View>
-        </Pressable>
+          </Pressable>
+
+          <Pressable
+            style={[styles.databaseButton, styles.restoreButton]}
+            onPress={handleRestoreData}
+            disabled={isLoading || isPopulating || isClearing || isBackingUp || isRestoring}
+          >
+            <View style={styles.buttonContent}>
+              <View style={styles.buttonIconContainer}>
+                {isRestoring ? (
+                  <Entypo
+                    name="cycle"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                ) : (
+                  <Entypo
+                    name="upload"
+                    size={theme.components.icon.small}
+                    color={theme.colors.white}
+                  />
+                )}
+              </View>
+              <View style={styles.buttonTextContainer}>
+                <Text style={styles.databaseButtonText}>
+                  {isRestoring ? "Restoring..." : "Restore Data"}
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.searchBarContainer}>
@@ -238,6 +329,57 @@ const Home = () => {
           />
         </View>
       )}
+
+      {/* Populate Database Confirmation Modal */}
+      <ConfirmationModal
+        visible={showPopulateConfirmation}
+        onClose={() => setShowPopulateConfirmation(false)}
+        onConfirm={handlePopulateConfirm}
+        title="Populate Database"
+        message="This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds."
+        confirmText="Populate"
+        variant="info"
+        isLoading={isPopulating}
+      />
+
+      {/* Clear Database Confirmation Modal */}
+      <ConfirmationModal
+        visible={showClearConfirmation}
+        onClose={() => setShowClearConfirmation(false)}
+        onConfirm={handleClearConfirm}
+        title="Clear Database"
+        message="This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!"
+        confirmText="Clear All"
+        variant="danger"
+        isLoading={isClearing}
+      />
+
+      {/* Backup Modal */}
+      <BackupModal
+        visible={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
+        onConfirm={handleBackupConfirm}
+        isLoading={isBackingUp}
+      />
+
+      {/* Restore Modal */}
+      <RestoreModal
+        visible={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onConfirm={handleRestoreConfirm}
+        isLoading={isRestoring}
+      />
+
+      {/* Restore Confirmation Modal */}
+      <RestoreConfirmationModal
+        visible={showRestoreConfirmationModal}
+        onClose={() => setShowRestoreConfirmationModal(false)}
+        onConfirm={handleFinalRestoreConfirm}
+        backupInfo={restoreBackupInfo}
+        isLoading={isRestoring}
+      />
+
+
     </View>
   );
 };
@@ -332,6 +474,9 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: theme.spacing["2xl"],
     marginTop: theme.spacing.sm,
+    gap: theme.spacing.md,
+  },
+  buttonRow: {
     flexDirection: "row",
     gap: theme.spacing.md,
     justifyContent: "space-between",
@@ -355,6 +500,14 @@ const styles = StyleSheet.create({
   clearButton: {
     backgroundColor: theme.colors.error[600],
     borderColor: theme.colors.error[500],
+  },
+  backupButton: {
+    backgroundColor: theme.colors.primary[600],
+    borderColor: theme.colors.primary[500],
+  },
+  restoreButton: {
+    backgroundColor: theme.colors.warning[600],
+    borderColor: theme.colors.warning[500],
   },
   buttonContent: {
     flexDirection: "row",

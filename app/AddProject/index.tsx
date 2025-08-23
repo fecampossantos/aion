@@ -2,7 +2,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,6 +12,7 @@ import { AntDesign } from "@expo/vector-icons";
 import TextInput from "../../components/TextInput";
 import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
+import { useToast } from "../../components/Toast/ToastContext";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { router } from "expo-router";
@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
  */
 const AddProject = () => {
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const [projectName, setProjectName] = useState<string>("");
   const [projectHourlyCost, setProjectHourlyCost] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -131,15 +132,12 @@ const AddProject = () => {
 
   const handleAddProject = async () => {
     if (projectName.trim() === "") {
-      Alert.alert("Erro", "O nome do projeto não pode estar vazio.");
+      showToast("O nome do projeto não pode estar vazio.", "error");
       return;
     }
 
     if (projectName.trim().length < 2) {
-      Alert.alert(
-        "Erro",
-        "O nome do projeto deve ter pelo menos 2 caracteres."
-      );
+      showToast("O nome do projeto deve ter pelo menos 2 caracteres.", "error");
       return;
     }
 
@@ -152,7 +150,7 @@ const AddProject = () => {
       );
 
       if (existingProject) {
-        Alert.alert("Erro", "Um projeto com esse nome já existe.");
+        showToast("Um projeto com esse nome já existe.", "error");
         setIsSubmitting(false);
         return;
       }
@@ -165,9 +163,10 @@ const AddProject = () => {
         parseFloat(cost)
       );
 
+      showToast("Projeto criado com sucesso!", "success");
       router.replace("/");
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível criar o projeto. Tente novamente.");
+      showToast("Não foi possível criar o projeto. Tente novamente.", "error");
       setIsSubmitting(false);
     }
   };

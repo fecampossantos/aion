@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -11,6 +10,7 @@ import { useEffect, useState } from "react";
 
 import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
+import { useToast } from "../../components/Toast/ToastContext";
 import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
 import { theme } from "../../globalStyle/theme";
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
  */
 const AddTask = () => {
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const { projectID } = useLocalSearchParams();
   const [project, setProject] = useState<IProject>();
   const [taskName, setTaskName] = useState<string>("");
@@ -122,12 +123,12 @@ const AddTask = () => {
 
   const handleAddTaskToProject = async () => {
     if (taskName.trim() === "") {
-      Alert.alert("Erro", "Por favor, insira um nome para a task.");
+      showToast("Por favor, insira um nome para a task.", "error");
       return;
     }
 
     if (taskName.trim().length < 2) {
-      Alert.alert("Erro", "O nome da task deve ter pelo menos 2 caracteres.");
+      showToast("O nome da task deve ter pelo menos 2 caracteres.", "error");
       return;
     }
 
@@ -140,9 +141,10 @@ const AddTask = () => {
         taskName.trim()
       );
 
+      showToast("Task criada com sucesso!", "success");
       router.back()
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível criar a task. Tente novamente.");
+      showToast("Não foi possível criar a task. Tente novamente.", "error");
       setIsSubmitting(false);
     }
   };

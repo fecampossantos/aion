@@ -12,6 +12,7 @@
 - **Data Persistence**: SQLite database for reliable local data storage
 
 ### Advanced Features
+- **Data Backup & Restore**: Export all data to JSON files and save to device storage
 - **PDF Reports**: Generate detailed time reports for projects (feature in development)
 - **Cost Calculation**: Automatic calculation of project costs based on time tracked and hourly rates
 - **Haptic Feedback**: Enhanced user experience with tactile feedback
@@ -237,10 +238,7 @@ This project is private and proprietary.
 - None (let me know if you find any 😅)
 
 ### Planned Features
-- Data backup and restore - _in progress on background agents_
 - Multi-language support
-- Last worked on tasks display on projects screen - _in progress on background agents_
-- Tasks analysis (burndown chart) - _in progress on background agents_
 
 ## 📞 Support
 

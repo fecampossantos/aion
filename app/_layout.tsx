@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { theme } from "../globalStyle/theme";
 import { useGoogleFonts } from "../globalStyle/fonts";
 import { View, Text } from "react-native";
+import { ToastProvider } from "../components/Toast/ToastContext";
 
 export default function HomeLayout() {
   const { fontsLoaded, fontError } = useGoogleFonts();
@@ -30,13 +31,15 @@ export default function HomeLayout() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.neutral[900] }}>
       <StatusBar style="light" />
-      <SQLiteProvider
-        databaseName="aionMainDatabase.db"
-        onInit={migrateDbIfNeeded}
-        useSuspense
-      >
-        <Slot />
-      </SQLiteProvider>
+      <ToastProvider>
+        <SQLiteProvider
+          databaseName="aionMainDatabase.db"
+          onInit={migrateDbIfNeeded}
+          useSuspense
+        >
+          <Slot />
+        </SQLiteProvider>
+      </ToastProvider>
     </SafeAreaView>
   );
 }

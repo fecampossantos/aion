@@ -47,7 +47,24 @@ describe("Project", () => {
     {
       task_id: 2,
       name: "Task 2",
-      completed: 1,
+      completed: 0, // Changed to incomplete so it shows by default
+      task_created_at: "2023-01-01T11:00:00Z",
+      timed_until_now: 300,
+    },
+  ];
+
+  const mockTasksWithCompleted = [
+    {
+      task_id: 1,
+      name: "Task 1",
+      completed: 0,
+      task_created_at: "2023-01-01T10:00:00Z",
+      timed_until_now: 120,
+    },
+    {
+      task_id: 2,
+      name: "Task 2",
+      completed: 1, // This one is completed
       task_created_at: "2023-01-01T11:00:00Z",
       timed_until_now: 300,
     },
@@ -172,7 +189,16 @@ describe("Project", () => {
   });
 
   it("handles task uncompletion", async () => {
-    const { getByText } = render(<Project />);
+    // Use mock data with a completed task for this test
+    mockDatabase.getAllAsync.mockResolvedValue(mockTasksWithCompleted);
+    
+    const { getByTestId, getByText } = render(<Project />);
+
+    // First toggle "show completed" to see the completed task
+    await waitFor(() => {
+      const toggleSwitch = getByTestId("toggle-switch");
+      fireEvent.press(toggleSwitch);
+    });
 
     await waitFor(() => {
       expect(getByText("Task 2")).toBeDefined();
@@ -182,7 +208,7 @@ describe("Project", () => {
     const task2 = getByText("Task 2");
     const taskComponent = task2.parent;
     if (taskComponent) {
-      fireEvent(taskComponent, "handleDoneTask", false, mockTasks[1]);
+      fireEvent(taskComponent, "handleDoneTask", false, mockTasksWithCompleted[1]);
     }
 
     await waitFor(() => {
@@ -339,6 +365,28 @@ describe("Project", () => {
     const taskElements = [getByText("Task 1"), getByText("Task 2")];
     expect(taskElements[0]).toBeDefined();
     expect(taskElements[1]).toBeDefined();
+  });
+
+  it("shows completed tasks when toggle is enabled", async () => {
+    // Use mock data with a completed task for this test
+    mockDatabase.getAllAsync.mockResolvedValue(mockTasksWithCompleted);
+    
+    const { getByTestId, getByText, queryByText } = render(<Project />);
+
+    // Initially, only Task 1 (incomplete) should be visible
+    await waitFor(() => {
+      expect(getByText("Task 1")).toBeDefined();
+      expect(queryByText("Task 2")).toBeNull(); // Task 2 is completed and hidden
+    });
+
+    // Toggle "show completed" to see all tasks
+    const toggleSwitch = getByTestId("toggle-switch");
+    fireEvent.press(toggleSwitch);
+
+    await waitFor(() => {
+      expect(getByText("Task 1")).toBeDefined();
+      expect(getByText("Task 2")).toBeDefined(); // Now Task 2 should be visible
+    });
   });
 
   it("handles task completion and refresh", async () => {

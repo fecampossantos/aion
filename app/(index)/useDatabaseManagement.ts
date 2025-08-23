@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Project } from "../../interfaces/Project";
 import {
@@ -7,6 +6,19 @@ import {
   clearDatabase,
   getDatabaseStats,
 } from "../../utils/databaseUtils";
+import {
+  downloadBackup,
+  restoreFromSelectedFile,
+  restoreFromFile,
+  getBackupStats,
+  BackupData,
+} from "../../utils/backupUtils";
+import {
+  BackupModal,
+  RestoreModal,
+  RestoreConfirmationModal,
+} from "../../components/Modal";
+import { useToast } from "../../components/Toast/ToastContext";
 
 // Interface for the last worked task with project info
 interface LastWorkedTask {
@@ -26,6 +38,7 @@ interface LastWorkedTask {
  */
 export const useDatabaseManagement = () => {
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const [projects, setProjects] = useState<Array<Project>>([]);
   const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(null);
   const [filteredProjects, setFilteredProjects] = useState<Array<Project>>([]);
@@ -33,6 +46,24 @@ export const useDatabaseManagement = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
+  const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
+  
+  // Modal states
+  const [showBackupModal, setShowBackupModal] = useState<boolean>(false);
+  const [showRestoreModal, setShowRestoreModal] = useState<boolean>(false);
+  const [showRestoreConfirmationModal, setShowRestoreConfirmationModal] = useState<boolean>(false);
+
+  const [restoreBackupInfo, setRestoreBackupInfo] = useState<{
+    date: string;
+    projectCount: number;
+    taskCount: number;
+    timingCount: number;
+  }>({ date: '', projectCount: 0, taskCount: 0, timingCount: 0 });
+  
+  // Confirmation modal states
+  const [showPopulateConfirmation, setShowPopulateConfirmation] = useState<boolean>(false);
+  const [showClearConfirmation, setShowClearConfirmation] = useState<boolean>(false);
 
   /**
    * Filters projects based on search query
@@ -146,76 +177,127 @@ export const useDatabaseManagement = () => {
   /**
    * Handles populating the database with sample data
    */
-  const handlePopulateDatabase = async () => {
-    Alert.alert(
-      "Populate Database",
-      "This will add 2 projects with extensive tasks and 2 months of time tracking data. This may take a few seconds.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Populate",
-          onPress: async () => {
-            setIsPopulating(true);
-            try {
-              await populateDatabase(database);
-              await refreshProjects();
-              const stats = await getDatabaseStats(database);
-              Alert.alert(
-                "Success!",
-                `Database populated successfully!\n\nAdded:\n• ${stats.projects} projects\n• ${stats.tasks} tasks\n• ${stats.timings} time entries`
-              );
-            } catch (error) {
-              Alert.alert(
-                "Error",
-                "Failed to populate database. Please try again."
-              );
-              console.error("Population error:", error);
-            } finally {
-              setIsPopulating(false);
-            }
-          },
-        },
-      ]
-    );
+  const handlePopulateDatabase = () => {
+    setShowPopulateConfirmation(true);
+  };
+
+  /**
+   * Handles populate confirmation
+   */
+  const handlePopulateConfirm = async () => {
+    setShowPopulateConfirmation(false);
+    setIsPopulating(true);
+    try {
+      await populateDatabase(database);
+      await refreshProjects();
+      const stats = await getDatabaseStats(database);
+      // Show success toast
+      showToast(`Database populated successfully! Added ${stats.projects} projects, ${stats.tasks} tasks, and ${stats.timings} time entries.`, 'success');
+    } catch (error) {
+      // Show error toast
+      showToast('Failed to populate database. Please try again.', 'error');
+      console.error("Population error:", error);
+    } finally {
+      setIsPopulating(false);
+    }
   };
 
   /**
    * Handles clearing all data from the database
    */
-  const handleClearDatabase = async () => {
-    Alert.alert(
-      "Clear Database",
-      "This will permanently delete ALL projects, tasks, and time tracking data. This action cannot be undone!",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Clear All",
-          style: "destructive",
-          onPress: async () => {
-            setIsClearing(true);
-            try {
-              await clearDatabase(database);
-              await refreshProjects();
-              Alert.alert("Success!", "Database cleared successfully!");
-            } catch (error) {
-              Alert.alert(
-                "Error",
-                "Failed to clear database. Please try again."
-              );
-              console.error("Clear error:", error);
-            } finally {
-              setIsClearing(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleClearDatabase = () => {
+    setShowClearConfirmation(true);
+  };
+
+  /**
+   * Handles clear confirmation
+   */
+  const handleClearConfirm = async () => {
+    setShowClearConfirmation(false);
+    setIsClearing(true);
+    try {
+      await clearDatabase(database);
+      await refreshProjects();
+      // Show success toast
+      showToast('Database cleared successfully!', 'success');
+    } catch (error) {
+      // Show error toast
+      showToast('Failed to clear database. Please try again.', 'error');
+      console.error("Clear error:", error);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  /**
+   * Handles creating and sharing a backup of all data
+   */
+  const handleBackupData = () => {
+    setShowBackupModal(true);
+  };
+
+  /**
+   * Handles backup confirmation
+   */
+  const handleBackupConfirm = async () => {
+    setShowBackupModal(false);
+    setIsBackingUp(true);
+    try {
+      await downloadBackup(database);
+      // Show success toast
+      showToast('Backup created successfully and ready to share!', 'success');
+      // Refresh projects after successful backup
+      await fetchAllProjects();
+    } catch (error) {
+      // Error handling is done in downloadBackup function
+      console.error("Backup error:", error);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  /**
+   * Handles restoring data from a backup file
+   */
+  const handleRestoreData = () => {
+    setShowRestoreModal(true);
+  };
+
+  /**
+   * Handles restore confirmation
+   */
+  const handleRestoreConfirm = async () => {
+    setShowRestoreModal(false);
+    setIsRestoring(true);
+    try {
+      const backupInfo = await restoreFromSelectedFile(database);
+      // Set backup info for confirmation modal
+      setRestoreBackupInfo(backupInfo);
+      setShowRestoreConfirmationModal(true);
+      setIsRestoring(false);
+    } catch (error) {
+      // Error handling is done in restoreFromSelectedFile function
+      console.error("Restore error:", error);
+      setIsRestoring(false);
+    }
+  };
+
+  /**
+   * Handles final restore confirmation
+   */
+  const handleFinalRestoreConfirm = async () => {
+    setShowRestoreConfirmationModal(false);
+    setIsRestoring(true);
+    try {
+      // The actual restore was already done, just refresh the data
+      await fetchAllProjects();
+      // Show success toast
+      showToast(`Restore complete! ${restoreBackupInfo.projectCount} projects, ${restoreBackupInfo.taskCount} tasks, and ${restoreBackupInfo.timingCount} time records restored.`, 'success');
+    } catch (error) {
+      console.error("Restore error:", error);
+    } finally {
+      setIsRestoring(false);
+    }
   };
 
   return {
@@ -226,11 +308,34 @@ export const useDatabaseManagement = () => {
     isLoading,
     isPopulating,
     isClearing,
+    isBackingUp,
+    isRestoring,
     fetchAllProjects,
     refreshProjects,
     handlePopulateDatabase,
+    handlePopulateConfirm,
     handleClearDatabase,
+    handleClearConfirm,
+    handleBackupData,
+    handleBackupConfirm,
+    handleRestoreData,
+    handleRestoreConfirm,
+    handleFinalRestoreConfirm,
     handleSearch,
     clearSearch,
+    // Modal states
+    showBackupModal,
+    setShowBackupModal,
+    showRestoreModal,
+    setShowRestoreModal,
+    showRestoreConfirmationModal,
+    setShowRestoreConfirmationModal,
+    restoreBackupInfo,
+    setRestoreBackupInfo,
+    // Confirmation modal states
+    showPopulateConfirmation,
+    setShowPopulateConfirmation,
+    showClearConfirmation,
+    setShowClearConfirmation,
   };
 };

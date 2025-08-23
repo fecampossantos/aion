@@ -1,9 +1,10 @@
-import { Text, View, ScrollView, Alert, StyleSheet } from "react-native";
+import { Text, View, ScrollView, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import TextInput from "../../components/TextInput";
 import CurrencyInput from "../../components/CurrencyInput";
 import Button from "../../components/Button";
+import { useToast } from "../../components/Toast/ToastContext";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
@@ -113,6 +114,7 @@ const EditProject = () => {
   const [project, setProject] = useState<IProject>();
 
   const database = useSQLiteContext();
+  const { showToast } = useToast();
   const [projectName, setProjectName] = useState<string>();
   const [projectHourlyCost, setProjectHourlyCost] = useState<string>();
   const [errorMessage, setErrorMessage] = useState(null);
@@ -166,11 +168,8 @@ const EditProject = () => {
           project.project_id
         );
         
-        Alert.alert(
-          "Sucesso", 
-          "Projeto atualizado com sucesso!",
-          [{ text: "OK", onPress: () => router.replace("/") }]
-        );
+        showToast("Projeto atualizado com sucesso!", "success");
+        router.replace("/");
       } else {
         router.replace("/");
       }

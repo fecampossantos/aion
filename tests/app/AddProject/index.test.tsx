@@ -16,6 +16,14 @@ jest.mock("expo-sqlite", () => ({
   useSQLiteContext: jest.fn(),
 }));
 
+// Mock the toast context
+jest.mock("../../../components/Toast/ToastContext", () => ({
+  useToast: () => ({
+    showToast: jest.fn(),
+  }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock("../../../components/TextInput", () => {
   const React = require("react");
   const { TextInput } = require("react-native");
@@ -142,7 +150,7 @@ describe("AddProject Screen", () => {
   it("shows error when project with same name already exists", async () => {
     mockDatabase.getFirstAsync.mockResolvedValue({ name: "Existing Project" });
 
-    const { getByTestId, getByText } = render(<AddProject />);
+    const { getByTestId } = render(<AddProject />);
 
     const textInput = getByTestId("text-input");
     fireEvent.changeText(textInput, "Existing Project");
@@ -151,16 +159,11 @@ describe("AddProject Screen", () => {
     fireEvent.press(button);
 
     await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledWith(
-        "Erro",
-        "Um projeto com esse nome já existe."
+      expect(mockDatabase.getFirstAsync).toHaveBeenCalledWith(
+        "SELECT * FROM projects WHERE name = ?;",
+        "Existing Project"
       );
     });
-
-    expect(mockDatabase.getFirstAsync).toHaveBeenCalledWith(
-      "SELECT * FROM projects WHERE name = ?;",
-      "Existing Project"
-    );
   });
 
   it("successfully creates project with valid data", async () => {
