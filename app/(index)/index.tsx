@@ -4,9 +4,11 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
+  Animated,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import { BlurView } from "expo-blur";
 
 import ProjectCard from "../../components/ProjectCard";
 import LoadingView from "../../components/LoadingView";
@@ -16,6 +18,7 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
+import { useRef, useState, useEffect } from "react";
 
 /**
  * Home component that displays the main dashboard with projects
@@ -32,6 +35,59 @@ const Home = () => {
     handleSearch,
     clearSearch,
   } = useDatabaseManagement();
+
+  // Animated values for scroll-based animations
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [blurIntensityValue, setBlurIntensityValue] = useState(0);
+  
+  // Animation interpolations with smooth easing
+  const headerTextScale = scrollY.interpolate({
+    inputRange: [0, 80, 120],
+    outputRange: [1, 0.65, 0.6],
+    extrapolate: 'clamp',
+  });
+  
+  const headerTextTranslateX = scrollY.interpolate({
+    inputRange: [0, 80, 120],
+    outputRange: [0, -40, -50],
+    extrapolate: 'clamp',
+  });
+  
+  const headerTextTranslateY = scrollY.interpolate({
+    inputRange: [0, 80, 120],
+    outputRange: [0, -8, -10],
+    extrapolate: 'clamp',
+  });
+  
+  const addButtonOpacity = scrollY.interpolate({
+    inputRange: [0, 30, 60],
+    outputRange: [1, 0.3, 0],
+    extrapolate: 'clamp',
+  });
+  
+  const addButtonScale = scrollY.interpolate({
+    inputRange: [0, 30, 60],
+    outputRange: [1, 0.8, 0.6],
+    extrapolate: 'clamp',
+  });
+  
+  const addButtonTranslateY = scrollY.interpolate({
+    inputRange: [0, 30, 60],
+    outputRange: [0, -10, -20],
+    extrapolate: 'clamp',
+  });
+  
+  // Set up listener for blur intensity
+  useEffect(() => {
+    const listener = scrollY.addListener(({ value }) => {
+      const intensity = Math.min(Math.max((value / 120) * 25, 0), 25);
+      setBlurIntensityValue(intensity);
+    });
+    
+    return () => {
+      scrollY.removeListener(listener);
+    };
+  }, [scrollY]);
 
   /**
    * Handles manual refresh of projects data
@@ -59,24 +115,57 @@ const Home = () => {
   return (
     <View style={styles.container} testID="home-container">
       <StatusBar style="light" />
-      <View style={styles.header}>
-        <Text style={styles.headerText}>aion</Text>
-        <View style={styles.headerButtons}>
-          <Pressable
-            style={styles.addButton}
-            onPress={() => router.push("AddProject")}
-            disabled={isLoading}
+      <View style={styles.headerContainer}>
+        <Animated.View style={styles.blurContainer}>
+          <BlurView
+            intensity={blurIntensityValue}
+            tint="dark"
+            style={styles.blurView}
+          />
+        </Animated.View>
+        <View style={styles.header}>
+          <Animated.Text 
+            style={[
+              styles.headerText,
+              {
+                transform: [
+                  { scale: headerTextScale },
+                  { translateX: headerTextTranslateX },
+                  { translateY: headerTextTranslateY },
+                ],
+              },
+            ]}
           >
-            <Entypo
-              name="plus"
-              size={theme.components.icon.medium}
-              color={theme.colors.neutral[800]}
-            />
-          </Pressable>
+            aion
+          </Animated.Text>
+          <Animated.View 
+            style={[
+              styles.headerButtons,
+              {
+                opacity: addButtonOpacity,
+                transform: [
+                  { translateY: addButtonTranslateY },
+                  { scale: addButtonScale },
+                ],
+              },
+            ]}
+          >
+            <Pressable
+              style={styles.addButton}
+              onPress={() => router.push("AddProject")}
+              disabled={isLoading}
+            >
+              <Entypo
+                name="plus"
+                size={theme.components.icon.medium}
+                color={theme.colors.neutral[800]}
+              />
+            </Pressable>
+          </Animated.View>
         </View>
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={
@@ -88,6 +177,11 @@ const Home = () => {
           />
         }
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
       >
         <View style={styles.searchBarContainer}>
           <SearchBar
@@ -163,7 +257,7 @@ const Home = () => {
             />
           </Pressable>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -176,16 +270,38 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingTop: theme.spacing["4xl"],
   },
-  header: {
+  headerContainer: {
+    position: "absolute",
+    top: theme.spacing["4xl"],
+    left: 0,
+    right: 0,
     width: "100%",
-    backgroundColor: theme.colors.neutral[900],
     height: 80,
+    zIndex: 10,
+    overflow: "hidden",
+  },
+  blurContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
+  },
+  blurView: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+  },
+  header: {
+    position: "relative",
+    zIndex: 2,
+    width: "100%",
+    height: "100%",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: theme.spacing["2xl"],
-    marginBottom: theme.spacing.lg,
   },
   headerText: {
     color: theme.colors.white,
@@ -220,6 +336,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     width: "100%",
+    marginTop: 80 + theme.spacing.lg,
   },
   scrollViewContent: {
     paddingBottom: theme.spacing["4xl"],
