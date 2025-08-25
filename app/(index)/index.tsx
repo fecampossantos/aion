@@ -15,7 +15,7 @@ import SearchBar from "../../components/SearchBar";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
-import { useDatabaseManagement } from "./useDatabaseManagement";
+import useDatabaseManagement from "./useDatabaseManagement";
 import { useTranslation } from "react-i18next";
 
 /**

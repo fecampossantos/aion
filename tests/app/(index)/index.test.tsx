@@ -90,7 +90,8 @@ const createMockHook = (overrides = {}) => ({
 const mockUseDatabaseManagement = jest.fn(() => createMockHook());
 
 jest.mock("../../../app/(index)/useDatabaseManagement", () => ({
-  useDatabaseManagement: () => mockUseDatabaseManagement(),
+  __esModule: true,
+  default: () => mockUseDatabaseManagement(),
 }));
 
 // Mock the LoadingView component

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../../globalStyle/theme';
-import { Modal, ModalButton } from './index';
+import Modal from './Modal';
+import ModalButton from './Button';
 
 interface RestoreConfirmationModalProps {
   visible: boolean;

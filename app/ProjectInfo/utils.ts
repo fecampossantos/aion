@@ -1,18 +1,18 @@
-export const getInitOfDay = (day: Date) => {
+const getInitOfDay = (day: Date) => {
   const startOfDay = new Date(day);
   startOfDay.setHours(0, 0, 0, 0);
 
   return startOfDay.toISOString().slice(0, 19).replace("T", " ");
 };
 
-export const getEndOfDay = (day: Date) => {
+const getEndOfDay = (day: Date) => {
   const endOfDay = new Date(day);
   endOfDay.setHours(23, 59, 59, 999);
 
   return endOfDay.toISOString().slice(0, 19).replace("T", " ");
 };
 
-export const prepareResultSet = (
+const prepareResultSet = (
   result: Array<{ day: string; total_time: number }>
 ) => {
   const labels: Array<string> = result.map((r) => {
@@ -24,4 +24,10 @@ export const prepareResultSet = (
   });
 
   return { labels, datasets: [{ data }] };
+};
+
+export default {
+  getInitOfDay,
+  getEndOfDay,
+  prepareResultSet,
 };

@@ -6,7 +6,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
  * @param {Date} initialDate - Initial date value
  * @returns {Object} Date picker state and functions
  */
-export const useDatePicker = (initialDate: Date = new Date()) => {
+const useDatePicker = (initialDate: Date = new Date()) => {
   const [date, setDate] = useState<Date>(initialDate);
   const [showPicker, setShowPicker] = useState(false);
 
@@ -53,3 +53,5 @@ export const useDatePicker = (initialDate: Date = new Date()) => {
     updateDate,
   };
 };
+
+export default useDatePicker;

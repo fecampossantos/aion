@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { Project as IProject } from "../../interfaces/Project";
-import { getEndOfDay, getInitOfDay, prepareResultSet } from "./utils";
+import utils from "./utils";
 
 const useReport = (projectID: string) => {
   const database = useSQLiteContext();
@@ -67,8 +67,8 @@ const useReport = (projectID: string) => {
       const result = await database.getAllAsync<{
         day: string;
         total_time: number;
-      }>(query, projectID, getInitOfDay(startDate), getEndOfDay(endDate));
-      setResultSet(prepareResultSet(result));
+      }>(query, projectID, utils.getInitOfDay(startDate), utils.getEndOfDay(endDate));
+      setResultSet(utils.prepareResultSet(result));
       setShowChart(true);
     } catch (e) {
       console.warn(e);

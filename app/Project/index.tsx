@@ -6,7 +6,7 @@ import LoadingView from "../../components/LoadingView";
 import Pagination from "../../components/Pagination";
 import ToggleSwitch from "../../components/ToggleSwitch";
 import { useLocalSearchParams } from "expo-router";
-import { useProject } from "./useProject";
+import useProject from "./useProject";
 import SearchBar from "../../components/SearchBar";
 import { ConfirmationModal } from "../../components/Modal";
 

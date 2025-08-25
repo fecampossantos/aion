@@ -21,7 +21,7 @@ import { BarChart, LineChart } from "react-native-chart-kit";
 import { useLocalSearchParams, router } from "expo-router";
 
 import useReport from "./useReport";
-import { useReportGeneration } from "./useReportGeneration";
+import useReportGeneration from "./useReportGeneration";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { theme } from "../../globalStyle/theme";

@@ -10,7 +10,7 @@ import { fullDate } from "../../utils/parser";
  * Custom hook for generating and sharing PDF reports
  * @returns {Object} Report generation functions and state
  */
-export const useReportGeneration = () => {
+const useReportGeneration = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const isGeneratingRef = useRef(false);
   const { showToast } = useToast();
@@ -140,3 +140,5 @@ export const useReportGeneration = () => {
     getEndOfDay,
   };
 };
+
+export default useReportGeneration;

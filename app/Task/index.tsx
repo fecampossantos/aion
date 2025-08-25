@@ -7,7 +7,7 @@ import Timing from "../../components/Timing";
 import LoadingView from "../../components/LoadingView";
 import Pagination from "../../components/Pagination";
 import { theme } from "../../globalStyle/theme";
-import { useTask } from "./useTask";
+import useTask from "./useTask";
 
 const styles = StyleSheet.create({
   container: {

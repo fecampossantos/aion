@@ -7,7 +7,7 @@ import { Timing as ITiming } from "../../interfaces/Timing";
  * @param {string} taskID - The task ID
  * @returns {Object} Task state and functions
  */
-export const useTask = (taskID: string) => {
+const useTask = (taskID: string) => {
   const database = useSQLiteContext();
   
   // Check if database context is available
@@ -190,3 +190,5 @@ export const useTask = (taskID: string) => {
     goToPage,
   };
 };
+
+export default useTask;

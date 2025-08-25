@@ -15,7 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { colors } from "../../globalStyle/theme";
 import globalStyle from "../../globalStyle";
 import { spacing, borderRadius, shadows, typography } from "../../globalStyle/theme";
-import { useDatePicker } from "./useDatePicker";
+import useDatePicker from "./useDatePicker";
 
 const styles = StyleSheet.create({
   container: {

@@ -15,7 +15,7 @@ import { shareAsync } from "expo-sharing";
 import { generateReportHTML } from "../../utils/pdfReportService";
 import { Project } from "../../interfaces/Project";
 import { theme } from "../../globalStyle/theme";
-import { useReportGeneration } from "../ProjectInfo/useReportGeneration";
+import useReportGeneration from "../ProjectInfo/useReportGeneration";
 
 const styles = StyleSheet.create({
   container: {

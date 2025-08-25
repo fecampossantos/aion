@@ -18,7 +18,7 @@ interface TaskWithTimed {
  * @param {string} projectID - The project ID
  * @returns {Object} Project state and functions
  */
-export const useProject = (projectID: string) => {
+const useProject = (projectID: string) => {
   const database = useSQLiteContext();
   const navigation = useNavigation();
   const router = useRouter();
@@ -347,3 +347,5 @@ ORDER BY
     handleCancelNavigation,
   };
 };
+
+export default useProject;

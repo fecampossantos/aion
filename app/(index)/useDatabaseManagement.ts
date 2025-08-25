@@ -24,7 +24,7 @@ interface LastWorkedTask {
  * Custom hook for managing database operations
  * @returns {Object} Database management functions and state
  */
-export const useDatabaseManagement = () => {
+const useDatabaseManagement = () => {
   const database = useSQLiteContext();
   const { showToast } = useToast();
   const [projects, setProjects] = useState<Array<Project>>([]);
@@ -215,3 +215,5 @@ export const useDatabaseManagement = () => {
     setShowClearConfirmation,
   };
 };
+
+export default useDatabaseManagement;
