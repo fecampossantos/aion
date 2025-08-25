@@ -4,6 +4,167 @@ jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
 }));
 
+// Mock react-i18next
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key, options) => {
+      const translations = {
+        // Settings translations
+        'settings.language': 'Language',
+        'settings.idioma': 'Idioma',
+        'settings.currentLanguage': 'English',
+        'settings.title': 'Settings',
+        'settings.general': 'General',
+        'settings.dataManagement': 'Data Management',
+        'settings.support': 'Support',
+        'settings.backup': 'Backup Data',
+        'settings.backupSubtitle': 'Save and share your data',
+        'settings.restore': 'Restore Data',
+        'settings.restoreSubtitle': 'Restore from a backup file',
+        'settings.github': 'GitHub',
+        'settings.githubSubtitle': 'View source code',
+        'settings.creating': 'Creating...',
+        'settings.restoring': 'Restoring...',
+        
+        // App translations
+        'app.name': 'aion',
+        'app.version': 'Version {{version}}',
+        
+        // Navigation translations
+        'navigation.projects': 'Projects',
+        'navigation.tasks': 'Tasks',
+        'navigation.settings': 'Settings',
+        'navigation.reports': 'Reports',
+        
+        // Home translations
+        'home.noProjects': 'You don\'t have any projects yet',
+        'home.noProjectsSubtitle': 'Create your first project to get started',
+        'home.noProjectsFound': 'No projects found',
+        'home.noProjectsFoundSubtitle': 'Try adjusting your search or create a new project',
+        'home.addProject': 'Add Project',
+        'home.searchProjects': 'Search projects...',
+        'home.lastWorkedTask': 'Last worked task',
+        'home.totalTime': 'Total time',
+        'home.lastWorked': 'Last worked: {{date}}',
+        'home.neverWorked': 'Never worked',
+        
+        // Project translations
+        'project.addProject': 'Add Project',
+        'project.editProject': 'Edit Project',
+        'project.projectInfo': 'Project Information',
+        'project.projectName': 'Project Name',
+        'project.projectNamePlaceholder': 'Enter project name...',
+        'project.hourlyRate': 'Hourly Rate',
+        'project.hourlyRatePlaceholder': '0.00',
+        'project.saveChanges': '💾 Save Changes',
+        'project.deleteProject': 'Delete Project',
+        'project.noTasks': 'This project has no tasks',
+        'project.addTask': 'Add Task',
+        'project.viewReport': 'View Report',
+        'project.tasks': 'Tasks',
+        'project.completedTasks': '{{completed}}/{{total}} tasks',
+        
+        // Task translations
+        'task.addTask': 'Add Task',
+        'task.editTask': 'Edit Task',
+        'task.taskName': 'Task Name',
+        'task.taskNamePlaceholder': 'Enter task name...',
+        'task.completed': 'Completed',
+        'task.pending': 'Pending',
+        'task.markCompleted': 'Mark as Completed',
+        'task.markPending': 'Mark as Pending',
+        'task.addTimeRecord': 'Add Time Record',
+        'task.deleteTask': 'Delete Task',
+        'task.noTasksFound': 'No tasks found',
+        'task.totalTime': 'Total time',
+        'task.sessions': 'sessions',
+        
+        // Time record translations
+        'timeRecord.addRecord': 'Add Time Record',
+        'timeRecord.editRecord': 'Edit Time Record',
+        'timeRecord.startTime': 'Start Time',
+        'timeRecord.endTime': 'End Time',
+        'timeRecord.duration': 'Duration',
+        'timeRecord.saveRecord': 'Save Record',
+        'timeRecord.deleteRecord': 'Delete Record',
+        
+        // Language selection translations
+        'languageSelection.title': 'Select Language',
+        'languageSelection.subtitle': 'Choose your preferred language',
+        'languageSelection.english': 'English',
+        'languageSelection.portuguese': 'Portuguese (Brazil)',
+        'languageSelection.currentLanguage': 'Current: {{language}}',
+        
+        // Backup translations
+        'backup.title': 'Backup Data',
+        'backup.message': 'This will create a backup file with all your projects, tasks, and time records.',
+        'backup.confirm': 'Create Backup',
+        'backup.success': 'Backup created successfully and ready to share!',
+        'backup.error': 'Error creating backup',
+        
+        // Restore translations
+        'restore.title': 'Restore Data',
+        'restore.message': 'Select a backup file to restore your data. This will replace all current data.',
+        'restore.confirm': 'Select File',
+        'restore.confirmRestore': 'Confirm Restore',
+        'restore.restoreMessage': 'Restore complete! {{projects}} projects, {{tasks}} tasks, and {{timings}} time records restored.',
+        'restore.error': 'Error restoring data',
+        
+        // Reports translations
+        'reports.title': 'Reports',
+        'reports.dateRange': 'Date Range',
+        'reports.generateReport': 'Generate Report',
+        'reports.totalTime': 'Total Time',
+        'reports.totalCost': 'Total Cost',
+        'reports.completionRate': 'Completion Rate',
+        'reports.sessionsDetail': 'Sessions Detail',
+        'reports.task': 'Task',
+        'reports.sessions': 'Sessions',
+        'reports.noData': 'No data available for the selected period',
+        
+        // Common translations
+        'common.save': 'Save',
+        'common.cancel': 'Cancel',
+        'common.delete': 'Delete',
+        'common.edit': 'Edit',
+        'common.add': 'Add',
+        'common.search': 'Search',
+        'common.loading': 'Loading...',
+        'common.error': 'Error',
+        'common.success': 'Success',
+        'common.confirm': 'Confirm',
+        'common.back': 'Back',
+        'common.next': 'Next',
+        'common.finish': 'Finish',
+        'common.total': 'Total',
+        'common.time': 'Time',
+        'common.cost': 'Cost',
+        'common.name': 'Name',
+        'common.from': 'From',
+        'common.to': 'To',
+        'common.start': 'Start',
+        'common.end': 'End',
+      };
+      
+      let result = translations[key] || key;
+      
+      // Handle interpolation
+      if (options && typeof options === 'object') {
+        Object.keys(options).forEach(param => {
+          const regex = new RegExp(`{{${param}}}`, 'g');
+          result = result.replace(regex, options[param]);
+        });
+      }
+      
+      return result;
+    },
+    i18n: {
+      language: 'en',
+      changeLanguage: jest.fn(),
+    },
+  }),
+}));
+
 jest.mock('expo-notifications', () => ({
   addNotificationReceivedListener: jest.fn(),
   addNotificationResponseReceivedListener: jest.fn(),

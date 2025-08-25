@@ -44,18 +44,18 @@ describe("Settings Page", () => {
 
     // Check if main elements are rendered
     expect(getByText("aion")).toBeDefined();
-    expect(getByText("Versão 1.1.2")).toBeDefined();
-    expect(getByText("Geral")).toBeDefined();
-    expect(getByText("Gerenciamento de Dados")).toBeDefined();
-    expect(getByText("Suporte")).toBeDefined();
+    expect(getByText("Version 1.1.2")).toBeDefined();
+    expect(getByText("General")).toBeDefined();
+    expect(getByText("Data Management")).toBeDefined();
+    expect(getByText("Support")).toBeDefined();
   });
 
   it("renders all general settings options", () => {
     const { getByText, getByTestId } = render(<Settings />);
 
     // General section options - only language remains
-    expect(getByText("Idioma")).toBeDefined();
-    expect(getByText("Português (Brasil)")).toBeDefined();
+    expect(getByText("Language")).toBeDefined();
+    expect(getByText("English")).toBeDefined();
     expect(getByTestId("settings-option-language")).toBeDefined();
   });
 
@@ -63,12 +63,12 @@ describe("Settings Page", () => {
     const { getByText, getByTestId } = render(<Settings />);
 
     // Data management section options
-    expect(getByText("Fazer Backup")).toBeDefined();
-    expect(getByText("Salvar e compartilhar seus dados")).toBeDefined();
+    expect(getByText("Backup Data")).toBeDefined();
+    expect(getByText("Save and share your data")).toBeDefined();
     expect(getByTestId("settings-option-backup")).toBeDefined();
 
-    expect(getByText("Restaurar Dados")).toBeDefined();
-    expect(getByText("Restaurar de um arquivo de backup")).toBeDefined();
+    expect(getByText("Restore Data")).toBeDefined();
+    expect(getByText("Restore from a backup file")).toBeDefined();
     expect(getByTestId("settings-option-restore")).toBeDefined();
   });
 
@@ -77,7 +77,7 @@ describe("Settings Page", () => {
 
     // Support section options - only GitHub remains
     expect(getByText("GitHub")).toBeDefined();
-    expect(getByText("Ver código fonte")).toBeDefined();
+    expect(getByText("View source code")).toBeDefined();
     expect(getByTestId("settings-option-github")).toBeDefined();
   });
 
@@ -87,7 +87,7 @@ describe("Settings Page", () => {
     const languageOption = getByTestId("settings-option-language");
     fireEvent.press(languageOption);
 
-    expect(mockConsoleLog).toHaveBeenCalledWith("Navigating to language settings");
+    expect(global.mockRouterPush).toHaveBeenCalledWith("/Language");
   });
 
   it("handles navigation to backup settings", () => {
@@ -119,12 +119,15 @@ describe("Settings Page", () => {
     const backupOption = getByTestId("settings-option-backup");
     const githubOption = getByTestId("settings-option-github");
 
+    // Reset mock before testing
+    global.mockRouterPush.mockClear();
+
     fireEvent.press(languageOption);
     fireEvent.press(backupOption);
     fireEvent.press(githubOption);
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("Navigating to language settings");
+    expect(global.mockRouterPush).toHaveBeenCalledTimes(1);
+    expect(global.mockRouterPush).toHaveBeenCalledWith("/Language");
   });
 
   it("renders with proper styling and layout", () => {

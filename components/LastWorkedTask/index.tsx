@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { fullDateWithHour } from "../../utils/parser";
+import { useTranslation } from "react-i18next";
 
 const styles = StyleSheet.create({
   container: {
@@ -74,11 +75,13 @@ const LastWorkedTask = ({
   task: LastWorkedTaskData;
   onPress: () => void;
 }) => {
+  const { t } = useTranslation();
+  
   const formatLastWorkedDate = (dateString: string) => {
-    if (!dateString) return "Nunca trabalhado";
+    if (!dateString) return t("home.lastWorked", { date: t("home.neverWorked") });
 
     const { d, time } = fullDateWithHour(dateString);
-    return `${d} at ${time}`;
+    return t("home.lastWorked", { date: `${d} at ${time}` });
   };
 
   const formatTotalTime = (seconds: number) => {
@@ -109,7 +112,7 @@ const LastWorkedTask = ({
           {task.name}
         </Text>
         <Text style={styles.lastWorkedText}>
-          Última vez trabalhado: {formatLastWorkedDate(task.last_timing_date)}
+          {formatLastWorkedDate(task.last_timing_date)}
         </Text>
       </View>
 
@@ -117,7 +120,7 @@ const LastWorkedTask = ({
         <Text style={styles.totalTime}>
           {formatTotalTime(task.timed_until_now)}
         </Text>
-        <Text style={styles.lastWorkedDate}>Tempo total</Text>
+        <Text style={styles.lastWorkedDate}>{t("home.totalTime")}</Text>
       </View>
     </TouchableOpacity>
   );

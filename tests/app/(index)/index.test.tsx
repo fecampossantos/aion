@@ -162,7 +162,7 @@ describe("Home Screen", () => {
   it("displays projects after loading", () => {
     const { getByText } = render(<Home />);
 
-    expect(getByText("Projetos")).toBeDefined();
+    expect(getByText("Projects")).toBeDefined();
     expect(getByText("Project 1")).toBeDefined();
     expect(getByText("Project 2")).toBeDefined();
   });
@@ -176,8 +176,8 @@ describe("Home Screen", () => {
     const { getByText } = render(<Home />);
 
     // Should show empty state when no projects exist
-    expect(getByText("Nenhum projeto ainda")).toBeDefined();
-    expect(getByText("Crie seu primeiro projeto para começar a organizar suas tarefas.")).toBeDefined();
+    expect(getByText("You don't have any projects yet")).toBeDefined();
+    expect(getByText("Create your first project to get started")).toBeDefined();
   });
 
   it("renders add button", () => {
@@ -216,7 +216,7 @@ describe("Home Screen", () => {
     const { getByTestId, getByPlaceholderText } = render(<Home />);
 
     expect(getByTestId("search-input")).toBeDefined();
-    expect(getByPlaceholderText("Buscar projetos...")).toBeDefined();
+    expect(getByPlaceholderText("Search projects...")).toBeDefined();
   });
 
   it("filters projects when searching", () => {
@@ -247,8 +247,8 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
 
-    expect(getByText("Nenhum projeto encontrado")).toBeDefined();
-    expect(getByText("Tente ajustar sua busca ou criar um novo projeto.")).toBeDefined();
+    expect(getByText("No projects found")).toBeDefined();
+    expect(getByText("Try adjusting your search or create a new project")).toBeDefined();
   });
 
   it("shows all projects when search is cleared", () => {
@@ -274,7 +274,7 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
 
-    expect(getByText("Projetos")).toBeDefined();
+    expect(getByText("Projects")).toBeDefined();
     expect(getByText("Project 1")).toBeDefined();
   });
 
@@ -328,7 +328,7 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    expect(getByText("Última Tarefa Trabalhada")).toBeDefined();
+    expect(getByText("Last worked task")).toBeDefined();
     expect(getByText("Test Project")).toBeDefined();
     expect(getByText("Test Task")).toBeDefined();
   });
@@ -340,7 +340,7 @@ describe("Home Screen", () => {
 
     const { queryByText } = render(<Home />);
     
-    expect(queryByText("Última Tarefa Trabalhada")).toBeNull();
+    expect(queryByText("Last worked task")).toBeNull();
   });
 
   it("navigates to task when last worked task is pressed", () => {
@@ -382,7 +382,7 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    expect(getByText("Projetos")).toBeDefined();
+    expect(getByText("Projects")).toBeDefined();
     expect(getByText("Project 1")).toBeDefined();
   });
 
@@ -394,8 +394,8 @@ describe("Home Screen", () => {
 
     const { getByText } = render(<Home />);
     
-    expect(getByText("Nenhum projeto encontrado")).toBeDefined();
-    expect(getByText("Tente ajustar sua busca ou criar um novo projeto.")).toBeDefined();
+    expect(getByText("No projects found")).toBeDefined();
+    expect(getByText("Try adjusting your search or create a new project")).toBeDefined();
   });
 
   it("shows modals when their states are true", () => {
@@ -431,11 +431,11 @@ describe("Home Screen", () => {
 
       if (testCase.isPopulating) {
         // The populate functionality is still in the Home screen
-        expect(getByText("Projetos")).toBeDefined();
+        expect(getByText("Projects")).toBeDefined();
       }
       if (testCase.isClearing) {
         // The clear functionality is still in the Home screen
-        expect(getByText("Projetos")).toBeDefined();
+        expect(getByText("Projects")).toBeDefined();
       }
     });
   });
@@ -445,7 +445,7 @@ describe("Home Screen", () => {
 
     // The backup and restore buttons are now in the Settings page
     // Only test for elements that are still present in the Home screen
-    expect(getByText("Projetos")).toBeDefined();
+    expect(getByText("Projects")).toBeDefined();
     expect(getByText("Project 1")).toBeDefined();
   });
 
@@ -457,7 +457,7 @@ describe("Home Screen", () => {
       // The main ScrollView should be present and contain all the scrollable content
       // We can verify this by checking that the content is properly structured
       expect(getByTestId("search-input")).toBeDefined();
-      expect(getByText("Projetos")).toBeDefined();
+      expect(getByText("Projects")).toBeDefined();
     });
 
     it("maintains header as fixed element outside ScrollView", () => {
@@ -470,7 +470,7 @@ describe("Home Screen", () => {
       expect(getByTestId("search-input")).toBeDefined();
       
       // Projects should be inside the ScrollView (scrollable)
-      expect(getByText("Projetos")).toBeDefined();
+      expect(getByText("Projects")).toBeDefined();
     });
 
     it("includes all content sections within the main ScrollView", () => {
@@ -478,7 +478,7 @@ describe("Home Screen", () => {
 
       // All these elements should be within the main ScrollView
       expect(getByTestId("search-input")).toBeDefined(); // Search bar
-      expect(getByText("Projetos")).toBeDefined(); // Projects section
+      expect(getByText("Projects")).toBeDefined(); // Projects section
       expect(getByText("Project 1")).toBeDefined(); // Project cards
     });
 
@@ -490,7 +490,7 @@ describe("Home Screen", () => {
       expect(getByTestId("search-input")).toBeDefined();
       
       // Then projects section (rendered as part of the flow)
-      expect(getByText("Projetos")).toBeDefined();
+      expect(getByText("Projects")).toBeDefined();
       
       // Then project cards
       expect(getByText("Project 1")).toBeDefined();
@@ -505,7 +505,7 @@ describe("Home Screen", () => {
 
       // All content should be properly spaced and laid out
       expect(getByTestId("search-input")).toBeDefined(); // Search bar
-      expect(getByText("Projetos")).toBeDefined(); // Projects section
+      expect(getByText("Projects")).toBeDefined(); // Projects section
       expect(getByText("Project 1")).toBeDefined(); // Project cards
     });
 
@@ -518,8 +518,8 @@ describe("Home Screen", () => {
       const { getByText } = render(<Home />);
 
       // Empty state should be properly displayed within the ScrollView
-      expect(getByText("Nenhum projeto ainda")).toBeDefined();
-      expect(getByText("Crie seu primeiro projeto para começar a organizar suas tarefas.")).toBeDefined();
+      expect(getByText("You don't have any projects yet")).toBeDefined();
+      expect(getByText("Create your first project to get started")).toBeDefined();
     });
 
     it("maintains search functionality within new structure", () => {

@@ -16,12 +16,14 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { theme } from "../../globalStyle/theme";
 import { useDatabaseManagement } from "./useDatabaseManagement";
+import { useTranslation } from "react-i18next";
 
 /**
  * Home component that displays the main dashboard with projects
  * @returns The main home screen component
  */
 const Home = () => {
+  const { t } = useTranslation();
   const {
     projects,
     lastWorkedTask,
@@ -60,7 +62,7 @@ const Home = () => {
     <View style={styles.container} testID="home-container">
       <StatusBar style="light" />
       <View style={styles.header}>
-        <Text style={styles.headerText}>aion</Text>
+        <Text style={styles.headerText}>{t("app.name")}</Text>
         <View style={styles.headerButtons}>
           <Pressable
             style={styles.addButton}
@@ -93,7 +95,7 @@ const Home = () => {
           <SearchBar
             value={searchQuery}
             onChangeText={handleSearch}
-            placeholder="Buscar projetos..."
+            placeholder={t("home.searchProjects")}
             onClear={clearSearch}
           />
         </View>
@@ -104,7 +106,7 @@ const Home = () => {
           <View style={styles.projectsList}>
             {filteredProjects.length > 0 ? (
               <View>
-                <Text style={styles.title}>Projetos</Text>
+                <Text style={styles.title}>{t("navigation.projects")}</Text>
                 {filteredProjects.map((project) => (
                   <ProjectCard project={project} key={project.project_id} />
                 ))}
@@ -113,20 +115,20 @@ const Home = () => {
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateIcon}>🔍</Text>
                 <Text style={styles.emptyStateTitle}>
-                  Nenhum projeto encontrado
+                  {t("home.noProjectsFound")}
                 </Text>
                 <Text style={styles.emptyStateSubtitle}>
-                  Tente ajustar sua busca ou criar um novo projeto.
+                  {t("home.noProjectsFoundSubtitle")}
                 </Text>
               </View>
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateIcon}>📁</Text>
                 <Text style={styles.emptyStateTitle}>
-                  Nenhum projeto ainda
+                  {t("home.noProjects")}
                 </Text>
                 <Text style={styles.emptyStateSubtitle}>
-                  Crie seu primeiro projeto para começar a organizar suas tarefas.
+                  {t("home.noProjectsSubtitle")}
                 </Text>
               </View>
             )}
@@ -137,7 +139,7 @@ const Home = () => {
         {lastWorkedTask && !isLoading && (
           <View style={styles.lastWorkedTaskContainer}>
             <Text style={styles.lastWorkedTaskTitle}>
-              Última Tarefa Trabalhada
+              {t("home.lastWorkedTask")}
             </Text>
             <Text style={styles.lastWorkedTaskProjectName}>
               {lastWorkedTask.project_name}

@@ -1,0 +1,154 @@
+{
+  "app": {
+    "name": "aion",
+    "version": "Versão {{version}}"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "search": "Buscar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "total": "Total",
+    "time": "Tempo",
+    "cost": "Custo",
+    "name": "Nome",
+    "from": "De",
+    "to": "Até",
+    "start": "Início",
+    "end": "Fim"
+  },
+  "navigation": {
+    "home": "Início",
+    "projects": "Projetos",
+    "tasks": "Tarefas",
+    "settings": "Configurações",
+    "reports": "Relatórios"
+  },
+  "home": {
+    "noProjects": "Você ainda não tem projetos",
+    "noProjectsSubtitle": "Crie seu primeiro projeto para começar",
+    "noProjectsFound": "Nenhum projeto encontrado",
+    "noProjectsFoundSubtitle": "Tente ajustar sua busca ou criar um novo projeto",
+    "addProject": "Adicionar Projeto",
+    "searchProjects": "Buscar projetos...",
+    "lastWorkedTask": "Última tarefa trabalhada",
+    "totalTime": "Tempo total",
+    "lastWorked": "Última vez trabalhado: {{date}}",
+    "neverWorked": "Nunca trabalhado"
+  },
+  "project": {
+    "addProject": "Adicionar Projeto",
+    "editProject": "Editar Projeto",
+    "projectInfo": "Informações do Projeto",
+    "projectName": "Nome do Projeto",
+    "projectNamePlaceholder": "Digite o nome do projeto...",
+    "hourlyRate": "Valor por Hora (R$)",
+    "hourlyRatePlaceholder": "0,00",
+    "saveChanges": "💾 Salvar Alterações",
+    "deleteProject": "Excluir Projeto",
+    "noTasks": "Esse projeto não tem tasks",
+    "addTask": "Adicionar Tarefa",
+    "viewReport": "Ver Relatório",
+    "tasks": "Tarefas",
+    "completedTasks": "{{completed}}/{{total}} tarefas",
+    "errors": {
+      "nameRequired": "O nome do projeto não pode estar vazio",
+      "nameExists": "Um projeto com esse nome já existe",
+      "deleteError": "Erro ao excluir projeto",
+      "saveError": "Erro ao salvar projeto"
+    }
+  },
+  "task": {
+    "addTask": "Adicionar Tarefa",
+    "editTask": "Editar Tarefa",
+    "taskName": "Nome da Tarefa",
+    "taskNamePlaceholder": "Digite o nome da tarefa...",
+    "completed": "Concluída",
+    "pending": "Pendente",
+    "markCompleted": "Marcar como Concluída",
+    "markPending": "Marcar como Pendente",
+    "addTimeRecord": "Adicionar Registro de Tempo",
+    "deleteTask": "Excluir Tarefa",
+    "noTasksFound": "Nenhuma tarefa encontrada",
+    "totalTime": "Tempo total",
+    "sessions": "sessões",
+    "errors": {
+      "nameRequired": "O nome da tarefa não pode estar vazio",
+      "saveError": "Erro ao salvar tarefa",
+      "deleteError": "Erro ao excluir tarefa"
+    }
+  },
+  "timeRecord": {
+    "addRecord": "Adicionar Registro de Tempo",
+    "editRecord": "Editar Registro de Tempo",
+    "startTime": "Hora de Início",
+    "endTime": "Hora de Fim",
+    "duration": "Duração",
+    "saveRecord": "Salvar Registro",
+    "deleteRecord": "Excluir Registro",
+    "errors": {
+      "invalidTime": "Hora inválida",
+      "endBeforeStart": "Hora de fim deve ser posterior à hora de início",
+      "saveError": "Erro ao salvar registro de tempo"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "general": "Geral",
+    "language": "Idioma",
+    "currentLanguage": "Português (Brasil)",
+    "dataManagement": "Gerenciamento de Dados",
+    "backup": "Fazer Backup",
+    "backupSubtitle": "Salvar e compartilhar seus dados",
+    "restore": "Restaurar Dados",
+    "restoreSubtitle": "Restaurar de um arquivo de backup",
+    "support": "Suporte",
+    "github": "GitHub",
+    "githubSubtitle": "Ver código fonte",
+    "creating": "Criando...",
+    "restoring": "Restaurando..."
+  },
+  "languageSelection": {
+    "title": "Selecionar Idioma",
+    "subtitle": "Escolha seu idioma preferido",
+    "english": "Inglês",
+    "portuguese": "Português (Brasil)",
+    "currentLanguage": "Atual: {{language}}"
+  },
+  "backup": {
+    "title": "Fazer Backup",
+    "message": "Isso criará um arquivo de backup com todos os seus projetos, tarefas e registros de tempo.",
+    "confirm": "Criar Backup",
+    "success": "Backup criado com sucesso e pronto para compartilhar!",
+    "error": "Erro ao criar backup"
+  },
+  "restore": {
+    "title": "Restaurar Dados",
+    "message": "Selecione um arquivo de backup para restaurar seus dados. Isso substituirá todos os dados atuais.",
+    "confirm": "Selecionar Arquivo",
+    "confirmRestore": "Confirmar Restauração",
+    "restoreMessage": "Restauração completa! {{projects}} projetos, {{tasks}} tarefas e {{timings}} registros de tempo restaurados.",
+    "error": "Erro ao restaurar dados"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "dateRange": "Período",
+    "generateReport": "Gerar Relatório",
+    "totalTime": "Tempo Total",
+    "totalCost": "Custo Total",
+    "completionRate": "Taxa de Conclusão",
+    "sessionsDetail": "Detalhamento de Sessões",
+    "task": "Tarefa",
+    "sessions": "Sessões",
+    "noData": "Nenhum dado disponível para o período selecionado"
+  }
+}

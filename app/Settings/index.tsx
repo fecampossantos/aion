@@ -17,6 +17,8 @@ import {
 } from "../../utils/backupUtils";
 import { useToast } from "../../components/Toast/ToastContext";
 import { Linking } from "react-native";
+import { useTranslation } from "react-i18next";
+import { router } from "expo-router";
 
 /**
  * Settings page component that displays various app configuration options
@@ -25,6 +27,7 @@ import { Linking } from "react-native";
 const Settings = () => {
   const database = useSQLiteContext();
   const { showToast } = useToast();
+  const { t, i18n } = useTranslation();
   const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
 
@@ -41,14 +44,6 @@ const Settings = () => {
   }>({ date: "", projectCount: 0, taskCount: 0, timingCount: 0 });
 
   /**
-   * Handles navigation to a specific settings section
-   */
-  const handleNavigateToSection = (section: string) => {
-    console.log(`Navigating to ${section} settings`);
-    // TODO: Implement navigation to specific settings sections
-  };
-
-  /**
    * Handles creating and sharing a backup of all data
    */
   const handleBackupData = () => {
@@ -61,11 +56,11 @@ const Settings = () => {
   const handleBackupConfirm = async () => {
     setShowBackupModal(false);
     setIsBackingUp(true);
-    try {
-      await downloadBackup(database);
-      // Show success toast
-      showToast("Backup created successfully and ready to share!", "success");
-    } catch (error) {
+          try {
+        await downloadBackup(database);
+        // Show success toast
+        showToast(t("backup.success"), "success");
+      } catch (error) {
       // Error handling is done in downloadBackup function
       console.error("Backup error:", error);
     } finally {
@@ -108,7 +103,11 @@ const Settings = () => {
     try {
       // The actual restore was already done, just show success message
       showToast(
-        `Restore complete! ${restoreBackupInfo.projectCount} projects, ${restoreBackupInfo.taskCount} tasks, and ${restoreBackupInfo.timingCount} time records restored.`,
+        t("restore.restoreMessage", {
+          projects: restoreBackupInfo.projectCount,
+          tasks: restoreBackupInfo.taskCount,
+          timings: restoreBackupInfo.timingCount,
+        }),
         "success"
       );
     } catch (error) {
@@ -162,8 +161,8 @@ const Settings = () => {
               <Text style={styles.optionTitle}>
                 {option.loading
                   ? option.id === "backup"
-                    ? "Criando..."
-                    : "Restaurando..."
+                    ? t("settings.creating")
+                    : t("settings.restoring")
                   : option.title}
               </Text>
               {option.subtitle && (
@@ -192,35 +191,35 @@ const Settings = () => {
       >
         {/* App Information Section */}
         <View style={styles.appInfoSection}>
-          <Text style={styles.appName}>aion</Text>
-          <Text style={styles.appVersion}>Versão {appConfig.expo.version}</Text>
+          <Text style={styles.appName}>{t("app.name")}</Text>
+          <Text style={styles.appVersion}>{t("app.version", { version: appConfig.expo.version })}</Text>
         </View>
 
         {/* General Settings */}
-        {renderSettingsSection("Geral", [
+        {renderSettingsSection(t("settings.general"), [
           {
             id: "language",
-            title: "Idioma",
-            subtitle: "Português (Brasil)",
+            title: t("settings.language"),
+            subtitle: t("settings.currentLanguage"),
             icon: "language",
-            onPress: () => handleNavigateToSection("language"),
+            onPress: () => router.push("/Language"),
           },
         ])}
 
         {/* Data Management */}
-        {renderSettingsSection("Gerenciamento de Dados", [
+        {renderSettingsSection(t("settings.dataManagement"), [
           {
             id: "backup",
-            title: "Fazer Backup",
-            subtitle: "Salvar e compartilhar seus dados",
+            title: t("settings.backup"),
+            subtitle: t("settings.backupSubtitle"),
             icon: "download",
             onPress: handleBackupData,
             loading: isBackingUp,
           },
           {
             id: "restore",
-            title: "Restaurar Dados",
-            subtitle: "Restaurar de um arquivo de backup",
+            title: t("settings.restore"),
+            subtitle: t("settings.restoreSubtitle"),
             icon: "upload",
             onPress: handleRestoreData,
             loading: isRestoring,
@@ -228,11 +227,11 @@ const Settings = () => {
         ])}
 
         {/* Support Section */}
-        {renderSettingsSection("Suporte", [
+        {renderSettingsSection(t("settings.support"), [
           {
             id: "github",
-            title: "GitHub",
-            subtitle: "Ver código fonte",
+            title: t("settings.github"),
+            subtitle: t("settings.githubSubtitle"),
             icon: "code",
             onPress: () => {
               // Open GitHub repository

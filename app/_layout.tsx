@@ -6,6 +6,7 @@ import { theme } from "../globalStyle/theme";
 import { useGoogleFonts } from "../globalStyle/fonts";
 import { View, Text } from "react-native";
 import { ToastProvider } from "../components/Toast/ToastContext";
+import "../i18n";
 
 export default function HomeLayout() {
   const { fontsLoaded, fontError } = useGoogleFonts();
@@ -82,13 +83,13 @@ async function migrateDbIfNeeded(db: SQLiteDatabase) {
     `);
     await db.runAsync(
       "INSERT INTO projects (name, hourly_cost) VALUES (?, ?);",
-      "projeto exemplo",
+      "Sample Project",
       10
     );
     await db.runAsync(
       "INSERT INTO tasks (project_id, name, completed) VALUES (?, ?, ?);",
       1,
-      "task exemplo",
+      "Sample Task",
       false
     );
     await db.runAsync(
