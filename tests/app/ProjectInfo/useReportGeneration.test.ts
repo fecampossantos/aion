@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useReportGeneration } from '../../../app/ProjectInfo/useReportGeneration';
+import useReportGeneration from '../../../app/ProjectInfo/useReportGeneration';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import { shareAsync } from 'expo-sharing';
@@ -36,7 +36,13 @@ jest.mock('../../../utils/parser', () => ({
   fullDate: jest.fn((date) => '01/01/2024'),
 }));
 
+jest.mock('../../../utils/preferencesUtils', () => ({
+  getPDFTemplatePreference: jest.fn(() => Promise.resolve('dark')),
+}));
+
 describe('useReportGeneration', () => {
+  const mockDatabase = {} as any;
+  
   const mockProject = {
     name: 'Test Project',
     project_id: '123',
@@ -69,7 +75,7 @@ describe('useReportGeneration', () => {
   });
 
   it('should initialize with default values', () => {
-    const { result } = renderHook(() => useReportGeneration());
+    const { result } = renderHook(() => useReportGeneration(mockDatabase));
 
     expect(result.current.isGeneratingReport).toBe(false);
     expect(typeof result.current.handleGenerateReport).toBe('function');
@@ -79,7 +85,7 @@ describe('useReportGeneration', () => {
 
   describe('getInitOfDay', () => {
     it('should return start of day in correct format', () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const testDate = new Date('2024-01-01T15:30:45.123');
       
       const formattedDate = result.current.getInitOfDay(testDate);
@@ -88,7 +94,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should handle different dates correctly', () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const testDate = new Date('2024-12-31T23:59:59.999');
       
       const formattedDate = result.current.getInitOfDay(testDate);
@@ -99,7 +105,7 @@ describe('useReportGeneration', () => {
 
   describe('getEndOfDay', () => {
     it('should return end of day in correct format', () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const testDate = new Date('2024-01-01T15:30:45.123');
       
       const formattedDate = result.current.getEndOfDay(testDate);
@@ -108,7 +114,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should handle different dates correctly', () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const testDate = new Date('2024-12-31T00:00:00.000');
       
       const formattedDate = result.current.getEndOfDay(testDate);
@@ -119,7 +125,7 @@ describe('useReportGeneration', () => {
 
   describe('handleGenerateReport', () => {
     it('should generate report successfully', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
@@ -149,7 +155,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should not generate report if already generating', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
@@ -189,7 +195,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should not generate report if project is null', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
@@ -208,7 +214,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should show error when no timings are found', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       const mockGetTimingsEmpty = jest.fn(() => Promise.resolve([]));
@@ -231,7 +237,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should handle PDF generation errors gracefully', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       
@@ -255,7 +261,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should handle file system errors gracefully', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       
@@ -279,7 +285,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should handle sharing errors gracefully', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       
@@ -303,7 +309,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should set isGeneratingReport to false after completion', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
@@ -328,7 +334,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should set isGeneratingReport to false after error', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       
@@ -354,7 +360,7 @@ describe('useReportGeneration', () => {
     });
 
     it('should generate correct document name', async () => {
-      const { result } = renderHook(() => useReportGeneration());
+      const { result } = renderHook(() => useReportGeneration(mockDatabase));
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 

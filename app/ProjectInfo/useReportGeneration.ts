@@ -5,12 +5,15 @@ import { shareAsync } from "expo-sharing";
 import { useToast } from "../../components/Toast/ToastContext";
 import { generateReportHTML } from "../../utils/pdfReportService";
 import { fullDate } from "../../utils/parser";
+import { getPDFTemplatePreference } from "../../utils/preferencesUtils";
+import { SQLiteDatabase } from "expo-sqlite";
 
 /**
  * Custom hook for generating and sharing PDF reports
+ * @param {SQLiteDatabase} database - SQLite database instance
  * @returns {Object} Report generation functions and state
  */
-const useReportGeneration = () => {
+const useReportGeneration = (database: SQLiteDatabase) => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const isGeneratingRef = useRef(false);
   const { showToast } = useToast();
@@ -90,12 +93,16 @@ const useReportGeneration = () => {
         "-"
       )}`;
 
+      // Get current PDF template preference
+      const templateType = await getPDFTemplatePreference(database);
+
       const html = generateReportHTML(
         project,
         startDateSTR,
         endDateSTR,
         timings,
-        documentName
+        documentName,
+        templateType
       );
 
       const { uri } = await Print.printToFileAsync({

@@ -16,7 +16,7 @@ import {
   getPDFTemplatePreference, 
   setPDFTemplatePreference 
 } from "../../utils/preferencesUtils";
-import { Content } from "../../components/Content";
+import Content from "../../components/Content";
 
 /**
  * PDF Templates selection page component
@@ -167,11 +167,10 @@ const PDFTemplates = () => {
     return (
       <PDFTemplatesLayoutWrapper>
         <Content.Wrapper>
-          <Content.Header 
-            title={t("templates.title")}
-            subtitle={t("templates.subtitle")}
-            showBackButton={true}
-          />
+                  <Content.Header 
+          left={<Content.BackButton onPress={router.back} />}
+          title={t("templates.title")}
+        />
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>{t("templates.loading")}</Text>
           </View>
@@ -184,9 +183,8 @@ const PDFTemplates = () => {
     <PDFTemplatesLayoutWrapper>
       <Content.Wrapper>
         <Content.Header 
+          left={<Content.BackButton onPress={router.back} />}
           title={t("templates.title")}
-          subtitle={t("templates.subtitle")}
-          showBackButton={true}
         />
         
         <ScrollView
