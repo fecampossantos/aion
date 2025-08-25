@@ -138,6 +138,9 @@ export async function populateDatabase(db: SQLiteDatabase) {
 // Function to clear all database data
 export async function clearDatabase(db: SQLiteDatabase) {
   try {
+    // Ensure foreign keys are enabled
+    await db.execAsync('PRAGMA foreign_keys = ON;');
+    
     // Delete in correct order due to foreign key constraints
     await db.runAsync("DELETE FROM timings;");
     await db.runAsync("DELETE FROM tasks;");

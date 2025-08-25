@@ -199,6 +199,9 @@ export async function restoreFromBackup(
   backupData: BackupData
 ): Promise<void> {
   try {
+    // Ensure foreign keys are enabled
+    await db.execAsync('PRAGMA foreign_keys = ON;');
+    
     // Validate backup data structure
     if (!backupData.data || !backupData.data.projects || !backupData.data.tasks || !backupData.data.timings) {
       throw new Error('Invalid backup data structure');

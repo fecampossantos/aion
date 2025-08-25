@@ -56,6 +56,7 @@ async function migrateDbIfNeeded(db: SQLiteDatabase) {
   if (currentDbVersion === 0) {
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
+      PRAGMA foreign_keys = ON;
     
       CREATE TABLE IF NOT EXISTS projects (
         project_id INTEGER PRIMARY KEY AUTOINCREMENT,
