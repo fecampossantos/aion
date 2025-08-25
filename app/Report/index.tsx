@@ -265,7 +265,7 @@ const Report = () => {
   const [datePickerValue, setDatePickerValue] = useState(null);
   const [dateShown, setDateShown] = useState<"start" | "end" | null>(null);
 
-  const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
+  const { isGeneratingReport, handleGenerateReport } = useReportGeneration(database);
 
   /**
    * Shows the date picker for the specified date type

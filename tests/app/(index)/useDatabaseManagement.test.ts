@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { useDatabaseManagement } from '../../../app/(index)/useDatabaseManagement';
+import useDatabaseManagement from '../../../app/(index)/useDatabaseManagement';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 import { ToastProvider } from '../../../components/Toast/ToastContext';

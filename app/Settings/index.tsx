@@ -204,6 +204,13 @@ const Settings = () => {
             icon: "language",
             onPress: () => router.push("/Language"),
           },
+          {
+            id: "pdfTemplates",
+            title: t("settings.pdfTemplates"),
+            subtitle: t("settings.pdfTemplatesSubtitle"),
+            icon: "text-document",
+            onPress: () => router.push("/PDFTemplates"),
+          },
         ])}
 
         {/* Data Management */}

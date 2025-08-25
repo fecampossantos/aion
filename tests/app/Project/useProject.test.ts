@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useProject } from '../../../app/Project/useProject';
+import useProject from '../../../app/Project/useProject';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
