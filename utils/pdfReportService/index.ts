@@ -5,6 +5,7 @@ import {
   secondsToTimeHHMMSS,
   fullDateWithHour,
 } from "../parser";
+import { PDFTemplateType } from "../../interfaces/UserPreferences";
 
 type TimingsResult = {
   task_completed: 0 | 1;
@@ -68,85 +69,301 @@ function calculateProjectSummary(timings: TimingsResult[]): ProjectSummary {
   };
 }
 
-export function generateReportHTML(
-  project: Project,
-  startDate: string,
-  endDate: string,
-  timings: TimingsResult[],
-  documentName: string
-): string {
-  const totalTimeInSeconds: number = timings.reduce((acc, curr) => {
-    return acc + curr.timing_timed;
-  }, 0);
+/**
+ * Get CSS styles for the specified PDF template
+ * @param templateType - The template type ('dark' or 'light')
+ * @returns CSS styles string
+ */
+function getTemplateStyles(templateType: PDFTemplateType): string {
+  if (templateType === 'light') {
+    return `
+      :root {
+        --primary: #2563eb;
+        --primary-light: #1d4ed8;
+        --success: #059669;
+        --success-light: #047857;
+        --warning: #d97706;
+        --warning-light: #b45309;
+        --neutral-50: #f8fafc;
+        --neutral-100: #f1f5f9;
+        --neutral-200: #e2e8f0;
+        --neutral-300: #cbd5e1;
+        --neutral-400: #94a3b8;
+        --neutral-500: #64748b;
+        --neutral-600: #475569;
+        --neutral-700: #334155;
+        --neutral-800: #1e293b;
+        --neutral-900: #0f172a;
+        --white: #ffffff;
+        --black: #000000;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --border-color: #e2e8f0;
+      }
 
-  const { hours, minutes, seconds } = secondsToHHMMSS(totalTimeInSeconds);
-  const totalTime = secondsToTimeHHMMSS(totalTimeInSeconds);
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-  const hours_cost = hours * project.hourly_cost;
-  const minutes_cost = minutes * (project.hourly_cost / 60);
-  const seconds_cost = seconds * (project.hourly_cost / 3600);
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.5;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+      }
 
-  let total_cost = hours_cost + minutes_cost + seconds_cost;
-  let str_total_cost = total_cost.toFixed(3);
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
 
-  if (
-    parseInt(str_total_cost.toString().charAt(str_total_cost.length - 1)) > 5
-  ) {
-    total_cost = parseFloat(total_cost.toFixed(2)) + 0.01;
+      .header {
+        text-align: center;
+        margin-bottom: 48px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .header h1 {
+        color: var(--text-primary);
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.025em;
+      }
+
+      .header .subtitle {
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .project-info {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+      }
+
+      .project-info h2 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--text-primary);
+        text-align: center;
+      }
+
+      .project-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        text-align: center;
+      }
+
+      .project-detail {
+        padding: 16px;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+
+      .project-detail .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+
+      .project-detail .value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .summary-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      .summary-card h3 {
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
+      }
+
+      .summary-card .metric {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 4px;
+        line-height: 1.2;
+      }
+
+      .summary-card .sub-metric {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .section {
+        margin-bottom: 40px;
+      }
+
+      .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .table-container {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 16px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 13px;
+        color: var(--text-primary);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .completed-task {
+        background: rgba(16, 185, 129, 0.1);
+      }
+
+      .pending-task {
+        background: rgba(245, 158, 11, 0.1);
+      }
+
+      .task-name {
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .sessions-count {
+        color: var(--text-secondary);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .task-total-time {
+        font-weight: 600;
+        color: var(--primary);
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 12px;
+      }
+
+      .task-cost {
+        font-weight: 600;
+        color: var(--success);
+        text-align: right;
+      }
+
+      .cost-summary {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--success);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        margin-top: 32px;
+      }
+
+      .cost-summary h3 {
+        font-size: 18px;
+        margin-bottom: 12px;
+        color: var(--success);
+        font-weight: 600;
+      }
+
+      .cost-summary .total-cost {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--success);
+      }
+
+      .cost-summary .cost-breakdown {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      @media print {
+        body {
+          font-size: 12px;
+          background-color: var(--bg-primary);
+        }
+        
+        .container {
+          padding: 20px;
+        }
+        
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .project-info,
+        .cost-summary,
+        .table-container {
+          border: 1px solid var(--border-color);
+          box-shadow: none;
+        }
+      }
+    `;
   } else {
-    total_cost = parseFloat(total_cost.toFixed(2));
-  }
-
-  const summary = calculateProjectSummary(timings);
-  const completionRate =
-    summary.totalTasks > 0
-      ? ((summary.completedTasks / summary.totalTasks) * 100).toFixed(1)
-      : "0";
-
-  // Group timings by task and only include tasks recorded during the period
-  const taskGroups = timings.reduce((acc, timing) => {
-    if (!acc[timing.task_name]) {
-      acc[timing.task_name] = {
-        sessions: [],
-        totalTime: 0,
-        completed: timing.task_completed,
-      };
-    }
-    acc[timing.task_name].sessions.push(timing);
-    acc[timing.task_name].totalTime += timing.timing_timed;
-    return acc;
-  }, {} as Record<string, { sessions: TimingsResult[]; totalTime: number; completed: number }>);
-
-  const task_summary_rows = Object.entries(taskGroups).map(
-    ([taskName, data]) => `
-    <tr class="${data.completed === 1 ? "completed-task" : "pending-task"}">
-      <td class="task-name">${taskName}</td>
-      <td class="sessions-count">${data.sessions.length}</td>
-      <td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>
-      <td class="task-cost">R$ ${(
-        (data.totalTime / 3600) *
-        project.hourly_cost
-      ).toFixed(2)}</td>
-    </tr>
-  `
-  );
-
-  const html = `
-    <!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${documentName}</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <style>
+    // Dark mode styles (existing)
+    return `
       :root {
         --primary: #3b82f6;
         --primary-light: #1e40af;
@@ -419,6 +636,91 @@ export function generateReportHTML(
           border: 1px solid var(--neutral-300);
         }
       }
+    `;
+  }
+}
+
+export function generateReportHTML(
+  project: Project,
+  startDate: string,
+  endDate: string,
+  timings: TimingsResult[],
+  documentName: string,
+  templateType: PDFTemplateType = 'dark'
+): string {
+  const totalTimeInSeconds: number = timings.reduce((acc, curr) => {
+    return acc + curr.timing_timed;
+  }, 0);
+
+  const { hours, minutes, seconds } = secondsToHHMMSS(totalTimeInSeconds);
+  const totalTime = secondsToTimeHHMMSS(totalTimeInSeconds);
+
+  const hours_cost = hours * project.hourly_cost;
+  const minutes_cost = minutes * (project.hourly_cost / 60);
+  const seconds_cost = seconds * (project.hourly_cost / 3600);
+
+  let total_cost = hours_cost + minutes_cost + seconds_cost;
+  let str_total_cost = total_cost.toFixed(3);
+
+  if (
+    parseInt(str_total_cost.toString().charAt(str_total_cost.length - 1)) > 5
+  ) {
+    total_cost = parseFloat(total_cost.toFixed(2)) + 0.01;
+  } else {
+    total_cost = parseFloat(total_cost.toFixed(2));
+  }
+
+  const summary = calculateProjectSummary(timings);
+  const completionRate =
+    summary.totalTasks > 0
+      ? ((summary.completedTasks / summary.totalTasks) * 100).toFixed(1)
+      : "0";
+
+  // Group timings by task and only include tasks recorded during the period
+  const taskGroups = timings.reduce((acc, timing) => {
+    if (!acc[timing.task_name]) {
+      acc[timing.task_name] = {
+        sessions: [],
+        totalTime: 0,
+        completed: timing.task_completed,
+      };
+    }
+    acc[timing.task_name].sessions.push(timing);
+    acc[timing.task_name].totalTime += timing.timing_timed;
+    return acc;
+  }, {} as Record<string, { sessions: TimingsResult[]; totalTime: number; completed: number }>);
+
+  const task_summary_rows = Object.entries(taskGroups).map(
+    ([taskName, data]) => `
+    <tr class="${data.completed === 1 ? "completed-task" : "pending-task"}">
+      <td class="task-name">${taskName}</td>
+      <td class="sessions-count">${data.sessions.length}</td>
+      <td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>
+      <td class="task-cost">R$ ${(
+        (data.totalTime / 3600) *
+        project.hourly_cost
+      ).toFixed(2)}</td>
+    </tr>
+  `
+  );
+
+  const html = `
+    <!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${documentName}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      ${getTemplateStyles(templateType)}
     </style>
   </head>
 

@@ -150,5 +150,16 @@
     "task": "Tarefa",
     "sessions": "Sessões",
     "noData": "Nenhum dado disponível para o período selecionado"
+  },
+  "templates": {
+    "title": "Modelos de PDF",
+    "subtitle": "Escolha seu modelo preferido para relatórios PDF",
+    "loading": "Carregando modelos...",
+    "default": "Padrão",
+    "save": "Salvar Modelo",
+    "saving": "Salvando...",
+    "saveSuccess": "Modelo de PDF atualizado com sucesso!",
+    "saveError": "Falha ao salvar preferência de modelo",
+    "loadError": "Falha ao carregar preferências de modelo"
   }
 }

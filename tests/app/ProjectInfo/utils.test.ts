@@ -1,10 +1,10 @@
-import { getInitOfDay, getEndOfDay, prepareResultSet } from "../../../app/ProjectInfo/utils";
+import utils from "../../../app/ProjectInfo/utils";
 
 describe("ProjectInfo Utils", () => {
   describe("getInitOfDay", () => {
     it("returns start of day in correct format", () => {
       const testDate = new Date("2023-12-01T15:30:45.123Z");
-      const result = getInitOfDay(testDate);
+      const result = utils.getInitOfDay(testDate);
       
       // Test that it returns the expected format
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -13,7 +13,7 @@ describe("ProjectInfo Utils", () => {
 
     it("handles different dates correctly", () => {
       const testDate = new Date("2024-02-29T12:00:00.000Z"); // Leap year
-      const result = getInitOfDay(testDate);
+      const result = utils.getInitOfDay(testDate);
       
       // Test that it returns a valid format
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -22,7 +22,7 @@ describe("ProjectInfo Utils", () => {
 
     it("resets time to start of day", () => {
       const testDate = new Date("2023-06-15T12:34:56.789Z");
-      const result = getInitOfDay(testDate);
+      const result = utils.getInitOfDay(testDate);
       
       // Test that the time part is consistent (should be start of day in UTC)
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -33,7 +33,7 @@ describe("ProjectInfo Utils", () => {
       const testDate = new Date("2023-12-01T15:30:45.123Z");
       const originalTime = testDate.getTime();
       
-      getInitOfDay(testDate);
+      utils.getInitOfDay(testDate);
       
       expect(testDate.getTime()).toBe(originalTime);
     });
@@ -42,7 +42,7 @@ describe("ProjectInfo Utils", () => {
   describe("getEndOfDay", () => {
     it("returns end of day in correct format", () => {
       const testDate = new Date("2023-12-01T10:30:45.123Z");
-      const result = getEndOfDay(testDate);
+      const result = utils.getEndOfDay(testDate);
       
       // Test that it returns the expected format
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -51,7 +51,7 @@ describe("ProjectInfo Utils", () => {
 
     it("handles different dates correctly", () => {
       const testDate = new Date("2024-01-01T12:00:00.000Z");
-      const result = getEndOfDay(testDate);
+      const result = utils.getEndOfDay(testDate);
       
       // Test that it returns a valid format
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -60,7 +60,7 @@ describe("ProjectInfo Utils", () => {
 
     it("sets time to end of day", () => {
       const testDate = new Date("2023-06-15T12:34:56.789Z");
-      const result = getEndOfDay(testDate);
+      const result = utils.getEndOfDay(testDate);
       
       // Test that the time part is consistent (should be end of day in UTC)
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
@@ -71,7 +71,7 @@ describe("ProjectInfo Utils", () => {
       const testDate = new Date("2023-12-01T15:30:45.123Z");
       const originalTime = testDate.getTime();
       
-      getEndOfDay(testDate);
+      utils.getEndOfDay(testDate);
       
       expect(testDate.getTime()).toBe(originalTime);
     });
@@ -85,14 +85,14 @@ describe("ProjectInfo Utils", () => {
         { day: "2023-12-03", total_time: 900 },  // 15 minutes
       ];
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.labels).toEqual(["01/12/2023", "02/12/2023", "03/12/2023"]);
       expect(result.datasets).toEqual([{ data: [60, 30, 15] }]);
     });
 
     it("handles empty array", () => {
-      const result = prepareResultSet([]);
+      const result = utils.prepareResultSet([]);
 
       expect(result.labels).toEqual([]);
       expect(result.datasets).toEqual([{ data: [] }]);
@@ -101,7 +101,7 @@ describe("ProjectInfo Utils", () => {
     it("handles single item", () => {
       const input = [{ day: "2023-01-15", total_time: 7200 }]; // 2 hours = 120 minutes
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.labels).toEqual(["15/01/2023"]);
       expect(result.datasets).toEqual([{ data: [120] }]);
@@ -114,7 +114,7 @@ describe("ProjectInfo Utils", () => {
         { day: "2023-12-03", total_time: 0 },    // 0 minutes
       ];
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.datasets[0].data).toEqual([1, 2, 0]);
     });
@@ -125,7 +125,7 @@ describe("ProjectInfo Utils", () => {
         { day: "2023-12-25", total_time: 120 },
       ];
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.labels).toEqual(["05/01/2023", "25/12/2023"]);
     });
@@ -136,7 +136,7 @@ describe("ProjectInfo Utils", () => {
         { day: "2023-12-02", total_time: 45 },  // 0.75 minutes
       ];
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.datasets[0].data).toEqual([1.5, 0.75]);
     });
@@ -148,7 +148,7 @@ describe("ProjectInfo Utils", () => {
         { day: "2023-12-02", total_time: 120 },
       ];
 
-      const result = prepareResultSet(input);
+      const result = utils.prepareResultSet(input);
 
       expect(result.labels).toEqual(["03/12/2023", "01/12/2023", "02/12/2023"]);
       expect(result.datasets[0].data).toEqual([3, 1, 2]);

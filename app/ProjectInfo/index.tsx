@@ -426,7 +426,7 @@ const ProjectInfo = () => {
     handleCancelDelete,
   } = useReport(projectID);
 
-  const { isGeneratingReport, handleGenerateReport } = useReportGeneration();
+  const { isGeneratingReport, handleGenerateReport } = useReportGeneration(database);
 
   useEffect(() => {
     getProject();

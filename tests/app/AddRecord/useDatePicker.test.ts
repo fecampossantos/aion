@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useDatePicker } from '../../../app/AddRecord/useDatePicker';
+import useDatePicker from '../../../app/AddRecord/useDatePicker';
 
 describe('useDatePicker', () => {
   const mockInitialDate = new Date('2024-01-01T10:00:00.000Z');
