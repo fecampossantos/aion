@@ -78,9 +78,9 @@ describe("LastWorkedTask", () => {
     );
 
     expect(getByText("Test Task")).toBeTruthy();
-    expect(getByText("Última vez trabalhado: 01/01/2024 at 10:30:00")).toBeTruthy();
+    expect(getByText("Last worked: 01/01/2024 at 10:30:00")).toBeTruthy();
     expect(getByText("1:00:00")).toBeTruthy(); // 1 hour formatted
-    expect(getByText("Tempo total")).toBeTruthy();
+    expect(getByText("Total time")).toBeTruthy();
   });
 
   it("calls onPress when pressed", () => {
@@ -105,7 +105,7 @@ describe("LastWorkedTask", () => {
       <LastWorkedTask task={taskWithNoTime} onPress={mockOnPress} />
     );
 
-    expect(getByText("Última vez trabalhado: Nunca trabalhado")).toBeTruthy();
+    expect(getByText("Last worked: Never worked")).toBeTruthy();
     expect(getByText("0:00:00")).toBeTruthy();
   });
 

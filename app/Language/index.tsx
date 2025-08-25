@@ -2,8 +2,8 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { theme } from "../../../globalStyle/theme";
-import { SettingsLayoutWrapper } from "../_layout";
+import { theme } from "../../globalStyle/theme";
+import { LanguageLayoutWrapper } from "./_layout";
 
 /**
  * Language selection page component
@@ -41,25 +41,8 @@ const LanguageSelection = () => {
   };
 
   return (
-    <SettingsLayoutWrapper>
+    <LanguageLayoutWrapper>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => router.back()}
-            testID="back-button"
-          >
-            <Entypo
-              name="chevron-left"
-              size={theme.components.icon.medium}
-              color={theme.colors.white}
-            />
-          </Pressable>
-          <Text style={styles.headerTitle}>{t('languageSelection.title')}</Text>
-        </View>
-
-        {/* Content */}
         <View style={styles.content}>
           <Text style={styles.subtitle}>{t('languageSelection.subtitle')}</Text>
           
@@ -67,7 +50,6 @@ const LanguageSelection = () => {
             {t('languageSelection.currentLanguage', { language: getCurrentLanguageName() })}
           </Text>
 
-          {/* Language Options */}
           <View style={styles.languageList}>
             {languages.map((language) => (
               <Pressable
@@ -95,7 +77,7 @@ const LanguageSelection = () => {
           </View>
         </View>
       </View>
-    </SettingsLayoutWrapper>
+    </LanguageLayoutWrapper>
   );
 };
 

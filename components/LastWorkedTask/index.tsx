@@ -78,7 +78,7 @@ const LastWorkedTask = ({
   const { t } = useTranslation();
   
   const formatLastWorkedDate = (dateString: string) => {
-    if (!dateString) return t("home.neverWorked");
+    if (!dateString) return t("home.lastWorked", { date: t("home.neverWorked") });
 
     const { d, time } = fullDateWithHour(dateString);
     return t("home.lastWorked", { date: `${d} at ${time}` });

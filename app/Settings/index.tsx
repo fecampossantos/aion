@@ -44,18 +44,6 @@ const Settings = () => {
   }>({ date: "", projectCount: 0, taskCount: 0, timingCount: 0 });
 
   /**
-   * Handles navigation to a specific settings section
-   */
-  const handleNavigateToSection = (section: string) => {
-    if (section === "language") {
-      router.push("/Settings/Language");
-    } else {
-      console.log(`Navigating to ${section} settings`);
-      // TODO: Implement navigation to other settings sections
-    }
-  };
-
-  /**
    * Handles creating and sharing a backup of all data
    */
   const handleBackupData = () => {
@@ -214,7 +202,7 @@ const Settings = () => {
             title: t("settings.language"),
             subtitle: t("settings.currentLanguage"),
             icon: "language",
-            onPress: () => handleNavigateToSection("language"),
+            onPress: () => router.push("/Language"),
           },
         ])}
 
