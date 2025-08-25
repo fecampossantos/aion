@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useTask } from '../../../app/Task/useTask';
+import useTask from '../../../app/Task/useTask';
 
 // Mock expo-sqlite
 const mockDatabase = {
