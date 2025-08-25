@@ -151,5 +151,16 @@
     "task": "Task",
     "sessions": "Sessions",
     "noData": "No data available for the selected period"
+  },
+  "templates": {
+    "title": "PDF Templates",
+    "subtitle": "Choose your preferred PDF report template",
+    "loading": "Loading templates...",
+    "default": "Default",
+    "save": "Save Template",
+    "saving": "Saving...",
+    "saveSuccess": "PDF template updated successfully!",
+    "saveError": "Failed to save template preference",
+    "loadError": "Failed to load template preferences"
   }
 }
