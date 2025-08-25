@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import * as Notifications from "expo-notifications";
+import { BackgroundTimer } from "../../utils/backgroundTimer";
+import { AppState, AppStateStatus } from 'react-native';
 
 /**
  * Custom hook for managing timer functionality
@@ -14,11 +16,15 @@ import * as Notifications from "expo-notifications";
 export const useTimer = ({
   disabled = false,
   taskName = "Task",
+  taskId = "",
+  projectId = "",
   onInit = () => {},
   onStop = (time: number) => {},
 }: {
   disabled?: boolean;
   taskName?: string;
+  taskId?: string;
+  projectId?: string;
   onInit?: () => void;
   onStop?: (time: number) => void;
 }) => {
@@ -27,6 +33,8 @@ export const useTimer = ({
   const [startTime, setStartTime] = useState<string | null>(null);
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const notificationId = useRef<string | null>(null);
+  const backgroundTimer = useRef<BackgroundTimer>(BackgroundTimer.getInstance());
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   /**
    * Handles timer touch events (start, pause, resume)
@@ -49,21 +57,17 @@ export const useTimer = ({
       setStartTime(formattedTime);
       onInit();
 
-      // Show notification
-      const id = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `Timer for ${taskName} running`,
-          body: `Started at ${formattedTime}`,
-        },
-        trigger: null, // Immediate notification
-      });
+      // Start background timer
+      const id = await backgroundTimer.current.startTimer(taskName, taskId, projectId);
       notificationId.current = id;
     } else if (isPaused) {
       // Resume from pause
       setIsPaused(false);
+      await backgroundTimer.current.resumeTimer();
     } else {
       // Pause timer
       setIsPaused(true);
+      await backgroundTimer.current.pauseTimer();
     }
   };
 
@@ -75,17 +79,16 @@ export const useTimer = ({
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     
-    // Stop timer
+    // Stop background timer and get final time
+    const totalSeconds = await backgroundTimer.current.stopTimer();
+    
+    // Update local state
     setIsCounting(false);
     setIsPaused(false);
-    onStop(getSeconds());
+    onStop(totalSeconds);
     resetCount();
 
-    // Dismiss notification
-    if (notificationId.current) {
-      await Notifications.dismissNotificationAsync(notificationId.current);
-      notificationId.current = null;
-    }
+    notificationId.current = null;
   };
 
   /**
@@ -130,28 +133,80 @@ export const useTimer = ({
     return "pause";
   };
 
-  // Timer effect
+  // Initialize background timer and sync with stored state
   useEffect(() => {
-    let intervalId: number;
+    const initializeTimer = async () => {
+      await backgroundTimer.current.initialize();
+      
+      // Check if there's an existing timer running
+      const isRunning = await backgroundTimer.current.isRunning();
+      const currentTime = await backgroundTimer.current.getCurrentTime();
+      
+      if (isRunning && currentTime) {
+        setIsCounting(true);
+        setIsPaused(false);
+        setTimer(currentTime);
+      }
+    };
+
+    initializeTimer();
+  }, []);
+
+  // Timer update effect - sync with background timer
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
 
     if (isCounting && !isPaused) {
-      intervalId = setInterval(() => {
-        setTimer((prevTimer) => {
-          const seconds = prevTimer.seconds + 1;
-          const minutes = prevTimer.minutes + Math.floor(seconds / 60);
-          const hours = prevTimer.hours + Math.floor(minutes / 60);
-
-          return {
-            hours: hours % 24,
-            minutes: minutes % 60,
-            seconds: seconds % 60,
-          };
-        });
+      intervalId = setInterval(async () => {
+        const currentTime = await backgroundTimer.current.getCurrentTime();
+        if (currentTime) {
+          setTimer(currentTime);
+        } else {
+          // Background timer stopped, sync local state
+          setIsCounting(false);
+          setIsPaused(false);
+          resetCount();
+        }
       }, 1000);
     }
 
     return () => clearInterval(intervalId);
   }, [isCounting, isPaused]);
+
+  // Handle app state changes
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App came to foreground, sync with background timer
+        const isRunning = await backgroundTimer.current.isRunning();
+        const currentTime = await backgroundTimer.current.getCurrentTime();
+        
+        if (isRunning && currentTime) {
+          setIsCounting(true);
+          setTimer(currentTime);
+          
+          const timerData = await backgroundTimer.current.getTimerData();
+          if (timerData && !timerData.isRunning) {
+            setIsPaused(true);
+          } else {
+            setIsPaused(false);
+          }
+        } else if (!isRunning) {
+          setIsCounting(false);
+          setIsPaused(false);
+          resetCount();
+        }
+      }
+      
+      appStateRef.current = nextAppState;
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   return {
     isCounting,

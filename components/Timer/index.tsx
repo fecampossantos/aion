@@ -119,6 +119,8 @@ interface TimerProps {
   disabled?: boolean;
   textToShowWhenStopped?: null | string;
   taskName?: string; // Added optional task name prop
+  taskId?: string; // Added optional task ID prop
+  projectId?: string; // Added optional project ID prop
 }
 
 /**
@@ -132,6 +134,8 @@ const Timer = ({
   disabled = false,
   textToShowWhenStopped,
   taskName = "Task", // Default task name
+  taskId = "", // Default task ID
+  projectId = "", // Default project ID
 }: TimerProps) => {
   const {
     isCounting,
@@ -142,6 +146,8 @@ const Timer = ({
   } = useTimer({
     disabled,
     taskName,
+    taskId,
+    projectId,
     onInit,
     onStop,
   });

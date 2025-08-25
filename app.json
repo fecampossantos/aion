@@ -16,7 +16,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "background-fetch",
+          "background-processing"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -35,7 +41,9 @@
       },
       "permissions": [
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE"
       ]
     },
     "web": {
@@ -46,7 +54,9 @@
       "expo-asset",
       "expo-sqlite",
       "expo-router",
-      "expo-document-picker"
+      "expo-document-picker",
+      "expo-task-manager",
+      "expo-background-fetch"
     ],
     "extra": {
       "eas": {

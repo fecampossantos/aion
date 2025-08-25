@@ -6,10 +6,24 @@ import { theme } from "../globalStyle/theme";
 import { useGoogleFonts } from "../globalStyle/fonts";
 import { View, Text } from "react-native";
 import { ToastProvider } from "../components/Toast/ToastContext";
+import { useEffect } from "react";
+import { NotificationHandler } from "../utils/notificationHandler";
 import "../i18n";
 
 export default function HomeLayout() {
   const { fontsLoaded, fontError } = useGoogleFonts();
+
+  // Initialize notification handler
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      const notificationHandler = NotificationHandler.getInstance();
+      await notificationHandler.initialize();
+    };
+
+    if (fontsLoaded) {
+      initializeNotifications();
+    }
+  }, [fontsLoaded]);
 
   // Show loading screen while fonts are loading
   if (!fontsLoaded) {
