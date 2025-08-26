@@ -111,6 +111,8 @@
     "backupSubtitle": "Salvar e compartilhar seus dados",
     "restore": "Restaurar Dados",
     "restoreSubtitle": "Restaurar de um arquivo de backup",
+    "pdfTemplates": "Modelos de PDF",
+    "pdfTemplatesSubtitle": "Personalize seus modelos de relatórios PDF",
     "support": "Suporte",
     "github": "GitHub",
     "githubSubtitle": "Ver código fonte",

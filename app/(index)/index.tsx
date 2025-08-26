@@ -150,22 +150,22 @@ const Home = () => {
             />
           </View>
         )}
-
-        {/* Settings Section - End of Page */}
-        <View style={styles.settingsContainer}>
-          <Pressable
-            style={styles.settingsButton}
-            onPress={handleNavigateToSettings}
-            disabled={isLoading}
-          >
-            <Entypo
-              name="cog"
-              size={theme.components.icon.medium}
-              color={theme.colors.white}
-            />
-          </Pressable>
-        </View>
       </ScrollView>
+
+      {/* Settings Section - Fixed at Bottom */}
+      <View style={styles.settingsContainer}>
+        <Pressable
+          style={styles.settingsButton}
+          onPress={handleNavigateToSettings}
+          disabled={isLoading}
+        >
+          <Entypo
+            name="cog"
+            size={theme.components.icon.medium}
+            color={theme.colors.neutral[900]}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -221,10 +221,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    width: "100%",
   },
   scrollViewContent: {
-    paddingBottom: theme.spacing["4xl"],
+    paddingBottom: theme.spacing["6xl"],
   },
   projectsList: {
     width: "100%",
@@ -291,11 +290,10 @@ const styles = StyleSheet.create({
     height: 50,
   },
   settingsContainer: {
-    width: "100%",
-    paddingHorizontal: theme.spacing["2xl"],
-    marginTop: theme.spacing["2xl"],
-    alignItems: "flex-end",
-    position: "relative",
+    position: "absolute",
+    bottom: theme.spacing["2xl"],
+    right: theme.spacing["2xl"],
+    zIndex: 10,
   },
   settingsButton: {
     display: "flex",

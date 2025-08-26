@@ -112,6 +112,8 @@
     "backupSubtitle": "Save and share your data",
     "restore": "Restore Data",
     "restoreSubtitle": "Restore from a backup file",
+    "pdfTemplates": "PDF Templates",
+    "pdfTemplatesSubtitle": "Customize your PDF report templates",
     "support": "Support",
     "github": "GitHub",
     "githubSubtitle": "View source code",
