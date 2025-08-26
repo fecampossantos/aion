@@ -27,7 +27,7 @@ import { router } from "expo-router";
 const Settings = () => {
   const database = useSQLiteContext();
   const { showToast } = useToast();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
 
@@ -56,11 +56,11 @@ const Settings = () => {
   const handleBackupConfirm = async () => {
     setShowBackupModal(false);
     setIsBackingUp(true);
-          try {
-        await downloadBackup(database);
-        // Show success toast
-        showToast(t("backup.success"), "success");
-      } catch (error) {
+    try {
+      await downloadBackup(database);
+      // Show success toast
+      showToast(t("backup.success"), "success");
+    } catch (error) {
       // Error handling is done in downloadBackup function
       console.error("Backup error:", error);
     } finally {
@@ -189,13 +189,13 @@ const Settings = () => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* App Information Section */}
         <View style={styles.appInfoSection}>
           <Text style={styles.appName}>{t("app.name")}</Text>
-          <Text style={styles.appVersion}>{t("app.version", { version: appConfig.expo.version })}</Text>
+          <Text style={styles.appVersion}>
+            {t("app.version", { version: appConfig.expo.version })}
+          </Text>
         </View>
 
-        {/* General Settings */}
         {renderSettingsSection(t("settings.general"), [
           {
             id: "language",
@@ -213,7 +213,6 @@ const Settings = () => {
           },
         ])}
 
-        {/* Data Management */}
         {renderSettingsSection(t("settings.dataManagement"), [
           {
             id: "backup",
@@ -233,7 +232,6 @@ const Settings = () => {
           },
         ])}
 
-        {/* Support Section */}
         {renderSettingsSection(t("settings.support"), [
           {
             id: "github",
@@ -248,7 +246,6 @@ const Settings = () => {
         ])}
       </ScrollView>
 
-      {/* Backup Modal */}
       <BackupModal
         visible={showBackupModal}
         onClose={() => setShowBackupModal(false)}
@@ -256,7 +253,6 @@ const Settings = () => {
         isLoading={isBackingUp}
       />
 
-      {/* Restore Modal */}
       <RestoreModal
         visible={showRestoreModal}
         onClose={() => setShowRestoreModal(false)}
@@ -264,7 +260,6 @@ const Settings = () => {
         isLoading={isRestoring}
       />
 
-      {/* Restore Confirmation Modal */}
       <RestoreConfirmationModal
         visible={showRestoreConfirmationModal}
         onClose={() => setShowRestoreConfirmationModal(false)}
