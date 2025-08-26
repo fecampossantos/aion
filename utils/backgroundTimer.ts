@@ -3,6 +3,7 @@ import * as BackgroundFetch from 'expo-background-fetch';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NotificationHandler } from './notificationHandler';
+import { AppState } from 'react-native';
 
 const BACKGROUND_TIMER_TASK = 'background-timer-task';
 const TIMER_STORAGE_KEY = 'background_timer_data';
@@ -43,21 +44,44 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
     
     await AsyncStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(updatedTimerData));
 
-    // Update notification with current time
+    // Update notification with current time - use direct notification scheduling for background updates
     if (timerData.notificationId) {
       const hours = Math.floor(totalElapsed / 3600);
       const minutes = Math.floor((totalElapsed % 3600) / 60);
       const seconds = totalElapsed % 60;
       const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       
-      const notificationHandler = NotificationHandler.getInstance();
-      await notificationHandler.updateTimerNotification(
-        timerData.notificationId,
-        timerData.taskName,
-        timeString,
-        timerData.taskId,
-        timerData.projectId
-      );
+      // Use direct notification scheduling for background updates - more reliable than NotificationHandler in background
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `${timerData.taskName} - ${timeString}`,
+            body: 'Timer is running - tap to open',
+            data: {
+              taskId: timerData.taskId,
+              projectId: timerData.projectId,
+              action: 'timer_running'
+            }
+          },
+          identifier: timerData.notificationId,
+          trigger: null,
+        });
+      } catch (notificationError) {
+        console.error('Failed to update background notification:', notificationError);
+        // Fallback: try using NotificationHandler
+        try {
+          const notificationHandler = NotificationHandler.getInstance();
+          await notificationHandler.updateTimerNotification(
+            timerData.notificationId,
+            timerData.taskName,
+            timeString,
+            timerData.taskId,
+            timerData.projectId
+          );
+        } catch (fallbackError) {
+          console.error('Fallback notification update also failed:', fallbackError);
+        }
+      }
     }
 
     return BackgroundFetch.BackgroundFetchResult.NewData;
@@ -70,6 +94,8 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
 export class BackgroundTimer {
   private static instance: BackgroundTimer;
   private updateInterval: NodeJS.Timeout | null = null;
+  private appState: string = 'active';
+  private appStateSubscription: any = null;
 
   public static getInstance(): BackgroundTimer {
     if (!BackgroundTimer.instance) {
@@ -97,9 +123,12 @@ export class BackgroundTimer {
         }),
       });
 
+      // Listen to app state changes
+      this.appStateSubscription = AppState.addEventListener('change', this.handleAppStateChange);
+
       // Register background fetch task
       await BackgroundFetch.registerTaskAsync(BACKGROUND_TIMER_TASK, {
-        minimumInterval: 1, // 15 seconds minimum interval
+        minimumInterval: 15, // 15 seconds minimum interval
         stopOnTerminate: false,
         startOnBoot: true,
       });
@@ -337,7 +366,7 @@ export class BackgroundTimer {
       } catch (error) {
         console.error('Local update error:', error);
       }
-    }, 1000); // Update every 5 seconds
+    }, 1000); // Update every 1 second
   }
 
   private stopLocalUpdates(): void {
@@ -347,9 +376,22 @@ export class BackgroundTimer {
     }
   }
 
+  private handleAppStateChange = (nextAppState: string) => {
+    this.appState = nextAppState;
+    if (nextAppState === 'active') {
+      this.startLocalUpdates();
+    } else {
+      this.stopLocalUpdates();
+    }
+  };
+
   async cleanup(): Promise<void> {
     this.stopLocalUpdates();
     try {
+      // Remove app state listener
+      if (this.appStateSubscription) {
+        this.appStateSubscription.remove();
+      }
       await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
     } catch (error) {
       console.error('Failed to cleanup background timer:', error);
