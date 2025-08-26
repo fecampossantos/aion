@@ -133,7 +133,6 @@ export class BackgroundTimer {
         startOnBoot: true,
       });
 
-      console.log('Background timer initialized');
     } catch (error) {
       console.error('Failed to initialize background timer:', error);
     }
