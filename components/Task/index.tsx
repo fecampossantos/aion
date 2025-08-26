@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View, Pressable, StyleSheet } from "react-native";
+import { Text, View, Pressable, StyleSheet } from "react-native";
 import Timer from "../Timer";
 import { secondsToTimeHHMMSS } from "../../utils/parser";
 import { useSQLiteContext } from "expo-sqlite";
@@ -124,6 +124,7 @@ const Task = ({
         disabled={disableTimer || task.completed === 1}
         onInit={() => onInitTimer()}
         textToShowWhenStopped={secondsToTimeHHMMSS(showTimedUntilNowOnTimer)}
+        key={task.task_id.toString() + "-timer"}
       />
     </View>
   );

@@ -175,6 +175,8 @@ const Task = () => {
             onInit={onInitTimer}
             onStop={onStopTimer}
             taskName={taskTitle}
+            taskId={taskID as string}
+            projectId={projectID as string}
           />
         </View>
 
