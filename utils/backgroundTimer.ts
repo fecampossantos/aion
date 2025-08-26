@@ -99,7 +99,7 @@ export class BackgroundTimer {
 
       // Register background fetch task
       await BackgroundFetch.registerTaskAsync(BACKGROUND_TIMER_TASK, {
-        minimumInterval: 15, // 15 seconds minimum interval
+        minimumInterval: 1, // 15 seconds minimum interval
         stopOnTerminate: false,
         startOnBoot: true,
       });
@@ -337,7 +337,7 @@ export class BackgroundTimer {
       } catch (error) {
         console.error('Local update error:', error);
       }
-    }, 5000); // Update every 5 seconds
+    }, 1000); // Update every 5 seconds
   }
 
   private stopLocalUpdates(): void {

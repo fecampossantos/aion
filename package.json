@@ -42,7 +42,7 @@
     "expo-splash-screen": "~0.30.10",
     "expo-sqlite": "~15.2.14",
     "expo-status-bar": "~2.2.3",
-    "expo-task-manager": "^13.1.6",
+    "expo-task-manager": "~13.1.6",
     "i18next": "^25.4.0",
     "react": "19.0.0",
     "react-i18next": "^15.7.1",
