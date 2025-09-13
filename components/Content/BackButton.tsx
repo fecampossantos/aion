@@ -9,7 +9,7 @@ import globalStyle from "../../globalStyle";
  */
 const BackButton = ({ onPress }: { onPress: () => void }) => (
   <Pressable onPress={onPress} testID="back-button">
-    <AntDesign name={"caretleft"} size={16} color={globalStyle.white} testID="back-icon" />
+    <AntDesign name={"caret-left"} size={16} color={globalStyle.white} testID="back-icon" />
   </Pressable>
 );
 

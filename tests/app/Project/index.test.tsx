@@ -80,9 +80,7 @@ describe("Project", () => {
     mockAlert.mockClear();
     
     // Mock Alert for this test
-    jest.spyOn(require("react-native"), "Alert").mockImplementation({
-      alert: mockAlert,
-    });
+    jest.spyOn(require("react-native"), "Alert").mockImplementation(mockAlert);
   });
 
   it("renders correctly with project and tasks", async () => {

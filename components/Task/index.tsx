@@ -70,18 +70,20 @@ const Task = ({
   task,
   onPress,
   disableTimer = false,
-  onInitTimer = () => {},
-  onStopTimer = () => {},
+  onInitTimer,
+  onStopTimer,
   showTimedUntilNowOnTimer,
   handleDoneTask,
+  showTimer = true,
 }: {
   task: TaskWithTimed;
   onPress: () => void;
-  disableTimer: boolean;
-  onInitTimer: () => void;
-  onStopTimer: () => void;
-  showTimedUntilNowOnTimer: null | number;
+  disableTimer?: boolean;
+  onInitTimer?: () => void;
+  onStopTimer?: () => void;
+  showTimedUntilNowOnTimer?: null | number;
   handleDoneTask: (isChecked: boolean, task: TaskWithTimed) => void;
+  showTimer: boolean;
 }) => {
   const database = useSQLiteContext();
 
@@ -119,13 +121,15 @@ const Task = ({
           </Text>
         </Pressable>
       </View>
-      <Timer
-        onStop={(time) => onStop(time)}
-        disabled={disableTimer || task.completed === 1}
-        onInit={() => onInitTimer()}
-        textToShowWhenStopped={secondsToTimeHHMMSS(showTimedUntilNowOnTimer)}
-        key={task.task_id.toString() + "-timer"}
-      />
+      {showTimer && (
+        <Timer
+          onStop={(time) => onStop(time)}
+          disabled={disableTimer || task.completed === 1}
+          onInit={() => onInitTimer()}
+          textToShowWhenStopped={secondsToTimeHHMMSS(showTimedUntilNowOnTimer)}
+          key={task.task_id.toString() + "-timer"}
+        />
+      )}
     </View>
   );
 };

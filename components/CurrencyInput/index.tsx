@@ -139,7 +139,6 @@ const CurrencyInput = ({
           value={value}
           onChangeText={(text) => handleChangeText(text)}
           placeholder={placeholder}
-          placeholderTextColor={theme.colors.neutral[500]}
           testID="currencyInput-input"
           editable={!disabled}
         />

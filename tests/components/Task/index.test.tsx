@@ -14,11 +14,11 @@ describe("<Task />", () => {
     timed_until_now: 0,
   };
 
-  const mockOnPress = jest.fn();
-  const mockDisableTimer = false;
-  const mockOnInitTimer = jest.fn();
-  const mockOnStopTimer = jest.fn();
-  const mockHandleDoneTask = jest.fn();
+const mockOnPress = jest.fn();
+const mockDisableTimer = false;
+const mockOnInitTimer = jest.fn();
+const mockOnStopTimer = jest.fn();
+const mockHandleDoneTask = jest.fn();
   const taskTestID = "task-touchable";
 
   beforeEach(() => {
@@ -55,6 +55,7 @@ describe("<Task />", () => {
         onInitTimer={() => mockOnInitTimer()}
         onStopTimer={() => mockOnStopTimer()}
         showTimedUntilNowOnTimer={taskWithTimed.timed_until_now}
+        handleDoneTask={mockHandleDoneTask}
       />
     );
     const projectName = getByText(taskWithTimed.name);
@@ -75,6 +76,7 @@ describe("<Task />", () => {
         onInitTimer={() => mockOnInitTimer()}
         onStopTimer={() => mockOnStopTimer()}
         showTimedUntilNowOnTimer={taskWithTimed.timed_until_now}
+        handleDoneTask={mockHandleDoneTask}
       />
     );
     const projectName = getByText(taskWithTimed.name);
@@ -95,6 +97,7 @@ describe("<Task />", () => {
         onInitTimer={() => mockOnInitTimer()}
         onStopTimer={() => mockOnStopTimer()}
         showTimedUntilNowOnTimer={taskWithTimed.timed_until_now}
+        handleDoneTask={mockHandleDoneTask}
       />
     );
     const projectName = getByText(taskWithTimed.name);
@@ -118,6 +121,7 @@ describe("<Task />", () => {
         onInitTimer={() => mockOnInitTimer()}
         onStopTimer={() => mockOnStopTimer()}
         showTimedUntilNowOnTimer={taskWithTimed.timed_until_now}
+        handleDoneTask={mockHandleDoneTask}
       />
     );
     const projectName = getByText(taskWithTimed.name);

@@ -99,13 +99,13 @@ export async function exportBackupToFile(
     const backupFilename = filename || `aion-backup-${timestamp}.json`;
 
     // Create file path in document directory
-    const filePath = `${FileSystem.documentDirectory}${backupFilename}`;
+    const filePath = `${FileSystem.documentDirectory || ''}${backupFilename}`;
 
     // Write backup data to file
     await FileSystem.writeAsStringAsync(
       filePath,
       JSON.stringify(backupData, null, 2),
-      { encoding: FileSystem.EncodingType.UTF8 }
+      { encoding: 'utf8' }
     );
 
     return filePath;
@@ -139,13 +139,13 @@ export async function downloadBackup(
     const backupFilename = filename || `aion-backup-${timestamp}.json`;
 
     // Create file path in Documents directory
-    const filePath = `${FileSystem.documentDirectory}${backupFilename}`;
+    const filePath = `${FileSystem.documentDirectory || ''}${backupFilename}`;
 
     // Write backup data to Documents directory
     await FileSystem.writeAsStringAsync(
       filePath,
       JSON.stringify(backupData, null, 2),
-      { encoding: FileSystem.EncodingType.UTF8 }
+      { encoding: 'utf8' }
     );
 
     // Verify file was created successfully
@@ -381,7 +381,7 @@ export async function restoreFromFile(
 
     // Read file content
     const fileContent = await FileSystem.readAsStringAsync(filePath, {
-      encoding: FileSystem.EncodingType.UTF8
+      encoding: 'utf8'
     });
 
     // Parse JSON data
@@ -423,7 +423,7 @@ export async function getBackupStats(filePath: string): Promise<{
 
     // Read file content
     const fileContent = await FileSystem.readAsStringAsync(filePath, {
-      encoding: FileSystem.EncodingType.UTF8
+      encoding: 'utf8'
     });
 
     // Parse JSON data

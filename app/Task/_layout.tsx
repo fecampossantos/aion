@@ -48,7 +48,10 @@ const TaskLayout = () => {
         left={
           <Content.BackButton
             onPress={() =>
-              router.back()
+              router.replace({
+                pathname: "/Project",
+                params: { projectID: projectID }
+              })
             }
           />
         }

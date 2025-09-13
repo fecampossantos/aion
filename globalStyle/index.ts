@@ -11,6 +11,7 @@ const globalStyle = {
   },
   background: eerie_black,
   white: "#ffffff",
+  error: "#ef4444", // Error color from theme
   font: {
     regular: "OpenSans_400Regular",
     medium: "OpenSans_500Medium",

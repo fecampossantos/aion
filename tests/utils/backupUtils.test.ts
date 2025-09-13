@@ -98,7 +98,7 @@ describe('backupUtils', () => {
       expect(FileSystem.writeAsStringAsync).toHaveBeenCalledWith(
         expect.stringContaining('test-backup.json'),
         expect.any(String),
-        { encoding: FileSystem.EncodingType.UTF8 }
+        { encoding: 'utf8' }
       );
       expect(result).toBeDefined();
       expect(result).toContain('test-backup.json');
@@ -141,7 +141,7 @@ describe('backupUtils', () => {
       expect(FileSystem.writeAsStringAsync).toHaveBeenCalledWith(
         expect.stringContaining('test-backup.json'),
         expect.any(String),
-        { encoding: FileSystem.EncodingType.UTF8 }
+        { encoding: 'utf8' }
       );
     });
 

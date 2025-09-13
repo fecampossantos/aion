@@ -15,13 +15,13 @@ The timer now continues running even when the app is in the background or comple
 
 **Key Components:**
 - `utils/backgroundTimer.ts` - Main background timer service
-- `expo-task-manager` and `expo-background-fetch` - Background task execution
+- `expo-task-manager` and `expo-background-task` - Background task execution
 - AsyncStorage - Persistent timer state storage
 
 **How it works:**
 - When a timer starts, it's registered as a background task
 - Timer state is stored in AsyncStorage for persistence
-- Background fetch runs every 15+ seconds to update timer state
+- Background task runs every 15+ seconds to update timer state
 - App syncs with background timer when returning to foreground
 
 ### 2. Persistent Notifications
@@ -36,9 +36,13 @@ When a timer is running, a persistent notification appears in the phone's notifi
 **Features:**
 - Shows current task name and elapsed time in notification
 - Updates every 5 seconds when app is active
-- Updates every 15+ seconds when app is in background
+- Updates every 15+ seconds when app is in background via background task
 - Tapping notification opens the app to the specific task page
 - Notification automatically dismisses when timer stops
+
+## Migration Notes
+
+**Updated to use `expo-background-task`**: This implementation has been migrated from the deprecated `expo-background-fetch` to `expo-background-task` for better energy efficiency and modern platform support using `WorkManager` on Android and `BGTaskScheduler` on iOS.
 
 ## Implementation Details
 

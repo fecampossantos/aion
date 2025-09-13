@@ -124,6 +124,8 @@ const styles = StyleSheet.create({
 const Project = () => {
   const { projectID } = useLocalSearchParams();
 
+  console.log("projectID", projectID);
+
   const {
     tasks,
     filteredTasks,
@@ -134,8 +136,6 @@ const Project = () => {
     showCompleted,
     handleNavigateToTask,
     handleDoneTask,
-    handleInitTimer,
-    handleStopTimer,
     getPaginatedTasks,
     getTotalPages,
     goToNextPage,
@@ -216,11 +216,8 @@ const Project = () => {
                   task={task}
                   key={task.task_id}
                   onPress={() => handleNavigateToTask(task)}
-                  disableTimer={false}
-                  onInitTimer={() => handleInitTimer(task.task_id)}
-                  onStopTimer={handleStopTimer}
-                  showTimedUntilNowOnTimer={task.timed_until_now}
                   handleDoneTask={handleDoneTask}
+                  showTimer={false}
                 />
               ))}
 

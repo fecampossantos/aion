@@ -58,7 +58,7 @@ const ProjectLayout = () => {
         backgroundColor: "rgba(255, 255, 255, 0.1)",
       }}
     >
-      <AntDesign name="infocirlceo" size={20} color="white" />
+      <AntDesign name="info-circle" size={20} color="white" />
     </Pressable>
   );
 

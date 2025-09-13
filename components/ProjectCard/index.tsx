@@ -74,7 +74,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
       </Text>
       <View style={styles.iconContainer}>
         <AntDesign 
-          name="arrowright" 
+          name="arrow-right" 
           size={20} 
           color="white" 
           style={styles.arrowIcon}

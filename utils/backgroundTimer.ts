@@ -1,5 +1,5 @@
 import * as TaskManager from 'expo-task-manager';
-import * as BackgroundFetch from 'expo-background-fetch';
+import * as BackgroundTask from 'expo-background-task';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NotificationHandler } from './notificationHandler';
@@ -23,13 +23,13 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
   try {
     const timerDataString = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
     if (!timerDataString) {
-      return BackgroundFetch.BackgroundFetchResult.NoData;
+      return BackgroundTask.BackgroundTaskResult.NoData;
     }
 
     const timerData: TimerData = JSON.parse(timerDataString);
     
     if (!timerData.isRunning) {
-      return BackgroundFetch.BackgroundFetchResult.NoData;
+      return BackgroundTask.BackgroundTaskResult.NoData;
     }
 
     // Calculate current elapsed time
@@ -84,10 +84,10 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
       }
     }
 
-    return BackgroundFetch.BackgroundFetchResult.NewData;
+    return BackgroundTask.BackgroundTaskResult.NewData;
   } catch (error) {
     console.error('Background timer task error:', error);
-    return BackgroundFetch.BackgroundFetchResult.Failed;
+    return BackgroundTask.BackgroundTaskResult.Failed;
   }
 });
 
@@ -126,11 +126,9 @@ export class BackgroundTimer {
       // Listen to app state changes
       this.appStateSubscription = AppState.addEventListener('change', this.handleAppStateChange);
 
-      // Register background fetch task
-      await BackgroundFetch.registerTaskAsync(BACKGROUND_TIMER_TASK, {
+      // Register background task
+      await BackgroundTask.registerTaskAsync(BACKGROUND_TIMER_TASK, {
         minimumInterval: 15, // 15 seconds minimum interval
-        stopOnTerminate: false,
-        startOnBoot: true,
       });
 
     } catch (error) {
@@ -391,7 +389,7 @@ export class BackgroundTimer {
       if (this.appStateSubscription) {
         this.appStateSubscription.remove();
       }
-      await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
+      await BackgroundTask.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
     } catch (error) {
       console.error('Failed to cleanup background timer:', error);
     }

@@ -379,7 +379,7 @@ describe('useFormValidation', () => {
       expect(result.current.error).toBe('Máximo de 10 caracteres permitidos');
 
       // Re-render the hook
-      rerender();
+      rerender({});
 
       // State should be preserved
       expect(result.current.error).toBe('Máximo de 10 caracteres permitidos');

@@ -45,35 +45,12 @@ const useProject = (projectID: string) => {
 
   const isTimerRunning = timerIdRunning !== null;
 
-  // Initial fetch on mount
-  useEffect(() => {
-    if (projectID) {
-      setIsLoading(true);
-      async function getProject() {
-        try {
-          const project = await database.getFirstAsync<IProject>(
-            `SELECT * FROM projects WHERE project_id = ?;`,
-            projectID
-          );
-
-          setProject(project);
-        } catch (error) {
-          // Set project to null on error and ensure loading is false
-          setProject(null);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      getProject();
-    }
-  }, [projectID, database]);
-
-  // Refetch when screen comes into focus
+  // Fetch data when screen comes into focus (handles both initial load and refresh)
   useFocusEffect(
     useCallback(() => {
       if (projectID) {
-        async function getProject() {
+        setIsLoading(true);
+        async function fetchData() {
           try {
             const project = await database.getFirstAsync<IProject>(
               `SELECT * FROM projects WHERE project_id = ?;`,
@@ -81,13 +58,41 @@ const useProject = (projectID: string) => {
             );
 
             setProject(project);
+            
+            // Fetch tasks
+            const allTasks = await database.getAllAsync<TaskWithTimed>(
+              `SELECT 
+    t.task_id,
+    t.name,
+    t.completed,
+    t.created_at AS task_created_at,
+    COALESCE(SUM(ti.time), 0) AS timed_until_now
+  FROM 
+    tasks t
+  LEFT JOIN 
+    timings ti ON t.task_id = ti.task_id
+  WHERE 
+    t.project_id = ?
+  GROUP BY 
+    t.task_id, t.name, t.completed, t.created_at
+  ORDER BY 
+    t.created_at;`,
+              projectID
+            );
+
+            setTasks(allTasks);
+            setFilteredTasks(allTasks);
           } catch (error) {
             // Set project to null on error
             setProject(null);
+            setTasks([]);
+            setFilteredTasks([]);
+          } finally {
+            setIsLoading(false);
           }
         }
 
-        getProject();
+        fetchData();
       }
     }, [projectID, database])
   );
@@ -96,7 +101,6 @@ const useProject = (projectID: string) => {
   useEffect(() => {
     setTasks([]);
     setFilteredTasks([]);
-    setIsLoading(true);
     setTimerIdRunning(null);
     setCurrentPage(1);
     setSearchQuery("");
@@ -196,12 +200,8 @@ ORDER BY
     }
   };
 
-  useEffect(() => {
-    if (projectID) {
-      setIsLoading(true);
-      getTasks();
-    }
-  }, [projectID]);
+  // Initial tasks fetch is now handled in useFocusEffect
+  // This useEffect is no longer needed as tasks are fetched when screen comes into focus
 
   // Cleanup effect to reset timer state on unmount
   useEffect(() => {
@@ -238,21 +238,6 @@ ORDER BY
       task.task_id
     );
     getTasks();
-  };
-
-  /**
-   * Initializes the timer for a specific task
-   * @param {number} taskId - The task ID to start the timer for
-   */
-  const handleInitTimer = (taskId: number) => {
-    setTimerIdRunning(taskId);
-  };
-
-  /**
-   * Stops the currently running timer
-   */
-  const handleStopTimer = () => {
-    setTimerIdRunning(null);
   };
 
   /**
@@ -341,8 +326,6 @@ ORDER BY
     handleShowCompletedToggle,
     handleNavigateToTask,
     handleDoneTask,
-    handleInitTimer,
-    handleStopTimer,
     handleConfirmNavigation,
     handleCancelNavigation,
   };

@@ -64,7 +64,7 @@ const SearchBar = ({
 
   return (
     <View style={styles.container}>
-      <AntDesign name="search1" size={20} style={styles.searchIcon} />
+      <AntDesign name="search" size={20} style={styles.searchIcon} />
       <TextInput
         style={styles.input}
         value={value}

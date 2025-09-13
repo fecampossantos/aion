@@ -307,7 +307,7 @@ describe('useDatePicker', () => {
       expect(result.current.date).toEqual(newDate);
 
       // Re-render the hook
-      rerender();
+      rerender({});
 
       // State should be preserved
       expect(result.current.date).toEqual(newDate);

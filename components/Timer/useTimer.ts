@@ -128,8 +128,8 @@ export const useTimer = ({
    * Gets the appropriate icon name based on timer state
    */
   const getIconName = () => {
-    if (!isCounting) return "caretright";
-    if (isPaused) return "caretright";
+    if (!isCounting) return "caret-right";
+    if (isPaused) return "caret-right";
     return "pause";
   };
 

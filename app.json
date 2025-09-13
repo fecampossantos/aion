@@ -56,7 +56,8 @@
       "expo-router",
       "expo-document-picker",
       "expo-task-manager",
-      "expo-background-fetch"
+      "expo-background-task",
+      "expo-localization"
     ],
     "extra": {
       "eas": {

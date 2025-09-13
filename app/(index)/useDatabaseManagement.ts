@@ -1,11 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { Project } from "../../interfaces/Project";
-import {
-  populateDatabase,
-  clearDatabase,
-  getDatabaseStats,
-} from "../../utils/databaseUtils";
 import { useToast } from "../../components/Toast/ToastContext";
 
 // Interface for the last worked task with project info
@@ -28,41 +23,51 @@ const useDatabaseManagement = () => {
   const database = useSQLiteContext();
   const { showToast } = useToast();
   const [projects, setProjects] = useState<Array<Project>>([]);
-  const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(null);
+  const [lastWorkedTask, setLastWorkedTask] = useState<LastWorkedTask | null>(
+    null
+  );
   const [filteredProjects, setFilteredProjects] = useState<Array<Project>>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopulating, setIsPopulating] = useState<boolean>(false);
   const [isClearing, setIsClearing] = useState<boolean>(false);
-  
+
   // Confirmation modal states
-  const [showPopulateConfirmation, setShowPopulateConfirmation] = useState<boolean>(false);
-  const [showClearConfirmation, setShowClearConfirmation] = useState<boolean>(false);
+  const [showPopulateConfirmation, setShowPopulateConfirmation] =
+    useState<boolean>(false);
+  const [showClearConfirmation, setShowClearConfirmation] =
+    useState<boolean>(false);
 
   /**
    * Filters projects based on search query
    * @param {string} query - Search query to filter projects by name
    */
-  const filterProjects = useCallback((query: string) => {
-    if (!query.trim()) {
-      setFilteredProjects(projects);
-      return;
-    }
-    
-    const filtered = projects.filter((project) =>
-      project.name.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredProjects(filtered);
-  }, [projects]);
+  const filterProjects = useCallback(
+    (query: string) => {
+      if (!query.trim()) {
+        setFilteredProjects(projects);
+        return;
+      }
+
+      const filtered = projects.filter((project) =>
+        project.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredProjects(filtered);
+    },
+    [projects]
+  );
 
   /**
    * Handles search query changes
    * @param {string} query - New search query
    */
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    filterProjects(query);
-  }, [filterProjects]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      filterProjects(query);
+    },
+    [filterProjects]
+  );
 
   /**
    * Clears the search query and resets filtered projects
@@ -133,60 +138,6 @@ const useDatabaseManagement = () => {
     }
   }, [fetchAllProjects, fetchLastWorkedTask]);
 
-  /**
-   * Handles populating the database with sample data
-   */
-  const handlePopulateDatabase = () => {
-    setShowPopulateConfirmation(true);
-  };
-
-  /**
-   * Handles populate confirmation
-   */
-  const handlePopulateConfirm = async () => {
-    setShowPopulateConfirmation(false);
-    setIsPopulating(true);
-    try {
-      await populateDatabase(database);
-      await refreshProjects();
-      // Show success toast
-      showToast('Database populated successfully!', 'success');
-    } catch (error) {
-      // Show error toast
-      showToast('Failed to populate database. Please try again.', 'error');
-      console.error("Populate error:", error);
-    } finally {
-      setIsPopulating(false);
-    }
-  };
-
-  /**
-   * Handles clearing all data from the database
-   */
-  const handleClearDatabase = () => {
-    setShowClearConfirmation(true);
-  };
-
-  /**
-   * Handles clear confirmation
-   */
-  const handleClearConfirm = async () => {
-    setShowClearConfirmation(false);
-    setIsClearing(true);
-    try {
-      await clearDatabase(database);
-      await refreshProjects();
-      // Show success toast
-      showToast('Database cleared successfully!', 'success');
-    } catch (error) {
-      // Show error toast
-      showToast('Failed to clear database. Please try again.', 'error');
-      console.error("Clear error:", error);
-    } finally {
-      setIsClearing(false);
-    }
-  };
-
   // Load initial data
   useEffect(() => {
     refreshProjects();
@@ -202,10 +153,6 @@ const useDatabaseManagement = () => {
     isClearing,
     fetchAllProjects,
     refreshProjects,
-    handlePopulateDatabase,
-    handlePopulateConfirm,
-    handleClearDatabase,
-    handleClearConfirm,
     handleSearch,
     clearSearch,
     // Confirmation modal states

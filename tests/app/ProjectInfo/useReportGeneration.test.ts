@@ -160,7 +160,7 @@ describe('useReportGeneration', () => {
       const endDate = new Date('2024-01-31');
 
       // Mock getTimings to be slow so we can test the blocking behavior
-      const slowMockGetTimings = jest.fn(() => new Promise(resolve => setTimeout(() => resolve(mockTimings), 100)));
+      const slowMockGetTimings = jest.fn(() => new Promise<any[]>(resolve => setTimeout(() => resolve(mockTimings), 100)));
 
       // Start first generation (this will be slow)
       const firstGeneration = result.current.handleGenerateReport({
