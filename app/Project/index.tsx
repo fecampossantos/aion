@@ -124,8 +124,6 @@ const styles = StyleSheet.create({
 const Project = () => {
   const { projectID } = useLocalSearchParams();
 
-  console.log("projectID", projectID);
-
   const {
     tasks,
     filteredTasks,
