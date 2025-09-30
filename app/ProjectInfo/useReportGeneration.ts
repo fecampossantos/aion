@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import * as Print from "expo-print";
-import * as FileSystem from "expo-file-system";
+import { File } from "expo-file-system";
 import { shareAsync } from "expo-sharing";
 import { useToast } from "../../components/Toast/ToastContext";
 import { generateReportHTML } from "../../utils/pdfReportService";
@@ -115,17 +115,18 @@ const useReportGeneration = (database: SQLiteDatabase) => {
         },
       });
 
-      const pdfFile = `${uri.slice(
+      // Create File instances for source and destination
+      const sourceFile = new File(uri);
+      const destinationPath = `${uri.slice(
         0,
         uri.lastIndexOf("/") + 1
       )}${documentName}.pdf`;
+      const destinationFile = new File(destinationPath);
 
-      await FileSystem.moveAsync({
-        from: uri,
-        to: pdfFile,
-      });
+      // Move the file using the new File API
+      await sourceFile.move(destinationFile);
 
-      await shareAsync(pdfFile, { UTI: ".pdf", mimeType: "application/pdf" });
+      await shareAsync(destinationPath, { UTI: ".pdf", mimeType: "application/pdf" });
 
       showToast("Relatório PDF gerado com sucesso!", "success");
     } catch (e) {
