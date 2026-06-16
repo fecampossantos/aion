@@ -1,4 +1,13 @@
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from "react-native";
 
 import { Project as IProject } from "../../interfaces/Project";
 import { useEffect, useState } from "react";
@@ -10,30 +19,34 @@ import { formatJsDateToDatabase, fullDate, fullHour } from "../../utils/parser";
 
 import { Picker } from "@react-native-picker/picker";
 import Task from "../../interfaces/Task";
-import TextInput from "../../components/TextInput";
 import { router, useLocalSearchParams } from "expo-router";
 import { colors } from "../../globalStyle/theme";
 import globalStyle from "../../globalStyle";
-import { spacing, borderRadius, shadows, typography } from "../../globalStyle/theme";
-import useDatePicker from "./useDatePicker";
+import {
+  spacing,
+  borderRadius,
+  shadows,
+  typography,
+} from "../../globalStyle/theme";
+import useDatePicker from "./_useDatePicker";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: colors.neutral[900],
     paddingHorizontal: globalStyle.padding.horizontal,
     paddingTop: spacing.xl,
-    paddingBottom: spacing['2xl'],
+    paddingBottom: spacing["2xl"],
   },
 
   // Header section
   header: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing["3xl"],
   },
   headerTitle: {
     color: globalStyle.white,
     fontFamily: globalStyle.font.bold,
-    fontSize: typography.fontSize['2xl'],
+    fontSize: typography.fontSize["2xl"],
     marginBottom: spacing.sm,
   },
   headerSubtitle: {
@@ -44,7 +57,7 @@ const styles = StyleSheet.create({
 
   // Task picker section
   pickerSection: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing["3xl"],
   },
   pickerLabel: {
     color: globalStyle.white,
@@ -53,7 +66,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   selectedTaskIndicator: {
-    position: 'absolute',
+    position: "absolute",
     right: spacing.md,
     top: spacing.md,
     backgroundColor: colors.success[500],
@@ -68,7 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     backgroundColor: colors.neutral[800],
     ...shadows.sm,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   pickerContainerFocused: {
     borderColor: colors.primary[500],
@@ -78,7 +91,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     height: 56,
     paddingHorizontal: spacing.lg,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   pickerItem: {
     backgroundColor: colors.neutral[800],
@@ -95,7 +108,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   dateSection: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing["3xl"],
   },
   dateLabel: {
     color: globalStyle.white,
@@ -129,14 +142,14 @@ const styles = StyleSheet.create({
 
   // Time section
   timeSection: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing["3xl"],
   },
   timeSectionTitle: {
     color: globalStyle.white,
     fontFamily: globalStyle.font.medium,
     fontSize: typography.fontSize.md,
     marginBottom: spacing.md,
-    textAlign: 'center',
+    textAlign: "center",
   },
   dateButtonsWrapper: {
     flexDirection: "row",
@@ -154,22 +167,22 @@ const styles = StyleSheet.create({
     fontFamily: globalStyle.font.medium,
     fontSize: typography.fontSize.md,
     marginBottom: spacing.md,
-    textAlign: 'center',
+    textAlign: "center",
   },
   timeInputContainer: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
 
   // Button section
   buttonSection: {
-    marginTop: 'auto',
-    paddingTop: spacing['2xl'],
+    marginTop: "auto",
+    paddingTop: spacing["2xl"],
   },
 
   // Form group styling
   formGroup: {
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing["2xl"],
   },
   formLabel: {
     color: globalStyle.white,
@@ -188,9 +201,16 @@ const styles = StyleSheet.create({
 const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
   return (
     <View style={styles.dateInputWapper}>
-      <Text style={styles.date} testID="date-display">{fullDate(date.toISOString())}</Text>
+      <Text style={styles.date} testID="date-display">
+        {fullDate(date.toISOString())}
+      </Text>
       <TouchableOpacity onPress={() => onPress()} style={styles.calendarButton}>
-        <Feather name="calendar" color="white" size={20} testID="calendar-icon" />
+        <Feather
+          name="calendar"
+          color="white"
+          size={20}
+          testID="calendar-icon"
+        />
       </TouchableOpacity>
     </View>
   );
@@ -202,9 +222,21 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
  * @param {Function} onPress - Function to call when time button is pressed
  * @returns {JSX.Element} A time display with button
  */
-const TimeDisplay = ({ date, onPress, testID }: { date: Date; onPress: () => void; testID?: string }) => {
+const TimeDisplay = ({
+  date,
+  onPress,
+  testID,
+}: {
+  date: Date;
+  onPress: () => void;
+  testID?: string;
+}) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.dateInputWapper} testID={testID}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.dateInputWapper}
+      testID={testID}
+    >
       <Text style={styles.date}>{fullHour(date.toISOString())}</Text>
       <View style={styles.calendarButton}>
         <Feather name="clock" color="white" size={20} />
@@ -224,7 +256,9 @@ const AddRecord = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<any>();
 
-  const { date, showPicker, showDatePicker, handleUpdateDate } = useDatePicker(new Date());
+  const { date, showPicker, showDatePicker, handleUpdateDate } = useDatePicker(
+    new Date()
+  );
 
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
@@ -237,7 +271,7 @@ const AddRecord = () => {
   useEffect(() => {
     async function getProject() {
       let currentProjectID = projectID;
-      
+
       // If we have a taskID but no projectID, get the project from the task
       if (taskID && !projectID) {
         const task = await database.getFirstAsync<Task>(
@@ -269,7 +303,7 @@ const AddRecord = () => {
       );
 
       setTasks(tasks);
-      
+
       // If we have a taskID from navigation, prepopulate the selected task
       if (taskID) {
         setSelectedTask(parseInt(taskID as string));
@@ -281,12 +315,13 @@ const AddRecord = () => {
 
   const getDifferenceInSeconds = () => {
     // Compare times based on the selected date (which we assume to be the same)
-    const startSeconds = startTime.getHours() * 3600 + startTime.getMinutes() * 60;
+    const startSeconds =
+      startTime.getHours() * 3600 + startTime.getMinutes() * 60;
     const endSeconds = endTime.getHours() * 3600 + endTime.getMinutes() * 60;
 
     // If end time is before start time, assume it's on the next day
     if (endSeconds < startSeconds) {
-      return (24 * 3600 - startSeconds) + endSeconds;
+      return 24 * 3600 - startSeconds + endSeconds;
     }
     return endSeconds - startSeconds;
   };
@@ -314,7 +349,11 @@ const AddRecord = () => {
     router.back();
   };
 
-  const handleTimeChange = (type: "start" | "end", event: any, selectedDate?: Date) => {
+  const handleTimeChange = (
+    type: "start" | "end",
+    event: any,
+    selectedDate?: Date
+  ) => {
     if (type === "start") {
       setShowStartPicker(false);
       if (selectedDate) setStartTime(selectedDate);
@@ -325,85 +364,100 @@ const AddRecord = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Adicionar Registro</Text>
-        <Text style={styles.headerSubtitle}>
-          {project?.name ? `Projeto: ${project.name}` : 'Carregando projeto...'}
-          {taskName && ` • Tarefa: ${taskName}`}
-        </Text>
-      </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: colors.neutral[900] }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Adicionar Registro</Text>
+          <Text style={styles.headerSubtitle}>
+            {project?.name
+              ? `Projeto: ${project.name}`
+              : "Carregando projeto..."}
+            {taskName && ` • Tarefa: ${taskName}`}
+          </Text>
+        </View>
 
-      <View style={styles.pickerSection}>
-        <Text style={styles.pickerLabel}>Selecione uma tarefa</Text>
-        <View style={[
-          styles.pickerContainer,
-          isPickerFocused && styles.pickerContainerFocused
-        ]}>
-          {selectedTask && selectedTask !== "none_task" && (
-            <View style={styles.selectedTaskIndicator} />
-          )}
-          <Picker
-            selectedValue={selectedTask}
-            onValueChange={(itemValue, itemIndex) => setSelectedTask(itemValue)}
-            style={styles.picker}
-            dropdownIconColor={colors.neutral[400]}
-            itemStyle={styles.pickerItem}
-            onFocus={() => setIsPickerFocused(true)}
-            onBlur={() => setIsPickerFocused(false)}
+        <View style={styles.pickerSection}>
+          <Text style={styles.pickerLabel}>Selecione uma tarefa</Text>
+          <View
+            style={[
+              styles.pickerContainer,
+              isPickerFocused && styles.pickerContainerFocused,
+            ]}
           >
-            <Picker.Item 
-              label="Selecione a task" 
-              value="none_task" 
-              style={styles.pickerItem}
-              color={colors.neutral[400]}
-            />
-            {tasks.map((task: Task) => (
+            {selectedTask && selectedTask !== "none_task" && (
+              <View style={styles.selectedTaskIndicator} />
+            )}
+            <Picker
+              selectedValue={selectedTask}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedTask(itemValue)
+              }
+              style={styles.picker}
+              dropdownIconColor={colors.neutral[400]}
+              itemStyle={styles.pickerItem}
+              onFocus={() => setIsPickerFocused(true)}
+              onBlur={() => setIsPickerFocused(false)}
+            >
               <Picker.Item
-                label={task.name}
-                value={task.task_id}
-                key={task.task_id}
+                label="Selecione a task"
+                value="none_task"
                 style={styles.pickerItem}
-                color={colors.white}
+                color={colors.neutral[400]}
               />
-            ))}
-          </Picker>
-        </View>
-      </View>
-
-      <View style={styles.dateSection}>
-        <Text style={styles.dateLabel}>Data do registro</Text>
-        <DateInput date={date} onPress={showDatePicker} />
-      </View>
-
-      <View style={styles.timeSection}>
-        <Text style={styles.timeSectionTitle}>Horário do trabalho</Text>
-        <View style={styles.dateButtonsWrapper}>
-          <View style={styles.dateWrapper}>
-            <Text style={styles.timeLabel}>Início</Text>
-            <TimeDisplay
-              date={startTime}
-              onPress={() => setShowStartPicker(true)}
-              testID="start-time-display"
-            />
-          </View>
-          <View style={styles.dateWrapper}>
-            <Text style={styles.timeLabel}>Fim</Text>
-            <TimeDisplay
-              date={endTime}
-              onPress={() => setShowEndPicker(true)}
-              testID="end-time-display"
-            />
+              {tasks.map((task: Task) => (
+                <Picker.Item
+                  label={task.name}
+                  value={task.task_id}
+                  key={task.task_id}
+                  style={styles.pickerItem}
+                  color={colors.white}
+                />
+              ))}
+            </Picker>
           </View>
         </View>
-      </View>
 
-      <View style={styles.buttonSection}>
-        <Button
-          onPress={async () => await handleAddRecord()}
-          text="Adicionar tempo"
-        />
-      </View>
+        <View style={styles.dateSection}>
+          <Text style={styles.dateLabel}>Data do registro</Text>
+          <DateInput date={date} onPress={showDatePicker} />
+        </View>
+
+        <View style={styles.timeSection}>
+          <Text style={styles.timeSectionTitle}>Horário do trabalho</Text>
+          <View style={styles.dateButtonsWrapper}>
+            <View style={styles.dateWrapper}>
+              <Text style={styles.timeLabel}>Início</Text>
+              <TimeDisplay
+                date={startTime}
+                onPress={() => setShowStartPicker(true)}
+                testID="start-time-display"
+              />
+            </View>
+            <View style={styles.dateWrapper}>
+              <Text style={styles.timeLabel}>Fim</Text>
+              <TimeDisplay
+                date={endTime}
+                onPress={() => setShowEndPicker(true)}
+                testID="end-time-display"
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.buttonSection}>
+          <Button
+            onPress={async () => await handleAddRecord()}
+            text="Adicionar tempo"
+          />
+        </View>
+      </ScrollView>
 
       {showPicker && (
         <DateTimePicker
@@ -432,7 +486,7 @@ const AddRecord = () => {
           onChange={(event, date) => handleTimeChange("end", event, date)}
         />
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

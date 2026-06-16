@@ -1,13 +1,11 @@
 import { renderHook, act } from '@testing-library/react-native';
-import useProject from '../../../app/Project/useProject';
+import useProject from '../../../app/Project/_useProject';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 
 // Mock the dependencies
 jest.mock('expo-sqlite');
-jest.mock('@react-navigation/native');
 jest.mock('expo-router');
 jest.mock('react-native');
 
