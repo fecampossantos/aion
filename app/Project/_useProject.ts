@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSQLiteContext } from "expo-sqlite";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect, useNavigation } from "expo-router";
 import { ConfirmationModal } from "../../components/Modal";
 import { Project as IProject } from "../../interfaces/Project";
 

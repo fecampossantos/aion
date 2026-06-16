@@ -57,7 +57,11 @@
       "expo-document-picker",
       "expo-task-manager",
       "expo-background-task",
-      "expo-localization"
+      "expo-localization",
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {

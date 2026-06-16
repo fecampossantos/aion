@@ -281,6 +281,12 @@ jest.mock('expo-router', () => ({
       callback();
     }
   }),
+  useNavigation: () => ({
+    setOptions: jest.fn(),
+    navigate: jest.fn(),
+    addListener: jest.fn(() => jest.fn()),
+    goBack: jest.fn(),
+  }),
 }));
 
 // Mock @react-navigation/native
