@@ -103,12 +103,12 @@ describe("AddRecord Component", () => {
     // Wait for the component to load project and tasks
     await waitFor(() => {
       expect(mockDatabase.getFirstAsync).toHaveBeenCalled();
-    }, { timeout: 10000 });
+    });
     
     // Now check for the text that should appear after loading
     await waitFor(() => {
       expect(getByText("Selecione a task")).toBeDefined();
-    }, { timeout: 10000 });
+    });
   });
 
   it("loads project and tasks on mount", async () => {
@@ -173,77 +173,22 @@ describe("AddRecord Component", () => {
     });
   });
 
-  it("validates time input correctly", async () => {
-    const { getByTestId } = render(<AddRecord />);
+  it("shows time pickers when time displays are pressed", async () => {
+    const { getByTestId, queryByTestId } = render(<AddRecord />);
 
     await waitFor(() => {
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-
-      // Test valid time
-      fireEvent.changeText(startTimeInput, "09:30");
-      fireEvent.changeText(endTimeInput, "17:45");
+      const startTimeDisplay = getByTestId("start-time-display");
+      fireEvent.press(startTimeDisplay);
     });
 
-    // Time inputs should be rendered
-    expect(getByTestId("start-time-input")).toBeTruthy();
-    expect(getByTestId("end-time-input")).toBeTruthy();
-  });
-
-  it("calculates time difference correctly", async () => {
-    const { getByTestId } = render(<AddRecord />);
+    expect(queryByTestId("startTimePicker")).toBeTruthy();
 
     await waitFor(() => {
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-
-      // Set start time to 09:00 and end time to 17:00 (8 hours = 28800 seconds)
-      fireEvent.changeText(startTimeInput, "09:00");
-      fireEvent.changeText(endTimeInput, "17:00");
+      const endTimeDisplay = getByTestId("end-time-display");
+      fireEvent.press(endTimeDisplay);
     });
 
-    // The component should calculate the difference internally
-    expect(getByTestId("start-time-input")).toBeTruthy();
-    expect(getByTestId("end-time-input")).toBeTruthy();
-  });
-
-  it("adds record when form is valid", async () => {
-    const { getByText, getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      // Set times
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-      fireEvent.changeText(startTimeInput, "09:00");
-      fireEvent.changeText(endTimeInput, "17:00");
-
-      // Press add button
-      const addButton = getByText("Adicionar tempo");
-      fireEvent.press(addButton);
-    });
-
-    // Since we can't easily select a task in the mock, we test the button press
-    // The actual validation would prevent the record from being added
-    expect(getByText("Adicionar tempo")).toBeTruthy();
-  });
-
-  it("navigates to project page after adding record", async () => {
-    const { getByText, getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      // Set times
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-      fireEvent.changeText(startTimeInput, "09:00");
-      fireEvent.changeText(endTimeInput, "17:00");
-
-      // Press add button
-      const addButton = getByText("Adicionar tempo");
-      fireEvent.press(addButton);
-    });
-
-    // Test that the button exists and can be pressed
-    expect(getByText("Adicionar tempo")).toBeTruthy();
+    expect(queryByTestId("endTimePicker")).toBeTruthy();
   });
 
   it("does not add record when no task is selected", async () => {
@@ -258,55 +203,6 @@ describe("AddRecord Component", () => {
     expect(mockDatabase.runAsync).not.toHaveBeenCalled();
   });
 
-  it("handles time input formatting correctly", async () => {
-    const { getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      const startTimeInput = getByTestId("start-time-input");
-      
-      // Test that only numeric input is accepted
-      fireEvent.changeText(startTimeInput, "abc123def");
-      
-      // The component should filter out non-numeric characters
-      expect(startTimeInput).toBeTruthy();
-    });
-  });
-
-  it("prevents adding record with invalid start time", async () => {
-    const { getByText, getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      // Set invalid start time (25:00 - invalid hours)
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-      fireEvent.changeText(startTimeInput, "25:00");
-      fireEvent.changeText(endTimeInput, "17:00");
-
-      // Press add button
-      const addButton = getByText("Adicionar tempo");
-      fireEvent.press(addButton);
-    });
-
-    expect(mockDatabase.runAsync).not.toHaveBeenCalled();
-  });
-
-  it("prevents adding record with invalid end time", async () => {
-    const { getByText, getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      // Set invalid end time (12:60 - invalid minutes)
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-      fireEvent.changeText(startTimeInput, "09:00");
-      fireEvent.changeText(endTimeInput, "12:60");
-
-      // Press add button
-      const addButton = getByText("Adicionar tempo");
-      fireEvent.press(addButton);
-    });
-
-    expect(mockDatabase.runAsync).not.toHaveBeenCalled();
-  });
 
   it("handles empty task list gracefully", async () => {
     mockDatabase.getAllAsync.mockResolvedValue([]);
@@ -318,41 +214,11 @@ describe("AddRecord Component", () => {
     });
   });
 
-  it("formats created_at date correctly for database", async () => {
-    const { getByText, getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      // Set times
-      const startTimeInput = getByTestId("start-time-input");
-      const endTimeInput = getByTestId("end-time-input");
-      fireEvent.changeText(startTimeInput, "09:00");
-      fireEvent.changeText(endTimeInput, "17:00");
-
-      // Press add button
-      const addButton = getByText("Adicionar tempo");
-      fireEvent.press(addButton);
-    });
-
-    // Test that the button exists and can be pressed
-    expect(getByText("Adicionar tempo")).toBeTruthy();
-  });
-
   it("handles component unmounting correctly", async () => {
     const { unmount } = render(<AddRecord />);
     
     // Component should unmount without errors
     expect(() => unmount()).not.toThrow();
-  });
-
-  it("displays time inputs with correct test IDs", async () => {
-    const { getByTestId } = render(<AddRecord />);
-
-    await waitFor(() => {
-      expect(getByTestId("start-time-display")).toBeTruthy();
-      expect(getByTestId("end-time-display")).toBeTruthy();
-      expect(getByTestId("start-time-input")).toBeTruthy();
-      expect(getByTestId("end-time-input")).toBeTruthy();
-    });
   });
 
   it("displays date input with correct test IDs", async () => {

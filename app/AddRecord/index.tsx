@@ -6,7 +6,7 @@ import { Feather } from "@expo/vector-icons";
 import Button from "../../components/Button";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSQLiteContext } from "expo-sqlite";
-import { formatJsDateToDatabase, fullDate } from "../../utils/parser";
+import { formatJsDateToDatabase, fullDate, fullHour } from "../../utils/parser";
 
 import { Picker } from "@react-native-picker/picker";
 import Task from "../../interfaces/Task";
@@ -197,30 +197,19 @@ const DateInput = ({ date, onPress }: { date: Date; onPress: () => void }) => {
 };
 
 /**
- * TimeInput component displays and handles time input
- * @param {string} time - The time value in HHMM format
- * @param {Function} onChange - Function to call when time changes
- * @returns {JSX.Element} A time input field with formatted display
+ * TimeDisplay component displays time with a button
+ * @param {Date} date - The date object containing time to display
+ * @param {Function} onPress - Function to call when time button is pressed
+ * @returns {JSX.Element} A time display with button
  */
-const TimeInput = ({
-  time,
-  onChange,
-  testID,
-}: {
-  time: string;
-  onChange: (value: string) => void;
-  testID?: string;
-}) => {
-  const formattedTime = `${time.slice(0, 2)}:${time.slice(2)}h`;
+const TimeDisplay = ({ date, onPress, testID }: { date: Date; onPress: () => void; testID?: string }) => {
   return (
-    <View style={styles.timeInputContainer}>
-      <TextInput
-        keyboardType="numeric"
-        value={formattedTime}
-        onChangeText={onChange}
-        testID={testID}
-      />
-    </View>
+    <TouchableOpacity onPress={onPress} style={styles.dateInputWapper} testID={testID}>
+      <Text style={styles.date}>{fullHour(date.toISOString())}</Text>
+      <View style={styles.calendarButton}>
+        <Feather name="clock" color="white" size={20} />
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -237,8 +226,10 @@ const AddRecord = () => {
 
   const { date, showPicker, showDatePicker, handleUpdateDate } = useDatePicker(new Date());
 
-  const [startTime, setStartTime] = useState("0000");
-  const [endTime, setEndTime] = useState("0000");
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
   const [project, setProject] = useState<IProject>();
   const [isPickerFocused, setIsPickerFocused] = useState(false);
@@ -288,37 +279,22 @@ const AddRecord = () => {
     getTasks();
   }, [project, taskID]);
 
-  const validTime = (value: string) => {
-    const hours = parseInt(value.slice(0, 2));
-    const minutes = parseInt(value.slice(2));
-
-    if (hours > 23 || minutes > 59) return false;
-
-    return true;
-  };
-
   const getDifferenceInSeconds = () => {
-    const hoursStart = parseInt(startTime.slice(0, 2));
-    const minutesStart = parseInt(startTime.slice(2));
+    // Compare times based on the selected date (which we assume to be the same)
+    const startSeconds = startTime.getHours() * 3600 + startTime.getMinutes() * 60;
+    const endSeconds = endTime.getHours() * 3600 + endTime.getMinutes() * 60;
 
-    const hoursEnd = parseInt(endTime.slice(0, 2));
-    const minutesEnd = parseInt(endTime.slice(2));
-
-    const hoursDiff = hoursEnd - hoursStart;
-    const minutesDiff = minutesEnd - minutesStart;
-
-    const diffInSeconds = hoursDiff * 3600 + minutesDiff * 60;
-
-    return diffInSeconds;
+    // If end time is before start time, assume it's on the next day
+    if (endSeconds < startSeconds) {
+      return (24 * 3600 - startSeconds) + endSeconds;
+    }
+    return endSeconds - startSeconds;
   };
 
   const formatCreatedAt = () => {
     const newDate = new Date(date);
-    const hoursStart = parseInt(startTime.slice(0, 2));
-    const minutesStart = parseInt(startTime.slice(2));
-
-    newDate.setHours(hoursStart);
-    newDate.setMinutes(minutesStart);
+    newDate.setHours(startTime.getHours());
+    newDate.setMinutes(startTime.getMinutes());
     newDate.setSeconds(0);
     newDate.setMilliseconds(0);
 
@@ -327,8 +303,6 @@ const AddRecord = () => {
 
   const handleAddRecord = async () => {
     if (selectedTask === undefined || selectedTask === "none_task") return;
-    if (!validTime(startTime)) return;
-    if (!validTime(endTime)) return;
 
     await database.runAsync(
       "INSERT INTO timings (task_id, time, created_at) VALUES (?, ?, ?);",
@@ -340,15 +314,13 @@ const AddRecord = () => {
     router.back();
   };
 
-  const handleChangeTime = (type: "start" | "end", value: string) => {
-    const formattedTime = value.replace(/\D/g, "");
-
-    if (formattedTime.length === 5) return;
-
+  const handleTimeChange = (type: "start" | "end", event: any, selectedDate?: Date) => {
     if (type === "start") {
-      setStartTime(formattedTime);
+      setShowStartPicker(false);
+      if (selectedDate) setStartTime(selectedDate);
     } else {
-      setEndTime(formattedTime);
+      setShowEndPicker(false);
+      if (selectedDate) setEndTime(selectedDate);
     }
   };
 
@@ -409,23 +381,19 @@ const AddRecord = () => {
         <View style={styles.dateButtonsWrapper}>
           <View style={styles.dateWrapper}>
             <Text style={styles.timeLabel}>Início</Text>
-            <View testID="start-time-display">
-              <TimeInput
-                onChange={(value) => handleChangeTime("start", value)}
-                time={startTime}
-                testID="start-time-input"
-              />
-            </View>
+            <TimeDisplay
+              date={startTime}
+              onPress={() => setShowStartPicker(true)}
+              testID="start-time-display"
+            />
           </View>
           <View style={styles.dateWrapper}>
             <Text style={styles.timeLabel}>Fim</Text>
-            <View testID="end-time-display">
-              <TimeInput
-                onChange={(value) => handleChangeTime("end", value)}
-                time={endTime}
-                testID="end-time-input"
-              />
-            </View>
+            <TimeDisplay
+              date={endTime}
+              onPress={() => setShowEndPicker(true)}
+              testID="end-time-display"
+            />
           </View>
         </View>
       </View>
@@ -444,6 +412,24 @@ const AddRecord = () => {
           mode={"date"}
           maximumDate={new Date()}
           onChange={handleUpdateDate}
+        />
+      )}
+      {showStartPicker && (
+        <DateTimePicker
+          testID="startTimePicker"
+          value={startTime}
+          mode="time"
+          is24Hour={true}
+          onChange={(event, date) => handleTimeChange("start", event, date)}
+        />
+      )}
+      {showEndPicker && (
+        <DateTimePicker
+          testID="endTimePicker"
+          value={endTime}
+          mode="time"
+          is24Hour={true}
+          onChange={(event, date) => handleTimeChange("end", event, date)}
         />
       )}
     </View>
