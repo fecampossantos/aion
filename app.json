@@ -1,6 +1,6 @@
 {
-  "scheme": "aion-app",
   "expo": {
+    "scheme": "aion-app",
     "name": "aion",
     "slug": "chrono",
     "version": "1.1.2",
