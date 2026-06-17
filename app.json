@@ -1,73 +1,71 @@
 {
-  "expo": {
-    "scheme": "aion-app",
-    "name": "aion",
-    "slug": "chrono",
-    "version": "1.1.2",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+  "scheme": "aion-app",
+  "name": "aion",
+  "slug": "chrono",
+  "version": "1.1.2",
+  "orientation": "portrait",
+  "icon": "./assets/icon.png",
+  "userInterfaceStyle": "dark",
+  "splash": {
+    "image": "./assets/splash.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#0000"
+  },
+  "assetBundlePatterns": [
+    "**/*"
+  ],
+  "ios": {
+    "supportsTablet": true,
+    "infoPlist": {
+      "UIBackgroundModes": [
+        "background-fetch",
+        "background-processing"
+      ]
+    }
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/adaptive-icon.png",
       "backgroundColor": "#0000"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "background-fetch",
-          "background-processing"
-        ]
-      }
+    "package": "com.fecampossantos.aion",
+    "versionCode": 5,
+    "statusBar": {
+      "backgroundColor": "#0f172a",
+      "barStyle": "light-content"
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0000"
-      },
-      "package": "com.fecampossantos.aion",
-      "versionCode": 5,
-      "statusBar": {
-        "backgroundColor": "#0f172a",
-        "barStyle": "light-content"
-      },
-      "navigationBar": {
-        "backgroundColor": "#0f172a",
-        "barStyle": "light"
-      },
-      "permissions": [
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WAKE_LOCK",
-        "android.permission.FOREGROUND_SERVICE"
-      ]
+    "navigationBar": {
+      "backgroundColor": "#0f172a",
+      "barStyle": "light"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-font",
-      "expo-asset",
-      "expo-sqlite",
-      "expo-router",
-      "expo-document-picker",
-      "expo-task-manager",
-      "expo-background-task",
-      "expo-localization",
-      "@react-native-community/datetimepicker",
-      "expo-sharing",
-      "expo-splash-screen",
-      "expo-status-bar"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "4ce5609b-da34-40e2-808e-689d7d1b4058"
-      }
-    },
-    "owner": "fe.campossantos"
-  }
+    "permissions": [
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WAKE_LOCK",
+      "android.permission.FOREGROUND_SERVICE"
+    ]
+  },
+  "web": {
+    "favicon": "./assets/favicon.png"
+  },
+  "plugins": [
+    "expo-font",
+    "expo-asset",
+    "expo-sqlite",
+    "expo-router",
+    "expo-document-picker",
+    "expo-task-manager",
+    "expo-background-task",
+    "expo-localization",
+    "@react-native-community/datetimepicker",
+    "expo-sharing",
+    "expo-splash-screen",
+    "expo-status-bar"
+  ],
+  "extra": {
+    "eas": {
+      "projectId": "4ce5609b-da34-40e2-808e-689d7d1b4058"
+    }
+  },
+  "owner": "fe.campossantos"
 }
