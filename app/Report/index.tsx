@@ -8,6 +8,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams } from "expo-router";
 import Button from "../../components/Button";
 import { useToast } from "../../components/Toast/ToastContext";
+import CheckBox from "../../components/CheckBox";
 
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
@@ -141,6 +142,20 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingBottom: 40,
   },
+  optionsSection: {
+    marginBottom: 24,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 4,
+  },
+  checkboxLabel: {
+    color: globalStyle.white,
+    fontSize: 16,
+    fontFamily: globalStyle.font.regular,
+  },
   generateButton: {
     minWidth: 200,
     height: 56,
@@ -264,6 +279,7 @@ const Report = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState(null);
   const [dateShown, setDateShown] = useState<"start" | "end" | null>(null);
+  const [showAllTrackings, setShowAllTrackings] = useState(false);
 
   const { isGeneratingReport, handleGenerateReport } = useReportGeneration(database);
 
@@ -340,6 +356,7 @@ const Report = () => {
         startDate,
         endDate,
         getTimings: getTimingsData,
+        showAllTrackings,
       });
     } catch (e) {
       console.warn("Error generating report:", e);
@@ -375,6 +392,16 @@ const Report = () => {
             label="Data Final"
             isActive={dateShown === "end"}
           />
+        </View>
+      </View>
+
+      <View style={styles.optionsSection}>
+        <View style={styles.checkboxContainer}>
+          <CheckBox
+            isChecked={showAllTrackings}
+            onPress={setShowAllTrackings}
+          />
+          <Text style={styles.checkboxLabel}>Mostrar todos os lançamentos</Text>
         </View>
       </View>
 

@@ -646,7 +646,8 @@ export function generateReportHTML(
   endDate: string,
   timings: TimingsResult[],
   documentName: string,
-  templateType: PDFTemplateType = 'dark'
+  templateType: PDFTemplateType = 'dark',
+  showAllTrackings: boolean = false
 ): string {
   const totalTimeInSeconds: number = timings.reduce((acc, curr) => {
     return acc + curr.timing_timed;
@@ -695,11 +696,11 @@ export function generateReportHTML(
     <tr class="${data.completed === 1 ? "completed-task" : "pending-task"}">
       <td class="task-name">${taskName}</td>
       <td class="sessions-count">${data.sessions.length}</td>
-      <td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>
-      <td class="task-cost">R$ ${(
+      ${showAllTrackings ? `<td class="task-total-time">${secondsToTimeHHMMSS(data.totalTime)}</td>` : ''}
+      <td class="task-cost">R$ ${
         (data.totalTime / 3600) *
         project.hourly_cost
-      ).toFixed(2)}</td>
+      }.toFixed(2)}</td>
     </tr>
   `
   );
@@ -771,7 +772,7 @@ export function generateReportHTML(
               <tr>
                 <th>Tarefa</th>
                 <th>Sessões</th>
-                <th>Tempo Total</th>
+                ${showAllTrackings ? '<th>Tempo Total</th>' : ''}
                 <th>Custo</th>
               </tr>
             </thead>
