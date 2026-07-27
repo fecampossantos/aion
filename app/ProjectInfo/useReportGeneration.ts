@@ -48,6 +48,7 @@ const useReportGeneration = (database: SQLiteDatabase) => {
    * @param {Date} options.startDate - Start date for the report
    * @param {Date} options.endDate - End date for the report
    * @param {Function} options.getTimings - Function to get timing data
+   * @param {boolean} options.showAllTrackings - Whether to show individual task times
    * @returns {Promise<void>}
    */
   const handleGenerateReport = async ({
@@ -56,12 +57,14 @@ const useReportGeneration = (database: SQLiteDatabase) => {
     startDate,
     endDate,
     getTimings,
+    showAllTrackings = false,
   }: {
     project: any;
     projectID: string;
     startDate: Date;
     endDate: Date;
     getTimings: () => Promise<any[]>;
+    showAllTrackings?: boolean;
   }) => {
     if (isGeneratingRef.current || !project) return;
 
@@ -102,7 +105,8 @@ const useReportGeneration = (database: SQLiteDatabase) => {
         endDateSTR,
         timings,
         documentName,
-        templateType
+        templateType,
+        showAllTrackings
       );
 
       const { uri } = await Print.printToFileAsync({
